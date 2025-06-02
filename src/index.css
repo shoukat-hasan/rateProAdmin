@@ -55,7 +55,7 @@ body {
   /* Layout variables */
   --sidebar-width: 280px;
   --sidebar-collapsed-width: 70px;
-  --header-height: 70px;
+  --header-height: 56px;
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -108,12 +108,6 @@ body {
   background-color: var(--primary-color) !important;
 }
 
-/* Form controls with custom colors */
-.form-control:focus,
-.form-select:focus {
-  border-color: var(--primary-color) !important;
-  box-shadow: 0 0 0 0.2rem rgba(31, 218, 228, 0.25) !important;
-}
 
 /* Nav tabs with custom colors */
 .nav-tabs .nav-link.active {
@@ -464,6 +458,12 @@ body {
   .card-body {
     padding: 1rem;
   }
+}
+/* Fix for dark mode text visibility */
+.form-control:focus {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
 }
 
 /* Responsive form adjustments */

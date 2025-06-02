@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { MdAdd, MdContentCopy, MdDelete, MdEdit } from "react-icons/md"
+import { MdAdd, MdContentCopy, MdDelete, MdEdit, MdSave } from "react-icons/md"
 
 const Templates = () => {
   const [templates, setTemplates] = useState([

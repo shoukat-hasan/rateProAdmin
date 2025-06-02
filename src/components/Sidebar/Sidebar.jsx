@@ -185,13 +185,13 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose }) =
 
   return (
     <div ref={sidebarRef} style={sidebarStyle} className="d-flex flex-column">
-      {/* Header */}
+      {/* Header
       <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
         {!collapsed && <h4 className="mb-0 text-primary fw-bold">Rate Pro</h4>}
         <Button variant="link" className="p-1 text-decoration-none" onClick={onClose} style={{ color: "inherit" }}>
           {isMobile || isTablet ? <MdClose size={24} /> : collapsed ? <MdMenu size={20} /> : <MdClose size={20} />}
         </Button>
-      </div>
+      </div> */}
 
       {/* Navigation */}
       <Nav className="flex-column flex-fill p-2">

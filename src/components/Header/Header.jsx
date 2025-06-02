@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Navbar, Nav, Dropdown, Form, InputGroup, Button } from "react-bootstrap"
 import {
@@ -9,6 +9,7 @@ import {
   MdDarkMode,
   MdNotifications,
   MdPerson,
+  MdClose,
   MdSearch,
   MdSettings,
   MdExitToApp,
@@ -16,10 +17,20 @@ import {
 } from "react-icons/md"
 import LanguageSelector from "../LanguageSelector/LanguageSelector.jsx"
 
-const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, sidebarOpen, sidebarCollapsed }) => {
+const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, sidebarOpen }) => {
   const [searchFocused, setSearchFocused] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const navigate = useNavigate()
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const handleLogout = () => {
     navigate("/login")
@@ -28,46 +39,44 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
   return (
     <Navbar
       expand="lg"
-      className="border-bottom px-3 py-2"
+      fixed="top"
+      className={`px-3 py-2 ${scrolled ? "shadow-sm" : ""}`}
       style={{
         height: "var(--header-height)",
         backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-        borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+        borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
+        transition: "all 0.3s ease",
       }}
     >
-      <div className="d-flex align-items-center flex-fill">
-        {/* Menu toggle button - visible on all screen sizes */}
+      <div className="d-flex align-items-center w-100">
+        {/* Menu toggle button - shows close icon when sidebar is open */}
         <Button
           variant="link"
           className="me-3 p-1 text-decoration-none"
           onClick={toggleSidebar}
-          style={{ color: "inherit" }}
+          style={{  color: darkMode ? "#fff" : "#000", minWidth: "40px" }}
         >
-          <MdMenu size={24} />
+          {sidebarOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
         </Button>
 
-        {/* Page title */}
-        <Navbar.Brand className="mb-0 h1 d-none d-md-block">Rate Pro Dashboard</Navbar.Brand>
+        {/* Page title - hidden on mobile when search is active */}
+        <Navbar.Brand className="mb-0 h1 d-none d-sm-flex" style={{ flex: 1, color: darkMode ? "#fff" : "#000" }}>
+          Rate Pro Dashboard
+        </Navbar.Brand>
 
-        {/* Mobile search toggle */}
-        {(isMobile || isTablet) && (
-          <Button
-            variant="link"
-            className="ms-auto me-2 p-1 text-decoration-none d-md-none"
-            onClick={() => setShowMobileSearch(!showMobileSearch)}
-            style={{ color: "inherit" }}
-          >
-            <MdSearch size={24} />
-          </Button>
-        )}
-
-        {/* Search bar - hidden on mobile unless toggled */}
+        {/* Search bar - full width on mobile when active */}
         <div
-          className={`${isMobile || isTablet ? (showMobileSearch ? "d-flex" : "d-none") : "d-flex"} ms-auto me-3`}
-          style={{ maxWidth: "300px", width: "100%" }}
+          className={`${isMobile || isTablet ? (showMobileSearch ? "d-flex" : "d-none d-md-flex") : "d-flex"}`}
+          style={{
+            flex: isMobile && showMobileSearch ? 1 : 2,
+            maxWidth: isMobile && showMobileSearch ? "none" : "400px",
+            marginLeft: "auto",
+            marginRight: "1rem",
+            transition: "all 0.3s ease"
+          }}
         >
           <InputGroup>
-            <InputGroup.Text className="bg-transparent border-end-0">
+            <InputGroup.Text className="bg-transparent border-end-0 text-white">
               <MdSearch />
             </InputGroup.Text>
             <Form.Control
@@ -80,17 +89,41 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
           </InputGroup>
         </div>
 
-        {/* Right side controls */}
-        <Nav className="ms-auto d-flex align-items-center">
+        {/* Mobile search toggle - hidden when search is active */}
+        {(isMobile || isTablet) && !showMobileSearch && (
+          <Button
+            variant="link"
+            className="me-2 p-1 text-decoration-none d-md-none"
+            onClick={() => setShowMobileSearch(true)}
+            style={{ color: "inherit" }}
+          >
+            <MdSearch size={24} />
+          </Button>
+        )}
+
+        {/* Close search button - only on mobile when search is active */}
+        {(isMobile || isTablet) && showMobileSearch && (
+          <Button
+            variant="link"
+            className="me-2 p-1 text-decoration-none"
+            onClick={() => setShowMobileSearch(false)}
+            style={{ color: "inherit" }}
+          >
+            <MdClose size={24} />
+          </Button>
+        )}
+
+        {/* Right side controls - hidden on mobile when search is active */}
+        <div className={`d-flex align-items-center ${showMobileSearch ? "d-none d-md-flex" : ""}`}>
           {/* Language selector - hidden on small mobile */}
-          <div className="me-3 d-none d-sm-block">
+          <div className="me-2 d-none d-sm-block">
             <LanguageSelector />
           </div>
 
           {/* Theme toggle */}
           <Button
             variant="link"
-            className="p-2 me-2 text-decoration-none rounded-circle"
+            className="p-1 me-2 text-decoration-none rounded-circle"
             onClick={toggleTheme}
             title={darkMode ? "Light mode" : "Dark mode"}
             style={{ color: "inherit" }}
@@ -98,11 +131,11 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             {darkMode ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
           </Button>
 
-          {/* Notifications */}
+          {/* Notifications dropdown */}
           <Dropdown align="end" className="me-2">
             <Dropdown.Toggle
               variant="link"
-              className="p-2 text-decoration-none rounded-circle position-relative"
+              className="p-1 text-decoration-none rounded-circle position-relative"
               style={{ color: "inherit", border: "none" }}
             >
               <MdNotifications size={20} />
@@ -119,13 +152,10 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
                 <span>Notifications</span>
                 <span className="badge bg-primary">3</span>
               </Dropdown.Header>
-
               <Dropdown.Item className="py-2">
                 <div className="d-flex">
-                  <div
-                    className="rounded-circle bg-success d-flex align-items-center justify-content-center me-3"
-                    style={{ width: "32px", height: "32px" }}
-                  >
+                  <div className="rounded-circle bg-success d-flex align-items-center justify-content-center me-3"
+                    style={{ width: "32px", height: "32px" }}>
                     <MdNotifications className="text-white" size={16} />
                   </div>
                   <div className="flex-fill">
@@ -135,29 +165,27 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
                   </div>
                 </div>
               </Dropdown.Item>
-
               <Dropdown.Divider />
-
               <Dropdown.Item as={Link} to="/notifications" className="text-center">
                 See All Notifications
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
 
-          {/* User profile */}
+          {/* User profile dropdown */}
           <Dropdown align="end">
             <Dropdown.Toggle
               variant="link"
-              className="d-flex align-items-center p-2 text-decoration-none"
+              className="d-flex align-items-center p-1 text-decoration-none"
               style={{ color: "inherit", border: "none" }}
             >
               <div
-                className="rounded-circle bg-light d-flex align-items-center justify-content-center me-2"
+                className="rounded-circle bg-light d-flex align-items-center justify-content-center"
                 style={{ width: "36px", height: "36px" }}
               >
                 <MdPerson className="text-secondary" />
               </div>
-              <span className="d-none d-lg-inline">Admin</span>
+              <span className="d-none d-lg-inline ms-2">Admin</span>
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
@@ -165,26 +193,22 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
                 <h6 className="mb-0">Admin</h6>
                 <small className="text-muted">admin@ratepro.com</small>
               </Dropdown.Header>
-
               <Dropdown.Item as={Link} to="/profile" className="d-flex align-items-center">
                 <MdAccountCircle className="me-2" />
                 Profile
               </Dropdown.Item>
-
               <Dropdown.Item as={Link} to="/settings" className="d-flex align-items-center">
                 <MdSettings className="me-2" />
                 Settings
               </Dropdown.Item>
-
               <Dropdown.Divider />
-
               <Dropdown.Item onClick={handleLogout} className="d-flex align-items-center text-danger">
                 <MdExitToApp className="me-2" />
                 Logout
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
-        </Nav>
+        </div>
       </div>
     </Navbar>
   )
