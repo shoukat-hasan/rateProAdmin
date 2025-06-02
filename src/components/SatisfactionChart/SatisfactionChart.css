@@ -1,0 +1,10 @@
+.satisfaction-chart {
+  height: 300px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .satisfaction-chart {
+    height: 250px;
+  }
+}
