@@ -1,3 +1,5 @@
+// src\pages\ContentManagement\Pricing.jsx
+
 import React from 'react'
 
 const Pricing = () => {

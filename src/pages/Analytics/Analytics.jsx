@@ -1,181 +1,381 @@
-// src/pages/Analytics/Analytics.jsx
 "use client"
 
-import { useState } from "react"
-import { Line, Bar, Pie } from "react-chartjs-2"
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  PointElement, 
-  LineElement, 
-  BarElement,
-  ArcElement,
-  Title, 
-  Tooltip, 
-  Legend 
-} from "chart.js"
-import { MdDownload, MdFilterAlt } from "react-icons/md"
+import { useState, useEffect } from "react"
+import { Container, Row, Col, Card, Form, Button, Table, Badge } from "react-bootstrap"
+import { MdTrendingUp, MdTrendingDown, MdBarChart, MdPieChart, MdDownload, MdRefresh } from "react-icons/md"
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-)
+const Analytics = ({ darkMode }) => {
+  const [loading, setLoading] = useState(true)
+  const [dateRange, setDateRange] = useState("30")
+  const [selectedMetric, setSelectedMetric] = useState("responses")
 
-const Analytics = () => {
-  const [timeRange, setTimeRange] = useState('30days')
-  const [surveyFilter, setSurveyFilter] = useState('all')
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setLoading(false), 1000)
+  }, [])
 
-  // Sample data
-  const responseData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Responses',
-        data: [65, 59, 80, 81, 56, 55],
-        backgroundColor: 'rgba(74, 108, 247, 0.2)',
-        borderColor: 'rgba(74, 108, 247, 1)',
-        borderWidth: 2,
-        tension: 0.4
-      }
-    ]
-  }
+  const metrics = [
+    {
+      title: "Total Responses",
+      value: "2,847",
+      change: "+12.5%",
+      trend: "up",
+      icon: MdBarChart,
+      color: "primary",
+    },
+    {
+      title: "Completion Rate",
+      value: "78.3%",
+      change: "+5.2%",
+      trend: "up",
+      icon: MdTrendingUp,
+      color: "success",
+    },
+    {
+      title: "Avg Response Time",
+      value: "3.2 min",
+      change: "-8.1%",
+      trend: "down",
+      icon: MdTrendingDown,
+      color: "info",
+    },
+    {
+      title: "Survey Engagement",
+      value: "85.7%",
+      change: "+3.4%",
+      trend: "up",
+      icon: MdPieChart,
+      color: "warning",
+    },
+  ]
 
-  const satisfactionData = {
-    labels: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'],
-    datasets: [
-      {
-        data: [30, 40, 15, 10, 5],
-        backgroundColor: [
-          'rgba(40, 167, 69, 0.7)',
-          'rgba(100, 200, 100, 0.7)',
-          'rgba(255, 193, 7, 0.7)',
-          'rgba(253, 126, 20, 0.7)',
-          'rgba(220, 53, 69, 0.7)'
-        ]
-      }
-    ]
-  }
+  const topSurveys = [
+    {
+      name: "Customer Satisfaction Q4",
+      responses: 456,
+      completion: 89,
+      avgRating: 4.2,
+      category: "Customer Feedback",
+    },
+    {
+      name: "Product Feedback Survey",
+      responses: 234,
+      completion: 76,
+      avgRating: 3.8,
+      category: "Product Development",
+    },
+    {
+      name: "Employee Engagement",
+      responses: 189,
+      completion: 92,
+      avgRating: 4.5,
+      category: "HR",
+    },
+    {
+      name: "Market Research Study",
+      responses: 167,
+      completion: 68,
+      avgRating: 3.9,
+      category: "Market Research",
+    },
+  ]
 
-  const npsData = {
-    labels: ['Promoters (9-10)', 'Passives (7-8)', 'Detractors (0-6)'],
-    datasets: [
-      {
-        data: [45, 35, 20],
-        backgroundColor: [
-          'rgba(40, 167, 69, 0.7)',
-          'rgba(255, 193, 7, 0.7)',
-          'rgba(220, 53, 69, 0.7)'
-        ]
-      }
-    ]
-  }
+  const responseData = [
+    { date: "2024-01-15", responses: 45, completion: 78 },
+    { date: "2024-01-16", responses: 52, completion: 82 },
+    { date: "2024-01-17", responses: 38, completion: 75 },
+    { date: "2024-01-18", responses: 61, completion: 85 },
+    { date: "2024-01-19", responses: 47, completion: 79 },
+    { date: "2024-01-20", responses: 55, completion: 88 },
+  ]
 
-  const exportData = () => {
-    // Export logic
-    console.log('Exporting data...')
+  if (loading) {
+    return (
+      <div className="loading-container d-flex justify-content-center align-items-center" style={{ height: "50vh" }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="analytics-page">
-      <div className="page-header">
-        <h1>Analytics Dashboard</h1>
-        <div className="filters">
-          <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)}>
-            <option value="7days">Last 7 Days</option>
-            <option value="30days">Last 30 Days</option>
-            <option value="90days">Last 90 Days</option>
-            <option value="year">Last Year</option>
-          </select>
-          <select value={surveyFilter} onChange={(e) => setSurveyFilter(e.target.value)}>
-            <option value="all">All Surveys</option>
-            <option value="csat">Customer Satisfaction</option>
-            <option value="nps">NPS Survey</option>
-          </select>
-          <button className="btn btn-outline-primary" onClick={exportData}>
-            <MdDownload /> Export
-          </button>
-        </div>
-      </div>
+    <Container fluid className="analytics-container py-4">
+      {/* Header */}
+      <Row className="mb-4">
+        <Col>
+          <div className="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+              <h2 className={`mb-1 ${darkMode ? "text-white" : "text-dark"}`}>Analytics</h2>
+              <p className="text-muted mb-0">Comprehensive insights and performance metrics</p>
+            </div>
+            <div className="d-flex gap-2 mt-2 mt-md-0">
+              <Form.Select
+                size="sm"
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                style={{
+                  width: "150px",
+                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                  borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                  color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                }}
+              >
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="90">Last 3 months</option>
+                <option value="365">Last year</option>
+              </Form.Select>
+              <Button variant="outline-primary" size="sm">
+                <MdRefresh className="me-1" />
+                Refresh
+              </Button>
+              <Button variant="primary" size="sm">
+                <MdDownload className="me-1" />
+                Export
+              </Button>
+            </div>
+          </div>
+        </Col>
+      </Row>
 
-      <div className="analytics-grid">
-        <div className="analytics-card">
-          <h2>Response Trends</h2>
-          <div className="chart-container">
-            <Line 
-              data={responseData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false
+      {/* Metrics Cards */}
+      <Row className="mb-4">
+        {metrics.map((metric, index) => (
+          <Col key={index} xs={12} sm={6} lg={3} className="mb-3">
+            <Card
+              className="metric-card h-100 border-0 shadow-sm cursor-pointer"
+              style={{
+                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+                borderLeft: `4px solid var(--${metric.color === "primary" ? "primary" : metric.color}-color)`,
+                transition: "transform 0.2s ease",
               }}
-            />
-          </div>
-        </div>
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)"
+              }}
+            >
+              <Card.Body className="d-flex align-items-center">
+                <div className="flex-grow-1">
+                  <div className={`text-muted small mb-1 ${darkMode ? "text-light" : ""}`}>{metric.title}</div>
+                  <div className={`h4 mb-1 fw-bold ${darkMode ? "text-white" : "text-dark"}`}>{metric.value}</div>
+                  <div
+                    className={`small d-flex align-items-center ${metric.trend === "up" ? "text-success" : "text-danger"}`}
+                  >
+                    {metric.trend === "up" ? <MdTrendingUp className="me-1" /> : <MdTrendingDown className="me-1" />}
+                    {metric.change} from last period
+                  </div>
+                </div>
+                <div
+                  className="metric-icon rounded-circle d-flex align-items-center justify-content-center"
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    backgroundColor: `var(--${metric.color === "primary" ? "primary" : metric.color}-color)`,
+                    opacity: 0.1,
+                  }}
+                >
+                  <metric.icon
+                    size={24}
+                    style={{ color: `var(--${metric.color === "primary" ? "primary" : metric.color}-color)` }}
+                  />
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
-        <div className="analytics-card">
-          <h2>Satisfaction Distribution</h2>
-          <div className="chart-container">
-            <Pie 
-              data={satisfactionData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false
+      <Row>
+        {/* Chart Area */}
+        <Col lg={8} className="mb-4">
+          <Card
+            className="border-0 shadow-sm"
+            style={{
+              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+            }}
+          >
+            <Card.Header
+              className="border-0 pb-0"
+              style={{
+                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
               }}
-            />
-          </div>
-        </div>
+            >
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Response Trends</h5>
+                <Form.Select
+                  size="sm"
+                  value={selectedMetric}
+                  onChange={(e) => setSelectedMetric(e.target.value)}
+                  style={{
+                    width: "150px",
+                    backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                    borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                    color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                  }}
+                >
+                  <option value="responses">Responses</option>
+                  <option value="completion">Completion Rate</option>
+                  <option value="engagement">Engagement</option>
+                </Form.Select>
+              </div>
+            </Card.Header>
+            <Card.Body>
+              <div
+                className="chart-placeholder d-flex align-items-center justify-content-center"
+                style={{
+                  height: "300px",
+                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                  borderRadius: "0.5rem",
+                  border: `2px dashed ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
+                }}
+              >
+                <div className="text-center">
+                  <MdBarChart size={48} className="text-muted mb-2" />
+                  <p className="text-muted mb-0">Chart visualization would appear here</p>
+                  <small className="text-muted">Integration with Chart.js or similar library</small>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
 
-        <div className="analytics-card">
-          <h2>Net Promoter Score</h2>
-          <div className="chart-container">
-            <Pie 
-              data={npsData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false
+        {/* Top Surveys */}
+        <Col lg={4} className="mb-4">
+          <Card
+            className="border-0 shadow-sm h-100"
+            style={{
+              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+            }}
+          >
+            <Card.Header
+              className="border-0 pb-0"
+              style={{
+                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
               }}
-            />
-          </div>
-          <div className="nps-score">
-            <h3>NPS: 25</h3>
-            <p>(Promoters - Detractors)</p>
-          </div>
-        </div>
+            >
+              <h5 className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Top Performing Surveys</h5>
+            </Card.Header>
+            <Card.Body className="p-0">
+              <div className="list-group list-group-flush">
+                {topSurveys.map((survey, index) => (
+                  <div
+                    key={index}
+                    className="list-group-item border-0 px-3 py-3"
+                    style={{
+                      backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+                      borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"} !important`,
+                    }}
+                  >
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div className="flex-grow-1">
+                        <h6 className={`mb-1 ${darkMode ? "text-white" : "text-dark"}`}>{survey.name}</h6>
+                        <p className="mb-1 small text-muted">{survey.category}</p>
+                        <div className="d-flex gap-3 small">
+                          <span className={darkMode ? "text-white" : "text-dark"}>{survey.responses} responses</span>
+                          <span className={darkMode ? "text-white" : "text-dark"}>{survey.completion}% completion</span>
+                        </div>
+                      </div>
+                      <Badge bg="primary" className="ms-2">
+                        {survey.avgRating}★
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
-        <div className="analytics-card full-width">
-          <h2>Question Performance</h2>
-          <div className="chart-container">
-            <Bar 
-              data={{
-                labels: ['Q1: Overall Satisfaction', 'Q2: Product Quality', 'Q3: Customer Support', 'Q4: Likely to Recommend'],
-                datasets: [{
-                  label: 'Average Rating',
-                  data: [4.2, 4.5, 3.8, 4.1],
-                  backgroundColor: 'rgba(74, 108, 247, 0.7)'
-                }]
+      {/* Recent Activity Table */}
+      <Row>
+        <Col>
+          <Card
+            className="border-0 shadow-sm"
+            style={{
+              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+            }}
+          >
+            <Card.Header
+              className="border-0 pb-0"
+              style={{
+                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
               }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    max: 5
-                  }
-                }
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+            >
+              <h5 className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Daily Response Activity</h5>
+            </Card.Header>
+            <Card.Body className="p-0">
+              <div className="table-responsive">
+                <Table
+                  className="mb-0"
+                  style={{
+                    color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                  }}
+                >
+                  <thead
+                    style={{
+                      backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                    }}
+                  >
+                    <tr>
+                      <th className="border-0 py-3 px-4">Date</th>
+                      <th className="border-0 py-3">Responses</th>
+                      <th className="border-0 py-3">Completion Rate</th>
+                      <th className="border-0 py-3">Trend</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {responseData.map((data, index) => (
+                      <tr
+                        key={index}
+                        style={{
+                          borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
+                        }}
+                      >
+                        <td className="py-3 px-4">
+                          <span className={darkMode ? "text-white" : "text-dark"}>{data.date}</span>
+                        </td>
+                        <td className="py-3">
+                          <span className={darkMode ? "text-white" : "text-dark"}>{data.responses}</span>
+                        </td>
+                        <td className="py-3">
+                          <div className="d-flex align-items-center">
+                            <div className="progress me-2" style={{ width: "60px", height: "6px" }}>
+                              <div className="progress-bar bg-primary" style={{ width: `${data.completion}%` }}></div>
+                            </div>
+                            <span className={`small ${darkMode ? "text-white" : "text-dark"}`}>{data.completion}%</span>
+                          </div>
+                        </td>
+                        <td className="py-3">
+                          {index > 0 && responseData[index - 1] ? (
+                            <span
+                              className={
+                                data.responses > responseData[index - 1].responses ? "text-success" : "text-danger"
+                              }
+                            >
+                              {data.responses > responseData[index - 1].responses ? (
+                                <MdTrendingUp />
+                              ) : (
+                                <MdTrendingDown />
+                              )}
+                            </span>
+                          ) : (
+                            <span className="text-muted">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   )
 }
 

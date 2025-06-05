@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { Navbar, Nav, Dropdown, Form, InputGroup, Button } from "react-bootstrap"
+import { Navbar, Dropdown, Form, InputGroup, Button } from "react-bootstrap"
 import {
   MdMenu,
   MdLightMode,
@@ -17,7 +17,7 @@ import {
 } from "react-icons/md"
 import LanguageSelector from "../LanguageSelector/LanguageSelector.jsx"
 
-const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, sidebarOpen }) => {
+const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, sidebarOpen, sidebarCollapsed }) => {
   const [searchFocused, setSearchFocused] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -49,14 +49,18 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
       }}
     >
       <div className="d-flex align-items-center w-100">
-        {/* Menu toggle button - shows close icon when sidebar is open */}
+        {/* Menu toggle button - now properly controlled */}
         <Button
           variant="link"
           className="me-3 p-1 text-decoration-none"
           onClick={toggleSidebar}
-          style={{  color: darkMode ? "#fff" : "#000", minWidth: "40px" }}
+          style={{
+            color: darkMode ? "#fff" : "#000",
+            minWidth: "40px",
+            marginRight: "12px",
+          }}
         >
-          {sidebarOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
+          {sidebarCollapsed || !sidebarOpen ? <MdMenu size={24} /> : <MdClose size={24} />}
         </Button>
 
         {/* Page title - hidden on mobile when search is active */}
@@ -72,17 +76,39 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             maxWidth: isMobile && showMobileSearch ? "none" : "400px",
             marginLeft: "auto",
             marginRight: "1rem",
-            transition: "all 0.3s ease"
+            transition: "all 0.3s ease",
           }}
         >
-          <InputGroup>
-            <InputGroup.Text className="bg-transparent border-end-0 text-white">
+          <InputGroup
+            className={`${searchFocused ? "shadow" : ""}`}
+            style={{
+              boxShadow: searchFocused
+                ? darkMode
+                  ? " #1fdae4"
+                  : " #1fdae4"
+                : "none",
+              borderRadius: "0.375rem",
+              color: "white",
+            }}
+          >
+            <InputGroup.Text
+              className={`bg-transparent border-end-0 ${darkMode ? "text-white" : ""}`}
+              style={{
+                borderColor: darkMode ? "#495057" : "#ced4da",
+                backgroundColor: darkMode ? "#fff" : "#000",
+              }}
+            >
               <MdSearch />
             </InputGroup.Text>
             <Form.Control
               type="text"
               placeholder="Search..."
-              className="border-start-0"
+              className={`border-start-0 ${darkMode ? "text-white" : "dark-placeholder"}`}
+              style={{
+                backgroundColor: darkMode ? "grey" : "var(--light-card)",
+                color: darkMode ? "#fff" : "000",
+                borderColor: darkMode ? "#495057" : "#ced4da",
+              }}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
             />
@@ -95,7 +121,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             variant="link"
             className="me-2 p-1 text-decoration-none d-md-none"
             onClick={() => setShowMobileSearch(true)}
-            style={{ color: "inherit" }}
+            style={{ color: darkMode ? "#fff" : "#000" }}
           >
             <MdSearch size={24} />
           </Button>
@@ -107,7 +133,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             variant="link"
             className="me-2 p-1 text-decoration-none"
             onClick={() => setShowMobileSearch(false)}
-            style={{ color: "inherit" }}
+            style={{ color: darkMode ? "#fff" : "#000" }}
           >
             <MdClose size={24} />
           </Button>
@@ -126,17 +152,21 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             className="p-1 me-2 text-decoration-none rounded-circle"
             onClick={toggleTheme}
             title={darkMode ? "Light mode" : "Dark mode"}
-            style={{ color: "inherit" }}
+            style={{ color: darkMode ? "#fff" : "#000" }}
           >
             {darkMode ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
           </Button>
 
-          {/* Notifications dropdown */}
+          {/* Notifications dropdown - Fixed alignment */}
           <Dropdown align="end" className="me-2">
             <Dropdown.Toggle
               variant="link"
               className="p-1 text-decoration-none rounded-circle position-relative"
-              style={{ color: "inherit", border: "none" }}
+              style={{
+                color: darkMode ? "#fff" : "#000",
+                border: "none",
+                backgroundColor: "transparent",
+              }}
             >
               <MdNotifications size={20} />
               <span
@@ -147,26 +177,126 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               </span>
             </Dropdown.Toggle>
 
-            <Dropdown.Menu style={{ minWidth: "300px" }}>
-              <Dropdown.Header className="d-flex justify-content-between">
+            <Dropdown.Menu
+              style={{
+                width: isMobile ? "100vw" : "320px",
+                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+                borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                boxShadow: "0 0.5rem 1rem rgba(0, 0, 0, 0.15)",
+                marginTop: "0.5rem",
+                ...(isMobile && {
+                  position: "fixed",
+                  top: "var(--header-height)",
+                  left: "0",
+                  right: "0",
+                  margin: "0",
+                  borderRadius: "0",
+                }),
+              }}
+            >
+              <Dropdown.Header className="d-flex justify-content-between" style={{ color: darkMode ? "#fff" : "#000" }}>
                 <span>Notifications</span>
                 <span className="badge bg-primary">3</span>
               </Dropdown.Header>
-              <Dropdown.Item className="py-2">
-                <div className="d-flex">
-                  <div className="rounded-circle bg-success d-flex align-items-center justify-content-center me-3"
-                    style={{ width: "32px", height: "32px" }}>
-                    <MdNotifications className="text-white" size={16} />
+
+              {/* Stats Section */}
+              <div
+                className="px-3 py-2"
+                style={{
+                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                  borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
+                }}
+              >
+                <div className="row text-center small">
+                  <div className="col-6 border-end py-2">
+                    <div className="fw-bold">24</div>
+                    <div className="text-muted">Total Surveys</div>
                   </div>
-                  <div className="flex-fill">
-                    <h6 className="mb-1 small">New Response</h6>
-                    <p className="mb-1 small text-muted">You received a new survey response</p>
-                    <small className="text-muted">5 mins ago</small>
+                  <div className="col-6 py-2">
+                    <div className="fw-bold">1,247</div>
+                    <div className="text-muted">Active Responses</div>
+                  </div>
+                  <div className="col-6 border-end py-2">
+                    <div className="fw-bold">78.5%</div>
+                    <div className="text-muted">Completion Rate</div>
+                  </div>
+                  <div className="col-6 py-2">
+                    <div className="fw-bold">3.2 min</div>
+                    <div className="text-muted">Avg Response Time</div>
                   </div>
                 </div>
-              </Dropdown.Item>
-              <Dropdown.Divider />
-              <Dropdown.Item as={Link} to="/notifications" className="text-center">
+              </div>
+
+              {/* Notification Items */}
+              <div className="p-2" style={{ maxHeight: "300px", overflowY: "auto" }}>
+                <div className="d-flex align-items-center px-2 py-1">
+                  <h6 className="mb-0 small fw-bold" style={{ color: darkMode ? "#fff" : "#000" }}>
+                    Recent Activity
+                  </h6>
+                </div>
+
+                <Dropdown.Item className="py-2" style={{ color: darkMode ? "#fff" : "#000" }}>
+                  <div className="d-flex">
+                    <div
+                      className="rounded-circle bg-success d-flex align-items-center justify-content-center me-3"
+                      style={{ width: "32px", height: "32px" }}
+                    >
+                      <MdNotifications className="text-white" size={16} />
+                    </div>
+                    <div className="flex-fill">
+                      <h6 className="mb-1 small" style={{ color: darkMode ? "#fff" : "#000" }}>
+                        New Response
+                      </h6>
+                      <p className="mb-1 small text-muted">You received a new survey response</p>
+                      <small className="text-muted">5 mins ago</small>
+                    </div>
+                  </div>
+                </Dropdown.Item>
+
+                <Dropdown.Item className="py-2" style={{ color: darkMode ? "#fff" : "#000" }}>
+                  <div className="d-flex">
+                    <div
+                      className="rounded-circle bg-info d-flex align-items-center justify-content-center me-3"
+                      style={{ width: "32px", height: "32px" }}
+                    >
+                      <MdNotifications className="text-white" size={16} />
+                    </div>
+                    <div className="flex-fill">
+                      <h6 className="mb-1 small" style={{ color: darkMode ? "#fff" : "#000" }}>
+                        Survey Completed
+                      </h6>
+                      <p className="mb-1 small text-muted">Customer Satisfaction survey reached 100 responses</p>
+                      <small className="text-muted">1 hour ago</small>
+                    </div>
+                  </div>
+                </Dropdown.Item>
+
+                <Dropdown.Item className="py-2" style={{ color: darkMode ? "#fff" : "#000" }}>
+                  <div className="d-flex">
+                    <div
+                      className="rounded-circle bg-warning d-flex align-items-center justify-content-center me-3"
+                      style={{ width: "32px", height: "32px" }}
+                    >
+                      <MdNotifications className="text-white" size={16} />
+                    </div>
+                    <div className="flex-fill">
+                      <h6 className="mb-1 small" style={{ color: darkMode ? "#fff" : "#000" }}>
+                        Low Response Rate
+                      </h6>
+                      <p className="mb-1 small text-muted">Product feedback survey needs attention</p>
+                      <small className="text-muted">2 hours ago</small>
+                    </div>
+                  </div>
+                </Dropdown.Item>
+              </div>
+
+              <Dropdown.Divider style={{ backgroundColor: darkMode ? "var(--dark-border)" : "var(--light-border)" }} />
+              <Dropdown.Item
+                as={Link}
+                to="/notifications"
+                className="text-center"
+                style={{ color: darkMode ? "#fff" : "#000" }}
+              >
                 See All Notifications
               </Dropdown.Item>
             </Dropdown.Menu>
@@ -177,31 +307,52 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             <Dropdown.Toggle
               variant="link"
               className="d-flex align-items-center p-1 text-decoration-none"
-              style={{ color: "inherit", border: "none" }}
+              style={{
+                color: darkMode ? "#fff" : "#000",
+                border: "none",
+                backgroundColor: "transparent",
+              }}
             >
               <div
                 className="rounded-circle bg-light d-flex align-items-center justify-content-center"
                 style={{ width: "36px", height: "36px" }}
               >
-                <MdPerson className="text-secondary" />
+                <MdPerson className={darkMode ? "text-white" : "text-secondary"} />
               </div>
               <span className="d-none d-lg-inline ms-2">Admin</span>
             </Dropdown.Toggle>
 
-            <Dropdown.Menu>
-              <Dropdown.Header>
+            <Dropdown.Menu
+              style={{
+                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+                borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                marginTop: "0.5rem",
+                minWidth: "200px",
+              }}
+            >
+              <Dropdown.Header style={{ color: darkMode ? "#fff" : "#000" }}>
                 <h6 className="mb-0">Admin</h6>
                 <small className="text-muted">admin@ratepro.com</small>
               </Dropdown.Header>
-              <Dropdown.Item as={Link} to="/profile" className="d-flex align-items-center">
+              <Dropdown.Item
+                as={Link}
+                to="/profile"
+                className="d-flex align-items-center"
+                style={{ color: darkMode ? "#fff" : "#000" }}
+              >
                 <MdAccountCircle className="me-2" />
                 Profile
               </Dropdown.Item>
-              <Dropdown.Item as={Link} to="/settings" className="d-flex align-items-center">
+              <Dropdown.Item
+                as={Link}
+                to="/settings"
+                className="d-flex align-items-center"
+                style={{ color: darkMode ? "#fff" : "#000" }}
+              >
                 <MdSettings className="me-2" />
                 Settings
               </Dropdown.Item>
-              <Dropdown.Divider />
+              <Dropdown.Divider style={{ backgroundColor: darkMode ? "var(--dark-border)" : "var(--light-border)" }} />
               <Dropdown.Item onClick={handleLogout} className="d-flex align-items-center text-danger">
                 <MdExitToApp className="me-2" />
                 Logout

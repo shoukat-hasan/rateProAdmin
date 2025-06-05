@@ -1,3 +1,5 @@
+// src\pages\ContentManagement\APIManagement.jsx
+
 import React from 'react'
 
 const APIManagement = () => {

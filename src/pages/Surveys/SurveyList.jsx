@@ -1,179 +1,245 @@
+// src\pages\Surveys\SurveyList.jsx
+
 "use client"
 
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import { Table, Badge, Button, InputGroup, Form, Row, Col } from "react-bootstrap"
-import { MdEdit, MdDelete, MdVisibility, MdAdd, MdSearch, MdFilterList } from "react-icons/md"
+import { useState } from "react"
+import { Container, Row, Col, Card, Table, Badge, Button, Form, InputGroup, Pagination, Modal } from "react-bootstrap"
 
-const SurveyList = ({ limit }) => {
-  const [surveys, setSurveys] = useState([])
-  const [loading, setLoading] = useState(true)
+const SurveyList = () => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(10)
   const [searchTerm, setSearchTerm] = useState("")
+  const [filterStatus, setFilterStatus] = useState("all")
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedSurvey, setSelectedSurvey] = useState(null)
 
-  useEffect(() => {
-    setTimeout(() => {
-      const dummySurveys = [
-        {
-          id: 1,
-          title: "Customer Satisfaction Survey",
-          status: "Active",
-          responses: 245,
-          created: "2023-05-15",
-          lastUpdated: "2023-06-01",
-        },
-        {
-          id: 2,
-          title: "Product Feedback Survey",
-          status: "Active",
-          responses: 189,
-          created: "2023-05-20",
-          lastUpdated: "2023-05-28",
-        },
-        {
-          id: 3,
-          title: "Employee Engagement Survey",
-          status: "Draft",
-          responses: 0,
-          created: "2023-06-01",
-          lastUpdated: "2023-06-01",
-        },
-        {
-          id: 4,
-          title: "Website Usability Survey",
-          status: "Active",
-          responses: 78,
-          created: "2023-05-10",
-          lastUpdated: "2023-05-25",
-        },
-        {
-          id: 5,
-          title: "Market Research Survey",
-          status: "Completed",
-          responses: 312,
-          created: "2023-04-15",
-          lastUpdated: "2023-05-15",
-        },
-      ]
+  const [surveys, setSurveys] = useState([
+    {
+      id: 1,
+      name: "Customer Satisfaction Q4",
+      status: "Active",
+      responses: 156,
+      created: "2024-01-10",
+      lastModified: "2024-01-15",
+    },
+    {
+      id: 2,
+      name: "Product Feedback Survey",
+      status: "Active",
+      responses: 89,
+      created: "2024-01-08",
+      lastModified: "2024-01-14",
+    },
+    {
+      id: 3,
+      name: "Employee Engagement",
+      status: "Completed",
+      responses: 234,
+      created: "2024-01-05",
+      lastModified: "2024-01-13",
+    },
+    {
+      id: 4,
+      name: "Market Research Study",
+      status: "Draft",
+      responses: 0,
+      created: "2024-01-03",
+      lastModified: "2024-01-12",
+    },
+    {
+      id: 5,
+      name: "User Experience Survey",
+      status: "Active",
+      responses: 178,
+      created: "2024-01-01",
+      lastModified: "2024-01-11",
+    },
+  ])
 
-      setSurveys(limit ? dummySurveys.slice(0, limit) : dummySurveys)
-      setLoading(false)
-    }, 800)
-  }, [limit])
-
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case "Active":
-        return "success"
-      case "Draft":
-        return "secondary"
-      case "Completed":
-        return "primary"
-      default:
-        return "secondary"
+  const getStatusBadge = (status) => {
+    const variants = {
+      Active: "success",
+      Completed: "primary",
+      Draft: "secondary",
+      Paused: "warning",
+      Archived: "dark",
     }
+    return <Badge bg={variants[status] || "secondary"}>{status}</Badge>
   }
 
-  if (loading) {
-    return <div className="text-center py-4">Loading surveys...</div>
+  const handleDelete = (survey) => {
+    setSelectedSurvey(survey)
+    setShowDeleteModal(true)
   }
+
+  const confirmDelete = () => {
+    setSurveys(surveys.filter((s) => s.id !== selectedSurvey.id))
+    setShowDeleteModal(false)
+    setSelectedSurvey(null)
+  }
+
+  const filteredSurveys = surveys.filter((survey) => {
+    const matchesSearch = survey.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesFilter = filterStatus === "all" || survey.status.toLowerCase() === filterStatus
+    return matchesSearch && matchesFilter
+  })
+
+  const totalPages = Math.ceil(filteredSurveys.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const currentSurveys = filteredSurveys.slice(startIndex, startIndex + itemsPerPage)
 
   return (
-    <div>
-      {!limit && (
-        <>
-          {/* Header */}
-          <Row className="mb-4">
-            <Col>
-              <div className="d-flex justify-content-between align-items-center">
-                <h1 className="h3 mb-0">Surveys</h1>
-                <Button variant="primary">
-                  <MdAdd className="me-2" />
-                  Create New Survey
-                </Button>
+    <Container fluid>
+      <Row className="mb-4">
+        <Col>
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 className="h3 mb-0">Surveys</h1>
+              <p className="text-muted">Manage all your surveys</p>
+            </div>
+            <Button variant="primary" href="/surveys/builder">
+              <i className="fas fa-plus me-2"></i>
+              Create Survey
+            </Button>
+          </div>
+        </Col>
+      </Row>
+
+      <Row className="mb-4">
+        <Col lg={6}>
+          <InputGroup>
+            <InputGroup.Text>
+              <i className="fas fa-search"></i>
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Search surveys..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+        <Col lg={3}>
+          <Form.Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="all">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="draft">Draft</option>
+            <option value="paused">Paused</option>
+          </Form.Select>
+        </Col>
+        <Col lg={3}>
+          <Button variant="outline-secondary" className="w-100">
+            <i className="fas fa-filter me-2"></i>
+            More Filters
+          </Button>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col>
+          <Card>
+            <Card.Body className="p-0">
+              <div className="table-responsive">
+                <Table className="mb-0" hover>
+                  <thead className="table-light">
+                    <tr>
+                      <th>Survey Name</th>
+                      <th>Status</th>
+                      <th>Responses</th>
+                      <th className="d-none d-md-table-cell">Created</th>
+                      <th className="d-none d-lg-table-cell">Last Modified</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentSurveys.map((survey) => (
+                      <tr key={survey.id}>
+                        <td>
+                          <div className="fw-medium">{survey.name}</div>
+                          <small className="text-muted d-md-none">
+                            Created: {new Date(survey.created).toLocaleDateString()}
+                          </small>
+                        </td>
+                        <td>{getStatusBadge(survey.status)}</td>
+                        <td>
+                          <span className="fw-medium">{survey.responses}</span>
+                        </td>
+                        <td className="d-none d-md-table-cell">{new Date(survey.created).toLocaleDateString()}</td>
+                        <td className="d-none d-lg-table-cell">{new Date(survey.lastModified).toLocaleDateString()}</td>
+                        <td>
+                          <div className="btn-group btn-group-sm">
+                            <Button variant="outline-primary" size="sm" title="View">
+                              <i className="fas fa-eye"></i>
+                            </Button>
+                            <Button variant="outline-secondary" size="sm" title="Edit">
+                              <i className="fas fa-edit"></i>
+                            </Button>
+                            <Button variant="outline-info" size="sm" title="Analytics">
+                              <i className="fas fa-chart-bar"></i>
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              title="Delete"
+                              onClick={() => handleDelete(survey)}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
               </div>
-            </Col>
-          </Row>
+            </Card.Body>
+            <Card.Footer>
+              <div className="d-flex justify-content-between align-items-center">
+                <small className="text-muted">
+                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredSurveys.length)} of{" "}
+                  {filteredSurveys.length} surveys
+                </small>
+                <Pagination size="sm" className="mb-0">
+                  <Pagination.Prev disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)} />
+                  {[...Array(totalPages)].map((_, index) => (
+                    <Pagination.Item
+                      key={index + 1}
+                      active={index + 1 === currentPage}
+                      onClick={() => setCurrentPage(index + 1)}
+                    >
+                      {index + 1}
+                    </Pagination.Item>
+                  ))}
+                  <Pagination.Next
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                  />
+                </Pagination>
+              </div>
+            </Card.Footer>
+          </Card>
+        </Col>
+      </Row>
 
-          {/* Filters */}
-          <Row className="mb-4">
-            <Col md={6}>
-              <InputGroup>
-                <InputGroup.Text>
-                  <MdSearch />
-                </InputGroup.Text>
-                <Form.Control
-                  type="text"
-                  placeholder="Search surveys..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
-            </Col>
-            <Col md={6} className="d-flex justify-content-end align-items-center gap-2">
-              <Button variant="outline-secondary" size="sm">
-                <MdFilterList className="me-1" />
-                Filter
-                <Badge bg="primary" className="ms-2">
-                  0
-                </Badge>
-              </Button>
-              <Form.Select size="sm" style={{ width: "auto" }}>
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="responses-high">Most Responses</option>
-                <option value="responses-low">Least Responses</option>
-              </Form.Select>
-            </Col>
-          </Row>
-        </>
-      )}
-
-      {/* Table */}
-      <div className="table-responsive">
-        <Table hover className="mb-0">
-          <thead>
-            <tr>
-              <th>Survey Title</th>
-              <th className="text-center">Status</th>
-              <th className="text-center">Responses</th>
-              <th>Created</th>
-              <th>Last Updated</th>
-              <th className="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {surveys.map((survey) => (
-              <tr key={survey.id}>
-                <td>
-                  <Link to={`/surveys/${survey.id}`} className="text-primary text-decoration-none fw-medium">
-                    {survey.title}
-                  </Link>
-                </td>
-                <td className="text-center">
-                  <Badge bg={getStatusVariant(survey.status)}>{survey.status}</Badge>
-                </td>
-                <td className="text-center">{survey.responses}</td>
-                <td>{survey.created}</td>
-                <td>{survey.lastUpdated}</td>
-                <td>
-                  <div className="d-flex justify-content-center gap-1">
-                    <Button variant="outline-primary" size="sm" title="View">
-                      <MdVisibility />
-                    </Button>
-                    <Button variant="outline-secondary" size="sm" title="Edit">
-                      <MdEdit />
-                    </Button>
-                    <Button variant="outline-danger" size="sm" title="Delete">
-                      <MdDelete />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
-    </div>
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete the survey "{selectedSurvey?.name}"? This action cannot be undone.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Delete Survey
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Container>
   )
 }
 

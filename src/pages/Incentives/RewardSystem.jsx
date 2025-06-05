@@ -1,3 +1,5 @@
+// src\pages\Incentives\RewardSystem.jsx
+
 import React from 'react'
 
 const RewardSystem = () => {

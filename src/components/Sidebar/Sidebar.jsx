@@ -1,3 +1,5 @@
+// src\components\Sidebar\Sidebar.jsx
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -34,7 +36,7 @@ import {
   MdDescription as MdTemplate, // Corrected import
 } from "react-icons/md"
 
-const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose }) => {
+const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onToggle  }) => {
   const [contentSubmenuOpen, setContentSubmenuOpen] = useState(false)
   const [surveySubmenuOpen, setSurveySubmenuOpen] = useState(false)
   const [accessSubmenuOpen, setAccessSubmenuOpen] = useState(false)
@@ -57,16 +59,28 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose }) =
     }
   }, [collapsed])
 
+
+// Handle close button click - now properly handles all screen sizes
+  const handleCloseClick = () => {
+    if (isMobile || isTablet) {
+      onClose?.() // Close on mobile/tablet
+    } else {
+      onToggle?.() // Toggle collapsed state on desktop/laptop
+    }
+  }
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && (isMobile || isTablet) && isOpen) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) &&  ((isMobile || isTablet) && isOpen || 
+         (!isMobile && !isTablet && !collapsed && isOpen))) {
         onClose()
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isMobile, isTablet, isOpen, onClose])
+  }, [isMobile, isTablet, isOpen, onClose, collapsed])
 
   const toggleContentSubmenu = () => setContentSubmenuOpen(!contentSubmenuOpen)
   const toggleSurveySubmenu = () => setSurveySubmenuOpen(!surveySubmenuOpen)
@@ -76,6 +90,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose }) =
   const toggleAudienceSubmenu = () => setAudienceSubmenuOpen(!audienceSubmenuOpen)
   const toggleIncentiveSubmenu = () => setIncentiveSubmenuOpen(!incentiveSubmenuOpen)
 
+  // Update sidebar style to handle all cases
   const sidebarStyle = {
     width: collapsed ? "70px" : "280px",
     height: "100vh",
@@ -185,13 +200,23 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose }) =
 
   return (
     <div ref={sidebarRef} style={sidebarStyle} className="d-flex flex-column">
-      {/* Header
-      <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
+         {/* Header */}
+      <div className="d-flex justify-content-between align-items-center p-3 border-bottom" 
+           style={{ height: "var(--header-height)" }}>
         {!collapsed && <h4 className="mb-0 text-primary fw-bold">Rate Pro</h4>}
-        <Button variant="link" className="p-1 text-decoration-none" onClick={onClose} style={{ color: "inherit" }}>
-          {isMobile || isTablet ? <MdClose size={24} /> : collapsed ? <MdMenu size={20} /> : <MdClose size={20} />}
+        <Button
+          variant="link"
+          className="p-1 text-decoration-none"
+          onClick={handleCloseClick}
+          style={{ 
+            color: "inherit",
+            marginLeft: collapsed ? "0" : "auto" // Ensures proper alignment
+          }}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <MdMenu size={24} /> : <MdClose size={24} />}
         </Button>
-      </div> */}
+      </div>
 
       {/* Navigation */}
       <Nav className="flex-column flex-fill p-2">
@@ -201,9 +226,8 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose }) =
               <>
                 <Button
                   variant="link"
-                  className={`w-100 text-start text-decoration-none d-flex align-items-center p-2 rounded ${
-                    item.isOpen ? "bg-primary bg-opacity-10" : ""
-                  }`}
+                  className={`w-100 text-start text-decoration-none d-flex align-items-center p-2 rounded ${item.isOpen ? "bg-primary bg-opacity-10" : ""
+                    }`}
                   onClick={collapsed ? undefined : item.toggle}
                   style={{
                     color: "inherit",

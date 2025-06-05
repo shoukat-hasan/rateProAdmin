@@ -1,3 +1,5 @@
+// src\pages\Settings\CustomThankYou.jsx
+
 import React from 'react'
 
 const CustomThankYou = () => {

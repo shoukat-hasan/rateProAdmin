@@ -1,156 +1,201 @@
-// src/pages/Templates/Templates.jsx
+// src\pages\Surveys\SurveyTemplates.jsx
+
 "use client"
 
 import { useState } from "react"
-import { MdAdd, MdContentCopy, MdDelete, MdEdit, MdSave } from "react-icons/md"
+import { Container, Row, Col, Card, Button, Badge, Form, InputGroup } from "react-bootstrap"
 
 const SurveyTemplates = () => {
-  const [templates, setTemplates] = useState([
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
+
+  const categories = [
+    { value: "all", label: "All Categories" },
+    { value: "customer", label: "Customer Feedback" },
+    { value: "employee", label: "Employee Engagement" },
+    { value: "market", label: "Market Research" },
+    { value: "product", label: "Product Feedback" },
+    { value: "event", label: "Event Feedback" },
+  ]
+
+  const templates = [
     {
       id: 1,
-      name: "Customer Satisfaction (CSAT)",
-      description: "Standard customer satisfaction survey",
-      questions: [
-        {
-          text: "How satisfied are you with our product?",
-          type: "rating",
-          options: ["1", "2", "3", "4", "5"]
-        },
-        {
-          text: "What can we improve?",
-          type: "text"
-        }
-      ]
+      name: "Customer Satisfaction Survey",
+      description: "Measure customer satisfaction with your products or services",
+      category: "customer",
+      questions: 12,
+      estimatedTime: "5 min",
+      popular: true,
     },
     {
       id: 2,
-      name: "Net Promoter Score (NPS)",
-      description: "Standard NPS survey",
-      questions: [
-        {
-          text: "How likely are you to recommend our product to others?",
-          type: "nps",
-          options: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-        }
-      ]
-    }
-  ])
-  const [showForm, setShowForm] = useState(false)
-  const [currentTemplate, setCurrentTemplate] = useState({
-    name: '',
-    description: '',
-    questions: []
+      name: "Employee Engagement Survey",
+      description: "Assess employee satisfaction and engagement levels",
+      category: "employee",
+      questions: 15,
+      estimatedTime: "7 min",
+      popular: true,
+    },
+    {
+      id: 3,
+      name: "Product Feedback Survey",
+      description: "Gather feedback on product features and usability",
+      category: "product",
+      questions: 10,
+      estimatedTime: "4 min",
+      popular: false,
+    },
+    {
+      id: 4,
+      name: "Market Research Survey",
+      description: "Understand market trends and customer preferences",
+      category: "market",
+      questions: 18,
+      estimatedTime: "10 min",
+      popular: false,
+    },
+    {
+      id: 5,
+      name: "Event Feedback Survey",
+      description: "Collect feedback from event attendees",
+      category: "event",
+      questions: 8,
+      estimatedTime: "3 min",
+      popular: true,
+    },
+    {
+      id: 6,
+      name: "Website Usability Survey",
+      description: "Evaluate website user experience and usability",
+      category: "product",
+      questions: 14,
+      estimatedTime: "6 min",
+      popular: false,
+    },
+  ]
+
+  const filteredTemplates = templates.filter((template) => {
+    const matchesSearch =
+      template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || template.category === selectedCategory
+    return matchesSearch && matchesCategory
   })
 
-  const createFromTemplate = (templateId) => {
-    // Navigate to survey creation with template data
-    console.log('Creating survey from template:', templateId)
-  }
-
-  const saveTemplate = (e) => {
-    e.preventDefault()
-    if (currentTemplate.id) {
-      setTemplates(templates.map(t => 
-        t.id === currentTemplate.id ? currentTemplate : t
-      ))
-    } else {
-      setTemplates([...templates, {
-        ...currentTemplate,
-        id: Date.now()
-      }])
+  const getCategoryBadge = (category) => {
+    const colors = {
+      customer: "primary",
+      employee: "success",
+      market: "info",
+      product: "warning",
+      event: "secondary",
     }
-    setShowForm(false)
-    setCurrentTemplate({ name: '', description: '', questions: [] })
+    return <Badge bg={colors[category] || "secondary"}>{categories.find((c) => c.value === category)?.label}</Badge>
   }
 
   return (
-    <div className="templates-page">
-      <div className="page-header">
-        <h1>Survey Templates</h1>
-        <button className="btn btn-primary" onClick={() => setShowForm(true)}>
-          <MdAdd /> New Template
-        </button>
-      </div>
-
-      {showForm && (
-        <div className="template-form">
-          <h2>{currentTemplate.id ? 'Edit' : 'Create'} Template</h2>
-          <form onSubmit={saveTemplate}>
-            <div className="form-group">
-              <label>Template Name</label>
-              <input
-                type="text"
-                value={currentTemplate.name}
-                onChange={(e) => setCurrentTemplate({...currentTemplate, name: e.target.value})}
-                required
-              />
+    <Container fluid>
+      <Row className="mb-4">
+        <Col>
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 className="h3 mb-0">Survey Templates</h1>
+              <p className="text-muted">Choose from pre-built templates to get started quickly</p>
             </div>
-            <div className="form-group">
-              <label>Description</label>
-              <textarea
-                value={currentTemplate.description}
-                onChange={(e) => setCurrentTemplate({...currentTemplate, description: e.target.value})}
-                rows={3}
-              />
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary">
-                <MdSave /> Save Template
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setShowForm(false)
-                  setCurrentTemplate({ name: '', description: '', questions: [] })
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      <div className="templates-grid">
-        {templates.map(template => (
-          <div key={template.id} className="template-card">
-            <h3>{template.name}</h3>
-            <p>{template.description}</p>
-            <div className="questions-preview">
-              {template.questions.map((q, i) => (
-                <div key={i} className="question-preview">
-                  <strong>{q.text}</strong> ({q.type})
-                </div>
-              ))}
-            </div>
-            <div className="template-actions">
-              <button
-                className="btn btn-sm btn-primary"
-                onClick={() => createFromTemplate(template.id)}
-              >
-                <MdContentCopy /> Use Template
-              </button>
-              <button
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => {
-                  setCurrentTemplate(template)
-                  setShowForm(true)
-                }}
-              >
-                <MdEdit />
-              </button>
-              <button
-                className="btn btn-sm btn-outline-danger"
-                onClick={() => setTemplates(templates.filter(t => t.id !== template.id))}
-              >
-                <MdDelete />
-              </button>
-            </div>
+            <Button variant="outline-primary">
+              <i className="fas fa-plus me-2"></i>
+              Create Custom Template
+            </Button>
           </div>
+        </Col>
+      </Row>
+
+      <Row className="mb-4">
+        <Col lg={6}>
+          <InputGroup>
+            <InputGroup.Text>
+              <i className="fas fa-search"></i>
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Search templates..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+        <Col lg={4}>
+          <Form.Select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+            {categories.map((category) => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
+          </Form.Select>
+        </Col>
+      </Row>
+
+      <Row>
+        {filteredTemplates.map((template) => (
+          <Col key={template.id} lg={4} md={6} className="mb-4">
+            <Card className="h-100 template-card">
+              <Card.Body className="d-flex flex-column">
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    {getCategoryBadge(template.category)}
+                    {template.popular && (
+                      <Badge bg="danger" className="ms-2">
+                        <i className="fas fa-fire me-1"></i>
+                        Popular
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                <h5 className="card-title">{template.name}</h5>
+                <p className="card-text text-muted flex-grow-1">{template.description}</p>
+
+                <div className="template-stats mb-3">
+                  <div className="d-flex justify-content-between text-muted small">
+                    <span>
+                      <i className="fas fa-question-circle me-1"></i>
+                      {template.questions} questions
+                    </span>
+                    <span>
+                      <i className="fas fa-clock me-1"></i>
+                      {template.estimatedTime}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="d-flex gap-2">
+                  <Button variant="primary" className="flex-grow-1">
+                    <i className="fas fa-rocket me-2"></i>
+                    Use Template
+                  </Button>
+                  <Button variant="outline-secondary">
+                    <i className="fas fa-eye"></i>
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
         ))}
-      </div>
-    </div>
+      </Row>
+
+      {filteredTemplates.length === 0 && (
+        <Row>
+          <Col>
+            <div className="text-center py-5">
+              <i className="fas fa-search fa-3x text-muted mb-3"></i>
+              <h5>No templates found</h5>
+              <p className="text-muted">Try adjusting your search criteria or browse all categories</p>
+            </div>
+          </Col>
+        </Row>
+      )}
+    </Container>
   )
 }
 

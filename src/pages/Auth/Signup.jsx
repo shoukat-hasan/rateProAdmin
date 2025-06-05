@@ -1,116 +1,184 @@
 // src\pages\Auth\Signup.jsx
+
 "use client"
 
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-
-import "./Auth.css"
+import { Container, Row, Col, Card, Form, Button, Alert } from "react-bootstrap"
+import { useNavigate, Link } from "react-router-dom"
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    company: "",
     password: "",
     confirmPassword: "",
+    company: "",
+    agreeToTerms: false,
   })
-  const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-
+  const [error, setError] = useState("")
   const navigate = useNavigate()
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value,
-    })
+    const { name, value, type, checked } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
+    setError("")
 
     if (formData.password !== formData.confirmPassword) {
-      return setError("Passwords do not match")
+      setError("Passwords do not match")
+      setLoading(false)
+      return
+    }
+
+    if (!formData.agreeToTerms) {
+      setError("Please agree to the terms and conditions")
+      setLoading(false)
+      return
     }
 
     try {
-      setError("")
-      setLoading(true)
-      await signup(formData.email, formData.password, formData.name, formData.company)
-      navigate("/")
-    } catch (error) {
-      setError("Failed to create an account")
-      console.error(error)
+      // Simulate signup
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      navigate("/dashboard")
+    } catch (err) {
+      setError("Signup failed. Please try again.")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1 className="auth-title">Rate Pro</h1>
-          <p className="auth-subtitle">Create your account</p>
-        </div>
+    <Container fluid className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+      <Row className="w-100 justify-content-center">
+        <Col xs={12} sm={10} md={8} lg={6} xl={4}>
+          <Card className="shadow">
+            <Card.Body className="p-4">
+              <div className="text-center mb-4">
+                <h2 className="h4 mb-1">Create Account</h2>
+                <p className="text-muted">Join RatePro and start creating surveys</p>
+              </div>
 
-        {error && <div className="auth-error">{error}</div>}
+              {error && <Alert variant="danger">{error}</Alert>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
-          </div>
+              <Form onSubmit={handleSubmit}>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>First Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="firstName"
+                        placeholder="Enter first name"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Last Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="lastName"
+                        placeholder="Enter last name"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
-          </div>
+                <Form.Group className="mb-3">
+                  <Form.Label>Email Address</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
 
-          <div className="form-group">
-            <label htmlFor="company">Company Name</label>
-            <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} required />
-          </div>
+                <Form.Group className="mb-3">
+                  <Form.Label>Company (Optional)</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="company"
+                    placeholder="Enter company name"
+                    value={formData.company}
+                    onChange={handleChange}
+                  />
+                </Form.Group>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="6"
-            />
-          </div>
+                <Form.Group className="mb-3">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    name="password"
+                    placeholder="Create a password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              minLength="6"
-            />
-          </div>
+                <Form.Group className="mb-3">
+                  <Form.Label>Confirm Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
 
-          <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? "Creating Account..." : "Sign Up"}
-          </button>
-        </form>
+                <Form.Group className="mb-3">
+                  <Form.Check
+                    type="checkbox"
+                    name="agreeToTerms"
+                    label="I agree to the Terms of Service and Privacy Policy"
+                    checked={formData.agreeToTerms}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
 
-        <div className="auth-footer">
-          <p>
-            Already have an account? <Link to="/login">Sign in</Link>
-          </p>
-        </div>
-      </div>
-    </div>
+                <Button type="submit" variant="primary" className="w-100 mb-3" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Creating account...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
+                </Button>
+              </Form>
+            </Card.Body>
+            <Card.Footer className="text-center py-3">
+              <span className="text-muted">Already have an account? </span>
+              <Link to="/login" className="text-decoration-none">
+                Sign in
+              </Link>
+            </Card.Footer>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   )
 }
 

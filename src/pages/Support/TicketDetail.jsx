@@ -1,3 +1,5 @@
+// src\pages\Support\TicketDetail.jsx
+
 import React from 'react'
 
 const TicketDetail = () => {

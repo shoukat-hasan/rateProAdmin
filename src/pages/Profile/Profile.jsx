@@ -1,256 +1,399 @@
-
-
-// src\pages\Profile\Profile.jsx
 "use client"
 
 import { useState } from "react"
+import { Container, Row, Col, Card, Form, Button, Tab, Tabs, Alert, Badge } from "react-bootstrap"
+import { MdPerson, MdSecurity, MdNotifications, MdEdit, MdSave, MdCancel } from "react-icons/md"
 
-import { MdSave, MdEdit, MdLock } from "react-icons/md"
-import "./Profile.css"
-
-const Profile = () => {
-  const { currentUser, updateProfile, updatePassword } = useState({})
-
-  const [profileData, setProfileData] = useState({
-    name: currentUser?.name || "",
-    email: currentUser?.email || "",
-    company: currentUser?.company || "",
-    phone: currentUser?.phone || "",
-    position: currentUser?.position || "",
+const Profile = ({ darkMode }) => {
+  const [activeTab, setActiveTab] = useState("profile")
+  const [isEditing, setIsEditing] = useState(false)
+  const [showAlert, setShowAlert] = useState(false)
+  const [formData, setFormData] = useState({
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@ratepro.com",
+    phone: "+1 (555) 123-4567",
+    department: "Administration",
+    role: "Super Admin",
+    bio: "Experienced administrator with 5+ years in survey management and data analysis.",
+    timezone: "UTC-5 (Eastern Time)",
+    language: "English",
   })
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+  const [notifications, setNotifications] = useState({
+    emailNotifications: true,
+    pushNotifications: false,
+    surveyAlerts: true,
+    weeklyReports: true,
+    systemUpdates: false,
   })
 
-  const [editMode, setEditMode] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
-  const [passwordError, setPasswordError] = useState("")
-  const [passwordSuccess, setPasswordSuccess] = useState("")
-
-  const handleProfileChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target
-    setProfileData({
-      ...profileData,
-      [name]: value,
-    })
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target
-    setPasswordData({
-      ...passwordData,
-      [name]: value,
-    })
+  const handleNotificationChange = (e) => {
+    const { name, checked } = e.target
+    setNotifications((prev) => ({ ...prev, [name]: checked }))
   }
 
-  const handleProfileSubmit = async (e) => {
-    e.preventDefault()
-
-    try {
-      setError("")
-      setSuccess("")
-      setLoading(true)
-
-      await updateProfile(profileData)
-      setSuccess("Profile updated successfully")
-      setEditMode(false)
-    } catch (error) {
-      setError("Failed to update profile")
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
+  const handleSave = () => {
+    setIsEditing(false)
+    setShowAlert(true)
+    setTimeout(() => setShowAlert(false), 3000)
   }
 
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault()
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      return setPasswordError("Passwords do not match")
-    }
-
-    try {
-      setPasswordError("")
-      setPasswordSuccess("")
-      setLoading(true)
-
-      await updatePassword(passwordData.newPassword)
-      setPasswordSuccess("Password updated successfully")
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      })
-    } catch (error) {
-      setPasswordError("Failed to update password")
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
+  const handleCancel = () => {
+    setIsEditing(false)
+    // Reset form data if needed
   }
 
   return (
-    <div className="profile-page">
-      <div className="page-header">
-        <h1>My Profile</h1>
-        {!editMode ? (
-          <button className="btn btn-primary" onClick={() => setEditMode(true)}>
-            <MdEdit /> Edit Profile
-          </button>
-        ) : (
-          <button className="btn btn-secondary" onClick={() => setEditMode(false)}>
-            Cancel
-          </button>
-        )}
-      </div>
-
-      <div className="profile-container">
-        <div className="profile-card">
-          <div className="profile-header">
-            <h2>Personal Information</h2>
+    <Container fluid className="profile-container py-4">
+      {/* Header */}
+      <Row className="mb-4">
+        <Col>
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h2 className={`mb-1 ${darkMode ? "text-white" : "text-dark"}`}>Profile Settings</h2>
+              <p className="text-muted mb-0">Manage your account settings and preferences</p>
+            </div>
+            <div className="d-flex gap-2">
+              {isEditing ? (
+                <>
+                  <Button variant="outline-secondary" size="sm" onClick={handleCancel}>
+                    <MdCancel className="me-1" />
+                    Cancel
+                  </Button>
+                  <Button variant="primary" size="sm" onClick={handleSave}>
+                    <MdSave className="me-1" />
+                    Save Changes
+                  </Button>
+                </>
+              ) : (
+                <Button variant="primary" size="sm" onClick={() => setIsEditing(true)}>
+                  <MdEdit className="me-1" />
+                  Edit Profile
+                </Button>
+              )}
+            </div>
           </div>
+        </Col>
+      </Row>
 
-          {error && <div className="alert alert-danger">{error}</div>}
-          {success && <div className="alert alert-success">{success}</div>}
+      {/* Alert */}
+      {showAlert && (
+        <Row className="mb-3">
+          <Col>
+            <Alert variant="success" className="d-flex align-items-center">
+              <MdSave className="me-2" />
+              Profile updated successfully!
+            </Alert>
+          </Col>
+        </Row>
+      )}
 
-          <form onSubmit={handleProfileSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="name">Full Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={profileData.name}
-                  onChange={handleProfileChange}
-                  disabled={!editMode}
-                  required
-                />
+      <Row>
+        {/* Profile Card */}
+        <Col lg={4} className="mb-4">
+          <Card
+            className="profile-card border-0 shadow-sm h-100"
+            style={{
+              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+            }}
+          >
+            <Card.Body className="text-center">
+              <div
+                className="profile-avatar mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center"
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  backgroundColor: "var(--primary-color)",
+                  color: "#fff",
+                  fontSize: "3rem",
+                }}
+              >
+                <MdPerson />
               </div>
-
-              <div className="form-group">
-                <label htmlFor="email">Email Address</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={profileData.email}
-                  onChange={handleProfileChange}
-                  disabled={!editMode}
-                  required
-                />
+              <h4 className={`mb-1 ${darkMode ? "text-white" : "text-dark"}`}>
+                {formData.firstName} {formData.lastName}
+              </h4>
+              <p className="text-muted mb-2">{formData.email}</p>
+              <Badge bg="primary" className="mb-3">
+                {formData.role}
+              </Badge>
+              <p className={`small ${darkMode ? "text-light" : "text-muted"}`}>{formData.bio}</p>
+              <div className="profile-stats mt-4">
+                <Row>
+                  <Col xs={4}>
+                    <div className={`fw-bold ${darkMode ? "text-white" : "text-dark"}`}>24</div>
+                    <div className="small text-muted">Surveys</div>
+                  </Col>
+                  <Col xs={4}>
+                    <div className={`fw-bold ${darkMode ? "text-white" : "text-dark"}`}>1.2K</div>
+                    <div className="small text-muted">Responses</div>
+                  </Col>
+                  <Col xs={4}>
+                    <div className={`fw-bold ${darkMode ? "text-white" : "text-dark"}`}>78%</div>
+                    <div className="small text-muted">Completion</div>
+                  </Col>
+                </Row>
               </div>
-            </div>
+            </Card.Body>
+          </Card>
+        </Col>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="company">Company</label>
-                <input
-                  type="text"
-                  id="company"
-                  name="company"
-                  value={profileData.company}
-                  onChange={handleProfileChange}
-                  disabled={!editMode}
-                />
-              </div>
+        {/* Settings Tabs */}
+        <Col lg={8}>
+          <Card
+            className="settings-card border-0 shadow-sm"
+            style={{
+              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+            }}
+          >
+            <Card.Body>
+              <Tabs
+                activeKey={activeTab}
+                onSelect={(k) => setActiveTab(k)}
+                className="profile-tabs mb-4"
+                style={{
+                  borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
+                }}
+              >
+                {/* Personal Information Tab */}
+                <Tab
+                  eventKey="profile"
+                  title={
+                    <span className={darkMode ? "text-white" : "text-dark"}>
+                      <MdPerson className="me-2" />
+                      Personal Info
+                    </span>
+                  }
+                >
+                  <Form>
+                    <Row>
+                      <Col md={6} className="mb-3">
+                        <Form.Group>
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>First Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            style={{
+                              backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                              borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6} className="mb-3">
+                        <Form.Group>
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>Last Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            style={{
+                              backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                              borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col md={6} className="mb-3">
+                        <Form.Group>
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>Email Address</Form.Label>
+                          <Form.Control
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            style={{
+                              backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                              borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6} className="mb-3">
+                        <Form.Group>
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>Phone Number</Form.Label>
+                          <Form.Control
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            style={{
+                              backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                              borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col md={6} className="mb-3">
+                        <Form.Group>
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>Department</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="department"
+                            value={formData.department}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            style={{
+                              backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                              borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6} className="mb-3">
+                        <Form.Group>
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>Role</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="role"
+                            value={formData.role}
+                            disabled
+                            style={{
+                              backgroundColor: darkMode ? "var(--dark-hover)" : "var(--light-hover)",
+                              borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                    <Form.Group className="mb-3">
+                      <Form.Label className={darkMode ? "text-white" : "text-dark"}>Bio</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="bio"
+                        value={formData.bio}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        style={{
+                          backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                          borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                          color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                        }}
+                      />
+                    </Form.Group>
+                  </Form>
+                </Tab>
 
-              <div className="form-group">
-                <label htmlFor="position">Position</label>
-                <input
-                  type="text"
-                  id="position"
-                  name="position"
-                  value={profileData.position}
-                  onChange={handleProfileChange}
-                  disabled={!editMode}
-                />
-              </div>
-            </div>
+                {/* Security Tab */}
+                <Tab
+                  eventKey="security"
+                  title={
+                    <span className={darkMode ? "text-white" : "text-dark"}>
+                      <MdSecurity className="me-2" />
+                      Security
+                    </span>
+                  }
+                >
+                  <div className="security-section">
+                    <h5 className={`mb-3 ${darkMode ? "text-white" : "text-dark"}`}>Change Password</h5>
+                    <Form>
+                      <Form.Group className="mb-3">
+                        <Form.Label className={darkMode ? "text-white" : "text-dark"}>Current Password</Form.Label>
+                        <Form.Control
+                          type="password"
+                          placeholder="Enter current password"
+                          style={{
+                            backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                            borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                            color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                          }}
+                        />
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label className={darkMode ? "text-white" : "text-dark"}>New Password</Form.Label>
+                        <Form.Control
+                          type="password"
+                          placeholder="Enter new password"
+                          style={{
+                            backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                            borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                            color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                          }}
+                        />
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label className={darkMode ? "text-white" : "text-dark"}>Confirm New Password</Form.Label>
+                        <Form.Control
+                          type="password"
+                          placeholder="Confirm new password"
+                          style={{
+                            backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                            borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                            color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                          }}
+                        />
+                      </Form.Group>
+                      <Button variant="primary">Update Password</Button>
+                    </Form>
+                  </div>
+                </Tab>
 
-            <div className="form-group">
-              <label htmlFor="phone">Phone Number</label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={profileData.phone}
-                onChange={handleProfileChange}
-                disabled={!editMode}
-              />
-            </div>
-
-            {editMode && (
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  <MdSave /> {loading ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            )}
-          </form>
-        </div>
-
-        <div className="profile-card">
-          <div className="profile-header">
-            <h2>Change Password</h2>
-          </div>
-
-          {passwordError && <div className="alert alert-danger">{passwordError}</div>}
-          {passwordSuccess && <div className="alert alert-success">{passwordSuccess}</div>}
-
-          <form onSubmit={handlePasswordSubmit}>
-            <div className="form-group">
-              <label htmlFor="currentPassword">Current Password</label>
-              <input
-                type="password"
-                id="currentPassword"
-                name="currentPassword"
-                value={passwordData.currentPassword}
-                onChange={handlePasswordChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="newPassword">New Password</label>
-              <input
-                type="password"
-                id="newPassword"
-                name="newPassword"
-                value={passwordData.newPassword}
-                onChange={handlePasswordChange}
-                required
-                minLength="6"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm New Password</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={passwordData.confirmPassword}
-                onChange={handlePasswordChange}
-                required
-                minLength="6"
-              />
-            </div>
-
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                <MdLock /> {loading ? "Updating..." : "Update Password"}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+                {/* Notifications Tab */}
+                <Tab
+                  eventKey="notifications"
+                  title={
+                    <span className={darkMode ? "text-white" : "text-dark"}>
+                      <MdNotifications className="me-2" />
+                      Notifications
+                    </span>
+                  }
+                >
+                  <div className="notifications-section">
+                    <h5 className={`mb-3 ${darkMode ? "text-white" : "text-dark"}`}>Notification Preferences</h5>
+                    <Form>
+                      {Object.entries(notifications).map(([key, value]) => (
+                        <Form.Group key={key} className="mb-3">
+                          <Form.Check
+                            type="switch"
+                            id={key}
+                            name={key}
+                            checked={value}
+                            onChange={handleNotificationChange}
+                            label={
+                              <span className={darkMode ? "text-white" : "text-dark"}>
+                                {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+                              </span>
+                            }
+                            style={{
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          />
+                        </Form.Group>
+                      ))}
+                      <Button variant="primary">Save Preferences</Button>
+                    </Form>
+                  </div>
+                </Tab>
+              </Tabs>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   )
 }
 

@@ -1,220 +1,415 @@
-//src\pages\Settings\Settings.jsx
-
 "use client"
 
 import { useState } from "react"
-import { MdSave } from "react-icons/md"
-import "./Settings.css"
+import { Container, Row, Col, Card, Form, Button, Tab, Tabs, Alert, Badge } from "react-bootstrap"
+import { MdSettings, MdSecurity, MdNotifications, MdPalette, MdSave, MdRefresh } from "react-icons/md"
 
-const Settings = () => {
-  const [generalSettings, setGeneralSettings] = useState({
-    companyName: "Acme Inc.",
-    email: "admin@acmeinc.com",
+const Settings = ({ darkMode, toggleTheme }) => {
+  const [activeTab, setActiveTab] = useState("general")
+  const [showAlert, setShowAlert] = useState(false)
+  const [settings, setSettings] = useState({
+    siteName: "Rate Pro",
+    siteDescription: "Professional Survey Management Platform",
+    timezone: "UTC-5",
     language: "en",
-    timezone: "UTC",
-  })
-
-  const [notificationSettings, setNotificationSettings] = useState({
+    dateFormat: "MM/DD/YYYY",
+    currency: "USD",
     emailNotifications: true,
-    surveyResponses: true,
+    pushNotifications: false,
     weeklyReports: true,
-    supportTickets: true,
+    systemAlerts: true,
+    darkMode: darkMode,
+    primaryColor: "#1fdae4",
+    autoSave: true,
+    sessionTimeout: "30",
   })
 
-  const [appearanceSettings, setAppearanceSettings] = useState({
-    primaryColor: "#4a6cf7",
-    logoUrl: "",
-  })
-
-  const handleGeneralChange = (e) => {
-    const { name, value } = e.target
-    setGeneralSettings((prev) => ({
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setSettings((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }))
   }
 
-  const handleNotificationChange = (e) => {
-    const { name, checked } = e.target
-    setNotificationSettings((prev) => ({
-      ...prev,
-      [name]: checked,
-    }))
-  }
-
-  const handleAppearanceChange = (e) => {
-    const { name, value } = e.target
-    setAppearanceSettings((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // In a real app, this would save the settings to the backend
-    console.log("Saving settings:", {
-      generalSettings,
-      notificationSettings,
-      appearanceSettings,
-    })
-    alert("Settings saved successfully!")
+  const handleSave = () => {
+    if (settings.darkMode !== darkMode) {
+      toggleTheme()
+    }
+    setShowAlert(true)
+    setTimeout(() => setShowAlert(false), 3000)
   }
 
   return (
-    <div className="settings-page">
-      <div className="page-header">
-        <h1>Settings</h1>
-        <button className="save-btn" onClick={handleSubmit}>
-          <MdSave /> Save Changes
-        </button>
-      </div>
+    <Container fluid className="settings-container mt-5" >
+      {/* Header */}
+      <Row className="mb-4">
+        <Col>
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h2 className={`mb-1 ${darkMode ? "text-white" : "text-dark"}`}>Settings</h2>
+              <p className="text-muted mb-0">Configure your application preferences</p>
+            </div>
+            <div className="d-flex gap-2">
+              <Button variant="outline-secondary" size="sm">
+                <MdRefresh className="me-1" />
+                Reset
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleSave}>
+                <MdSave className="me-1" />
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </Col>
+      </Row>
 
-      <div className="settings-container">
-        <div className="settings-sidebar">
-          <ul>
-            <li className="active">General</li>
-            <li>Notifications</li>
-            <li>Appearance</li>
-            <li>Security</li>
-            <li>Billing</li>
-            <li>API</li>
-          </ul>
-        </div>
+      {/* Alert */}
+      {showAlert && (
+        <Row className="mb-3">
+          <Col>
+            <Alert variant="success" className="d-flex align-items-center">
+              <MdSave className="me-2" />
+              Settings saved successfully!
+            </Alert>
+          </Col>
+        </Row>
+      )}
 
-        <div className="settings-content">
-          <section className="settings-section">
-            <h2>General Settings</h2>
-            <div className="form-group">
-              <label htmlFor="companyName">Company Name</label>
-              <input
-                type="text"
-                id="companyName"
-                name="companyName"
-                value={generalSettings.companyName}
-                onChange={handleGeneralChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="email">Email Address</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={generalSettings.email}
-                onChange={handleGeneralChange}
-              />
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="language">Language</label>
-                <select id="language" name="language" value={generalSettings.language} onChange={handleGeneralChange}>
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="timezone">Timezone</label>
-                <select id="timezone" name="timezone" value={generalSettings.timezone} onChange={handleGeneralChange}>
-                  <option value="UTC">UTC</option>
-                  <option value="EST">Eastern Time (EST)</option>
-                  <option value="CST">Central Time (CST)</option>
-                  <option value="PST">Pacific Time (PST)</option>
-                </select>
-              </div>
-            </div>
-          </section>
+      <Row>
+        <Col>
+          <Card
+            className="settings-card border-0 shadow-sm"
+            style={{
+              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+            }}
+          >
+            <Card.Body>
+              <Tabs
+                activeKey={activeTab}
+                onSelect={(k) => setActiveTab(k)}
+                className="settings-tabs mb-4"
+                style={{
+                  borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
+                }}
+              >
+                {/* General Settings */}
+                <Tab
+                  eventKey="general"
+                  title={
+                    <span className={darkMode ? "text-white" : "text-dark"}>
+                      <MdSettings className="me-2" />
+                      General
+                    </span>
+                  }
+                >
+                  <Row>
+                    <Col lg={8}>
+                      <Form>
+                        <Row>
+                          <Col md={6} className="mb-3">
+                            <Form.Group>
+                              <Form.Label className={darkMode ? "text-white" : "text-dark"}>Site Name</Form.Label>
+                              <Form.Control
+                                type="text"
+                                name="siteName"
+                                value={settings.siteName}
+                                onChange={handleInputChange}
+                                style={{
+                                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                                  borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                                  color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                                }}
+                              />
+                            </Form.Group>
+                          </Col>
+                          <Col md={6} className="mb-3">
+                            <Form.Group>
+                              <Form.Label className={darkMode ? "text-white" : "text-dark"}>Timezone</Form.Label>
+                              <Form.Select
+                                name="timezone"
+                                value={settings.timezone}
+                                onChange={handleInputChange}
+                                style={{
+                                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                                  borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                                  color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                                }}
+                              >
+                                <option value="UTC-12">UTC-12 (Baker Island)</option>
+                                <option value="UTC-8">UTC-8 (Pacific Time)</option>
+                                <option value="UTC-5">UTC-5 (Eastern Time)</option>
+                                <option value="UTC+0">UTC+0 (Greenwich Mean Time)</option>
+                                <option value="UTC+5:30">UTC+5:30 (India Standard Time)</option>
+                                <option value="UTC+8">UTC+8 (China Standard Time)</option>
+                              </Form.Select>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                        <Form.Group className="mb-3">
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>Site Description</Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={3}
+                            name="siteDescription"
+                            value={settings.siteDescription}
+                            onChange={handleInputChange}
+                            style={{
+                              backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                              borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          />
+                        </Form.Group>
+                        <Row>
+                          <Col md={4} className="mb-3">
+                            <Form.Group>
+                              <Form.Label className={darkMode ? "text-white" : "text-dark"}>Language</Form.Label>
+                              <Form.Select
+                                name="language"
+                                value={settings.language}
+                                onChange={handleInputChange}
+                                style={{
+                                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                                  borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                                  color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                                }}
+                              >
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="de">Deutsch</option>
+                              </Form.Select>
+                            </Form.Group>
+                          </Col>
+                          <Col md={4} className="mb-3">
+                            <Form.Group>
+                              <Form.Label className={darkMode ? "text-white" : "text-dark"}>Date Format</Form.Label>
+                              <Form.Select
+                                name="dateFormat"
+                                value={settings.dateFormat}
+                                onChange={handleInputChange}
+                                style={{
+                                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                                  borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                                  color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                                }}
+                              >
+                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                              </Form.Select>
+                            </Form.Group>
+                          </Col>
+                          <Col md={4} className="mb-3">
+                            <Form.Group>
+                              <Form.Label className={darkMode ? "text-white" : "text-dark"}>Currency</Form.Label>
+                              <Form.Select
+                                name="currency"
+                                value={settings.currency}
+                                onChange={handleInputChange}
+                                style={{
+                                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                                  borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                                  color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                                }}
+                              >
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="JPY">JPY (¥)</option>
+                              </Form.Select>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                      </Form>
+                    </Col>
+                  </Row>
+                </Tab>
 
-          <section className="settings-section">
-            <h2>Notification Preferences</h2>
-            <div className="form-group checkbox">
-              <label>
-                <input
-                  type="checkbox"
-                  name="emailNotifications"
-                  checked={notificationSettings.emailNotifications}
-                  onChange={handleNotificationChange}
-                />
-                Enable Email Notifications
-              </label>
-            </div>
-            <div className="form-group checkbox">
-              <label>
-                <input
-                  type="checkbox"
-                  name="surveyResponses"
-                  checked={notificationSettings.surveyResponses}
-                  onChange={handleNotificationChange}
-                />
-                Notify on new survey responses
-              </label>
-            </div>
-            <div className="form-group checkbox">
-              <label>
-                <input
-                  type="checkbox"
-                  name="weeklyReports"
-                  checked={notificationSettings.weeklyReports}
-                  onChange={handleNotificationChange}
-                />
-                Send weekly summary reports
-              </label>
-            </div>
-            <div className="form-group checkbox">
-              <label>
-                <input
-                  type="checkbox"
-                  name="supportTickets"
-                  checked={notificationSettings.supportTickets}
-                  onChange={handleNotificationChange}
-                />
-                Notify on support ticket updates
-              </label>
-            </div>
-          </section>
+                {/* Appearance Settings */}
+                <Tab
+                  eventKey="appearance"
+                  title={
+                    <span className={darkMode ? "text-white" : "text-dark"}>
+                      <MdPalette className="me-2" />
+                      Appearance
+                    </span>
+                  }
+                >
+                  <Row>
+                    <Col lg={6}>
+                      <Form>
+                        <Form.Group className="mb-4">
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>Theme Mode</Form.Label>
+                          <div className="mt-2">
+                            <Form.Check
+                              type="switch"
+                              id="darkModeSwitch"
+                              name="darkMode"
+                              checked={settings.darkMode}
+                              onChange={handleInputChange}
+                              label={
+                                <span className={darkMode ? "text-white" : "text-dark"}>
+                                  Dark Mode{" "}
+                                  {settings.darkMode && (
+                                    <Badge bg="primary" className="ms-2">
+                                      Active
+                                    </Badge>
+                                  )}
+                                </span>
+                              }
+                            />
+                          </div>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>Primary Color</Form.Label>
+                          <div className="d-flex align-items-center gap-3">
+                            <Form.Control
+                              type="color"
+                              name="primaryColor"
+                              value={settings.primaryColor}
+                              onChange={handleInputChange}
+                              style={{ width: "60px", height: "40px" }}
+                            />
+                            <Form.Control
+                              type="text"
+                              name="primaryColor"
+                              value={settings.primaryColor}
+                              onChange={handleInputChange}
+                              style={{
+                                backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                                borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                                color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                                maxWidth: "120px",
+                              }}
+                            />
+                          </div>
+                        </Form.Group>
+                      </Form>
+                    </Col>
+                  </Row>
+                </Tab>
 
-          <section className="settings-section">
-            <h2>Appearance</h2>
-            <div className="form-group">
-              <label htmlFor="primaryColor">Primary Color</label>
-              <div className="color-picker">
-                <input
-                  type="color"
-                  id="primaryColor"
-                  name="primaryColor"
-                  value={appearanceSettings.primaryColor}
-                  onChange={handleAppearanceChange}
-                />
-                <span>{appearanceSettings.primaryColor}</span>
-              </div>
-            </div>
-            <div className="form-group">
-              <label htmlFor="logoUrl">Logo URL</label>
-              <input
-                type="text"
-                id="logoUrl"
-                name="logoUrl"
-                value={appearanceSettings.logoUrl}
-                onChange={handleAppearanceChange}
-                placeholder="https://example.com/logo.png"
-              />
-            </div>
-            <div className="form-group">
-              <label>Logo Preview</label>
-              <div className="logo-preview">
-                {appearanceSettings.logoUrl ? (
-                  <img src={appearanceSettings.logoUrl || "/placeholder.svg"} alt="Company Logo" />
-                ) : (
-                  <div className="no-logo">No logo uploaded</div>
-                )}
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>
+                {/* Notifications Settings */}
+                <Tab
+                  eventKey="notifications"
+                  title={
+                    <span className={darkMode ? "text-white" : "text-dark"}>
+                      <MdNotifications className="me-2" />
+                      Notifications
+                    </span>
+                  }
+                >
+                  <Row>
+                    <Col lg={6}>
+                      <Form>
+                        <h5 className={`mb-3 ${darkMode ? "text-white" : "text-dark"}`}>Email Notifications</h5>
+                        <Form.Group className="mb-3">
+                          <Form.Check
+                            type="switch"
+                            id="emailNotifications"
+                            name="emailNotifications"
+                            checked={settings.emailNotifications}
+                            onChange={handleInputChange}
+                            label={
+                              <span className={darkMode ? "text-white" : "text-dark"}>Enable Email Notifications</span>
+                            }
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                          <Form.Check
+                            type="switch"
+                            id="weeklyReports"
+                            name="weeklyReports"
+                            checked={settings.weeklyReports}
+                            onChange={handleInputChange}
+                            label={<span className={darkMode ? "text-white" : "text-dark"}>Weekly Reports</span>}
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-4">
+                          <Form.Check
+                            type="switch"
+                            id="systemAlerts"
+                            name="systemAlerts"
+                            checked={settings.systemAlerts}
+                            onChange={handleInputChange}
+                            label={<span className={darkMode ? "text-white" : "text-dark"}>System Alerts</span>}
+                          />
+                        </Form.Group>
+
+                        <h5 className={`mb-3 ${darkMode ? "text-white" : "text-dark"}`}>Push Notifications</h5>
+                        <Form.Group className="mb-3">
+                          <Form.Check
+                            type="switch"
+                            id="pushNotifications"
+                            name="pushNotifications"
+                            checked={settings.pushNotifications}
+                            onChange={handleInputChange}
+                            label={
+                              <span className={darkMode ? "text-white" : "text-dark"}>Enable Push Notifications</span>
+                            }
+                          />
+                        </Form.Group>
+                      </Form>
+                    </Col>
+                  </Row>
+                </Tab>
+
+                {/* Security Settings */}
+                <Tab
+                  eventKey="security"
+                  title={
+                    <span className={darkMode ? "text-white" : "text-dark"}>
+                      <MdSecurity className="me-2" />
+                      Security
+                    </span>
+                  }
+                >
+                  <Row>
+                    <Col lg={6}>
+                      <Form>
+                        <Form.Group className="mb-3">
+                          <Form.Label className={darkMode ? "text-white" : "text-dark"}>
+                            Session Timeout (minutes)
+                          </Form.Label>
+                          <Form.Select
+                            name="sessionTimeout"
+                            value={settings.sessionTimeout}
+                            onChange={handleInputChange}
+                            style={{
+                              backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                              borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                              color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                            }}
+                          >
+                            <option value="15">15 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="60">1 hour</option>
+                            <option value="120">2 hours</option>
+                            <option value="0">Never</option>
+                          </Form.Select>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                          <Form.Check
+                            type="switch"
+                            id="autoSave"
+                            name="autoSave"
+                            checked={settings.autoSave}
+                            onChange={handleInputChange}
+                            label={<span className={darkMode ? "text-white" : "text-dark"}>Auto-save changes</span>}
+                          />
+                        </Form.Group>
+                      </Form>
+                    </Col>
+                  </Row>
+                </Tab>
+              </Tabs>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   )
 }
 

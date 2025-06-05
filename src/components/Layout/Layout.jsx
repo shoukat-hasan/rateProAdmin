@@ -1,3 +1,5 @@
+// src\components\Layout\Layout.jsx
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -6,11 +8,34 @@ import { Container } from "react-bootstrap"
 import Sidebar from "../Sidebar/Sidebar.jsx"
 import Header from "../Header/Header.jsx"
 
-const Layout = ({ darkMode, toggleTheme }) => {
+const Layout = ({ darkMode, toggleTheme, onToggle }) => {
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !sidebarCollapsed) {
+        onToggle?.();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [sidebarCollapsed, onToggle]);
+
+
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    if (savedState !== null) {
+      setSidebarCollapsed(JSON.parse(savedState));
+    }
+
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   // Handle responsive behavior
   useEffect(() => {
@@ -22,16 +47,22 @@ const Layout = ({ darkMode, toggleTheme }) => {
       setIsMobile(mobile)
       setIsTablet(tablet)
 
-      // Auto-open sidebar on larger screens, close on mobile
-      if (mobile) {
-        setSidebarOpen(false)
-      } else if (tablet) {
-        setSidebarOpen(false)
-        setSidebarCollapsed(true)
-      } else {
-        setSidebarOpen(true)
-        setSidebarCollapsed(false)
+      if (width < 992) { // 992px is Bootstrap's lg breakpoint
+        setSidebarOpen(false);
       }
+
+      // Auto behavior
+      if ( sidebarOpen || mobile || tablet) {
+        setSidebarOpen(false) // Always closed on mobile/tablet
+      } else {
+        
+        setSidebarCollapsed(width < 1200) // Collapse on smaller desktop screens
+      }
+      // Collapse state only for desktop
+      if (!mobile && !tablet) {
+        setSidebarCollapsed(true) // Example breakpoint for collapsed
+      }
+
     }
 
     handleResize()
@@ -41,15 +72,17 @@ const Layout = ({ darkMode, toggleTheme }) => {
 
   const toggleSidebar = () => {
     if (isMobile || isTablet) {
-      setSidebarOpen((prev) => !prev)
+      setSidebarOpen(prev => !prev)
     } else {
-      setSidebarCollapsed((prev) => !prev)
+      setSidebarCollapsed(prev => !prev)
     }
   }
 
   const closeSidebar = () => {
-    if (isMobile || isTablet) {
+    if (isMobile || isTablet ) {
       setSidebarOpen(false)
+    } else {
+      setSidebarCollapsed(true) // For desktop, collapse instead of close
     }
   }
 
@@ -73,12 +106,14 @@ const Layout = ({ darkMode, toggleTheme }) => {
   return (
     <div className={`d-flex min-vh-100 ${darkMode ? "dark" : "light"}`}>
       <Sidebar
-        isOpen={sidebarOpen}
+        isOpen={isMobile || isTablet ? sidebarOpen : true} // Always open on desktop
         isMobile={isMobile}
         isTablet={isTablet}
-        collapsed={!isMobile && sidebarCollapsed}
+        collapsed={!isMobile && !isTablet && sidebarCollapsed} // Only collapsed on desktop
         darkMode={darkMode}
         onClose={closeSidebar}
+        onToggle={toggleSidebar}
+
       />
 
       <div className="flex-fill d-flex flex-column" style={getContentStyle()}>
@@ -93,7 +128,7 @@ const Layout = ({ darkMode, toggleTheme }) => {
         />
 
         <main className="flex-fill overflow-auto">
-          <Container fluid className="p-3 p-md-4 h-100">
+          <Container fluid className="p-3 p-md-4 h-100 mt-5">
             <Outlet />
           </Container>
         </main>

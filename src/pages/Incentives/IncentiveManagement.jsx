@@ -1,3 +1,5 @@
+// src\pages\Incentives\IncentiveManagement.jsx
+
 import React from 'react'
 
 const IncentiveManagement = () => {

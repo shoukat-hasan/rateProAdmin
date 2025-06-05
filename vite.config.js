@@ -1,27 +1,24 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite"
+import react from "@vitejs/plugin-react"
 
 export default defineConfig({
   plugins: [react()],
-    build: {
+  base:'/',
+  build: {
+    outDir: "dist",
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
-          react: ['react', 'react-dom'],
-          reacticons: ['react-icons'],
-          bootstrap: ['react-bootstrap'],
-          
-        }
+          vendor: ["react", "react-dom"],
+          bootstrap: ["bootstrap", "react-bootstrap"],
+          router: ["react-router-dom"],
+        },
       },
-      chunkSizeWarningLimit: 1000, // Increase limit if needed
-    }
+    },
+    chunkSizeWarningLimit: 1000,
   },
-  base:'/',
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@import "bootstrap/scss/bootstrap";`
-      }
-    }
-  }
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-router-dom", "bootstrap", "react-bootstrap"],
+  },
 })

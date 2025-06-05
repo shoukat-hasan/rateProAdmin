@@ -1,3 +1,5 @@
+// src\pages\Auth\EnterEmail.jsx
+
 "use client"
 
 import { useState } from "react"

@@ -1,3 +1,5 @@
+// src\pages\Surveys\SurveyDetail.jsx
+
 "use client"
 
 

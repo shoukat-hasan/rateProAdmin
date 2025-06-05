@@ -1,3 +1,5 @@
+// src\App.jsx
+
 "use client"
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
@@ -52,6 +54,10 @@ import NotFound from "./pages/NotFound/NotFound.jsx"
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
+
+
+   
+
     try {
       const saved = localStorage.getItem("darkMode")
       return saved !== null ? JSON.parse(saved) : window.matchMedia("(prefers-color-scheme: dark)").matches

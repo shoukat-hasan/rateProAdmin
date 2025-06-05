@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Dropdown } from "react-bootstrap"
 import { MdLanguage } from "react-icons/md"
 
-const LanguageSelector = () => {
+const LanguageSelector = ({ darkMode }) => {
   const [currentLanguage, setCurrentLanguage] = useState("en")
 
   const languages = [
@@ -20,7 +20,6 @@ const LanguageSelector = () => {
 
   const changeLanguage = (langCode) => {
     setCurrentLanguage(langCode)
-    // In a real app, you would update the app's language context
     console.log("Language changed to:", langCode)
   }
 
@@ -36,13 +35,21 @@ const LanguageSelector = () => {
         <span className="d-none d-xl-inline">{currentLang?.name}</span>
       </Dropdown.Toggle>
 
-      <Dropdown.Menu>
-        <Dropdown.Header>Select Language</Dropdown.Header>
+      <Dropdown.Menu
+        style={{
+          backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+          borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+          marginTop: "0.5rem",
+          minWidth: "180px",
+        }}
+      >
+        <Dropdown.Header style={{ color: darkMode ? "#fff" : "#000" }}>Select Language</Dropdown.Header>
         {languages.map((lang) => (
           <Dropdown.Item
             key={lang.code}
             onClick={() => changeLanguage(lang.code)}
             className={`d-flex align-items-center ${currentLanguage === lang.code ? "active" : ""}`}
+            style={{ color: darkMode ? "#fff" : "#000" }}
           >
             <span className="me-2">{lang.flag}</span>
             <span>{lang.name}</span>

@@ -1,3 +1,5 @@
+// src\pages\Settings\ThankYouPage.jsx
+
 "use client"
 
 import { useState } from "react"

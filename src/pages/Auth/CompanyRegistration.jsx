@@ -1,3 +1,5 @@
+// src\pages\Auth\CompanyRegistration.jsx
+
 "use client"
 
 import { useState } from "react"

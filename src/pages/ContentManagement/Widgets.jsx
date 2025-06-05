@@ -1,3 +1,5 @@
+// src\pages\ContentManagement\Widgets.jsx
+
 import React from 'react'
 
 const Widgets = () => {

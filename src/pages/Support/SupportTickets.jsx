@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { MdCheck, MdClose, MdReply, MdAdd } from "react-icons/md";
-import "./Tickets.css";
+
 
 const SupportTickets = () => {
   const [tickets, setTickets] = useState([
