@@ -1,3 +1,5 @@
+// src\pages\Profile\Profile.jsx
+
 "use client"
 
 import { useState } from "react"

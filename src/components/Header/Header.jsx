@@ -80,22 +80,22 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
           }}
         >
           <InputGroup
-            className={`${searchFocused ? "shadow" : ""}`}
+            className={`search-input-group ${searchFocused ? "shadow" : ""}`}
             style={{
               boxShadow: searchFocused
                 ? darkMode
-                  ? " #1fdae4"
-                  : " #1fdae4"
+                  ? "0 0 0 0.2rem rgba(31, 218, 228, 0.25)"
+                  : "0 0 0 0.2rem rgba(31, 218, 228, 0.25)"
                 : "none",
               borderRadius: "0.375rem",
-              color: "white",
             }}
           >
             <InputGroup.Text
-              className={`bg-transparent border-end-0 ${darkMode ? "text-white" : ""}`}
+              className={`bg-transparent border-end-0`}
               style={{
-                borderColor: darkMode ? "#495057" : "#ced4da",
-                backgroundColor: darkMode ? "#fff" : "#000",
+                borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                color: darkMode ? "var(--dark-text)" : "var(--light-text)",
               }}
             >
               <MdSearch />
@@ -103,11 +103,12 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             <Form.Control
               type="text"
               placeholder="Search..."
-              className={`border-start-0 ${darkMode ? "text-white" : "dark-placeholder"}`}
+              className={`border-start-0 search-input`}
               style={{
-                backgroundColor: darkMode ? "grey" : "var(--light-card)",
-                color: darkMode ? "#fff" : "000",
-                borderColor: darkMode ? "#495057" : "#ced4da",
+                backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
+                color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                "--placeholder-color": darkMode ? "#ffffff" : "#6c757d",
               }}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}

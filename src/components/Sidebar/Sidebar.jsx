@@ -1,9 +1,7 @@
-// src\components\Sidebar\Sidebar.jsx
-
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useLocation } from "react-router-dom"
 import { Nav, Collapse, Button } from "react-bootstrap"
 import {
   MdDashboard,
@@ -12,14 +10,10 @@ import {
   MdPeople,
   MdInsertChart,
   MdSettings,
-  MdWeb,
   MdExpandMore,
   MdExpandLess,
   MdMenu,
   MdClose,
-  MdIntegrationInstructions,
-  MdComment,
-  MdWidgets,
   MdOutlineDashboardCustomize,
   MdSecurity,
   MdGroup,
@@ -32,48 +26,197 @@ import {
   MdApi,
   MdSegment,
   MdTrendingUp,
-  MdSync as MdRealTimeSync, // Corrected import  MdSegment,
-  MdDescription as MdTemplate, // Corrected import
+  MdSync as MdRealTimeSync,
+  MdDescription as MdTemplate,
+  MdPersonAdd,
+  MdManageAccounts,
+  MdQuestionAnswer,
+  MdAnalytics,
+  MdShare,
+  MdOutlineSettingsApplications as MdCustomize,
+  MdViewList,
+  MdDescription,
+  MdLogin,
+  MdLock,
+  MdVisibility,
+  MdList,
+  MdBarChart,
+  MdShowChart,
+  MdPayment,
+  MdColorLens,
+  MdMailOutline,
+  MdBusiness,
+  MdPersonOutline,
+  MdAssignmentInd,
+  MdContacts,
+  MdThumbUp,
+  MdCode,
+  MdCampaign,
 } from "react-icons/md"
 
-const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onToggle  }) => {
-  const [contentSubmenuOpen, setContentSubmenuOpen] = useState(false)
+const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onToggle }) => {
+  const location = useLocation()
+  const [authSubmenuOpen, setAuthSubmenuOpen] = useState(false)
   const [surveySubmenuOpen, setSurveySubmenuOpen] = useState(false)
+  const [userSubmenuOpen, setUserSubmenuOpen] = useState(false)
   const [accessSubmenuOpen, setAccessSubmenuOpen] = useState(false)
-  const [communicationSubmenuOpen, setCommunicationSubmenuOpen] = useState(false)
   const [analyticsSubmenuOpen, setAnalyticsSubmenuOpen] = useState(false)
   const [audienceSubmenuOpen, setAudienceSubmenuOpen] = useState(false)
-  const [incentiveSubmenuOpen, setIncentiveSubmenuOpen] = useState(false)
+  const [communicationSubmenuOpen, setCommunicationSubmenuOpen] = useState(false)
+  const [settingsSubmenuOpen, setSettingsSubmenuOpen] = useState(false)
+  const [incentivesSubmenuOpen, setIncentivesSubmenuOpen] = useState(false)
+  const [hoveredItem, setHoveredItem] = useState(null)
+  const [collapsedDropdownOpen, setCollapsedDropdownOpen] = useState(null)
   const sidebarRef = useRef()
 
   // Reset submenu states when sidebar collapses
   useEffect(() => {
     if (collapsed) {
-      setContentSubmenuOpen(false)
+      setAuthSubmenuOpen(false)
       setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
       setAccessSubmenuOpen(false)
       setCommunicationSubmenuOpen(false)
       setAnalyticsSubmenuOpen(false)
       setAudienceSubmenuOpen(false)
-      setIncentiveSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+      setCollapsedDropdownOpen(null)
     }
   }, [collapsed])
 
+  // Auto-open submenu if current route matches
+  useEffect(() => {
+    const currentPath = location.pathname
 
-// Handle close button click - now properly handles all screen sizes
+    // Check which submenu should be open based on current path
+    if (
+      currentPath.startsWith("/login") ||
+      currentPath.startsWith("/signup") ||
+      currentPath.startsWith("/company-registration") ||
+      currentPath.startsWith("/forgot-password") ||
+      currentPath.startsWith("/reset-password") ||
+      currentPath.startsWith("/enter-email") ||
+      currentPath.startsWith("/enter-reset-code")
+    ) {
+      setAuthSubmenuOpen(true)
+      setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    } else if (currentPath.startsWith("/surveys")) {
+      setSurveySubmenuOpen(true)
+      setAuthSubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    } else if (currentPath.startsWith("/users") || currentPath === "/profile") {
+      setUserSubmenuOpen(true)
+      setAuthSubmenuOpen(false)
+      setSurveySubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    } else if (currentPath.startsWith("/access")) {
+      setAccessSubmenuOpen(true)
+      setAuthSubmenuOpen(false)
+      setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    } else if (currentPath.startsWith("/analytics")) {
+      setAnalyticsSubmenuOpen(true)
+      setAuthSubmenuOpen(false)
+      setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    } else if (currentPath.startsWith("/audiences")) {
+      setAudienceSubmenuOpen(true)
+      setAuthSubmenuOpen(false)
+      setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    } else if (currentPath.startsWith("/communication")) {
+      setCommunicationSubmenuOpen(true)
+      setAuthSubmenuOpen(false)
+      setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    } else if (currentPath.startsWith("/incentives")) {
+      setIncentivesSubmenuOpen(true)
+      setAuthSubmenuOpen(false)
+      setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+    } else if (currentPath.startsWith("/settings")) {
+      setSettingsSubmenuOpen(true)
+      setAuthSubmenuOpen(false)
+      setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    } else {
+      // Close all submenus for single pages
+      setAuthSubmenuOpen(false)
+      setSurveySubmenuOpen(false)
+      setUserSubmenuOpen(false)
+      setAccessSubmenuOpen(false)
+      setAnalyticsSubmenuOpen(false)
+      setAudienceSubmenuOpen(false)
+      setCommunicationSubmenuOpen(false)
+      setSettingsSubmenuOpen(false)
+      setIncentivesSubmenuOpen(false)
+    }
+  }, [location.pathname])
+
   const handleCloseClick = () => {
     if (isMobile || isTablet) {
-      onClose?.() // Close on mobile/tablet
+      onClose?.()
     } else {
-      onToggle?.() // Toggle collapsed state on desktop/laptop
+      onToggle?.()
     }
   }
 
-
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target) &&  ((isMobile || isTablet) && isOpen || 
-         (!isMobile && !isTablet && !collapsed && isOpen))) {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        (((isMobile || isTablet) && isOpen) || (!isMobile && !isTablet && !collapsed && isOpen))
+      ) {
         onClose()
       }
     }
@@ -82,15 +225,105 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [isMobile, isTablet, isOpen, onClose, collapsed])
 
-  const toggleContentSubmenu = () => setContentSubmenuOpen(!contentSubmenuOpen)
-  const toggleSurveySubmenu = () => setSurveySubmenuOpen(!surveySubmenuOpen)
-  const toggleAccessSubmenu = () => setAccessSubmenuOpen(!accessSubmenuOpen)
-  const toggleCommunicationSubmenu = () => setCommunicationSubmenuOpen(!communicationSubmenuOpen)
-  const toggleAnalyticsSubmenu = () => setAnalyticsSubmenuOpen(!analyticsSubmenuOpen)
-  const toggleAudienceSubmenu = () => setAudienceSubmenuOpen(!audienceSubmenuOpen)
-  const toggleIncentiveSubmenu = () => setIncentiveSubmenuOpen(!incentiveSubmenuOpen)
+  const toggleSubmenu = (submenuName) => {
+    // Check if the clicked submenu is already open
+    let isCurrentlyOpen = false
 
-  // Update sidebar style to handle all cases
+    switch (submenuName) {
+      case "auth":
+        isCurrentlyOpen = authSubmenuOpen
+        break
+      case "survey":
+        isCurrentlyOpen = surveySubmenuOpen
+        break
+      case "user":
+        isCurrentlyOpen = userSubmenuOpen
+        break
+      case "access":
+        isCurrentlyOpen = accessSubmenuOpen
+        break
+      case "analytics":
+        isCurrentlyOpen = analyticsSubmenuOpen
+        break
+      case "audience":
+        isCurrentlyOpen = audienceSubmenuOpen
+        break
+      case "communication":
+        isCurrentlyOpen = communicationSubmenuOpen
+        break
+      case "incentives":
+        isCurrentlyOpen = incentivesSubmenuOpen
+        break
+      case "settings":
+        isCurrentlyOpen = settingsSubmenuOpen
+        break
+    }
+
+    // Close all submenus first
+    setAuthSubmenuOpen(false)
+    setSurveySubmenuOpen(false)
+    setUserSubmenuOpen(false)
+    setAccessSubmenuOpen(false)
+    setAnalyticsSubmenuOpen(false)
+    setAudienceSubmenuOpen(false)
+    setCommunicationSubmenuOpen(false)
+    setSettingsSubmenuOpen(false)
+    setIncentivesSubmenuOpen(false)
+
+    // If the clicked submenu was not open, open it
+    if (!isCurrentlyOpen) {
+      switch (submenuName) {
+        case "auth":
+          setAuthSubmenuOpen(true)
+          break
+        case "survey":
+          setSurveySubmenuOpen(true)
+          break
+        case "user":
+          setUserSubmenuOpen(true)
+          break
+        case "access":
+          setAccessSubmenuOpen(true)
+          break
+        case "analytics":
+          setAnalyticsSubmenuOpen(true)
+          break
+        case "audience":
+          setAudienceSubmenuOpen(true)
+          break
+        case "communication":
+          setCommunicationSubmenuOpen(true)
+          break
+        case "incentives":
+          setIncentivesSubmenuOpen(true)
+          break
+        case "settings":
+          setSettingsSubmenuOpen(true)
+          break
+      }
+    }
+  }
+
+  const handleCollapsedDropdownClick = (itemName) => {
+    if (collapsed) {
+      setCollapsedDropdownOpen(collapsedDropdownOpen === itemName ? null : itemName)
+    }
+  }
+
+  const handleCollapsedDropdownHover = (itemName) => {
+    if (collapsed) {
+      setCollapsedDropdownOpen(itemName)
+    }
+  }
+
+  const handleCollapsedDropdownLeave = () => {
+    if (collapsed) {
+      setTimeout(() => {
+        setCollapsedDropdownOpen(null)
+      }, 300)
+    }
+  }
+
   const sidebarStyle = {
     width: collapsed ? "70px" : "280px",
     height: "100vh",
@@ -109,40 +342,66 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   const navItems = [
     { path: "/", name: "Dashboard", icon: <MdDashboard /> },
     {
+      name: "Authentication",
+      icon: <MdLogin />,
+      submenu: true,
+      isOpen: authSubmenuOpen,
+      toggle: () => toggleSubmenu("auth"),
+      submenuItems: [
+        { path: "/login", name: "Login", icon: <MdLogin /> },
+        { path: "/signup", name: "Sign Up", icon: <MdPersonAdd /> },
+        { path: "/company-registration", name: "Company Registration", icon: <MdBusiness /> },
+        { path: "/forgot-password", name: "Forgot Password", icon: <MdLock /> },
+        { path: "/reset-password", name: "Reset Password", icon: <MdLock /> },
+        { path: "/enter-email", name: "Enter Email", icon: <MdEmail /> },
+        { path: "/enter-reset-code", name: "Enter Reset Code", icon: <MdCode /> },
+      ],
+    },
+    {
       name: "Survey Management",
       icon: <MdAssignment />,
       submenu: true,
       isOpen: surveySubmenuOpen,
-      toggle: toggleSurveySubmenu,
+      toggle: () => toggleSubmenu("survey"),
       submenuItems: [
-        { path: "/surveys", name: "All Surveys", icon: <MdAssignment /> },
+        { path: "/surveys", name: "All Surveys", icon: <MdViewList /> },
         { path: "/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline /> },
         { path: "/surveys/templates", name: "Survey Templates", icon: <MdTemplate /> },
         { path: "/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule /> },
+        { path: "/surveys/responses", name: "Survey Responses", icon: <MdQuestionAnswer /> },
+        { path: "/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics /> },
+        { path: "/surveys/customization", name: "Customization", icon: <MdCustomize /> },
+        { path: "/surveys/sharing", name: "Survey Sharing", icon: <MdShare /> },
+        { path: "/surveys/settings", name: "Survey Settings", icon: <MdSettings /> },
+        { path: "/surveys/detail", name: "Survey Detail", icon: <MdVisibility /> },
+        { path: "/surveys/list", name: "Survey List", icon: <MdList /> },
+        { path: "/surveys/takesurvey", name: "Take Survey", icon: <MdAssignment /> },
       ],
     },
     {
-      name: "Audience Management",
-      icon: <MdPeople />,
+      name: "User Management",
+      icon: <MdGroup />,
       submenu: true,
-      isOpen: audienceSubmenuOpen,
-      toggle: toggleAudienceSubmenu,
+      isOpen: userSubmenuOpen,
+      toggle: () => toggleSubmenu("user"),
       submenuItems: [
-        { path: "/audiences", name: "All Audiences", icon: <MdPeople /> },
-        { path: "/audiences/segmentation", name: "Segmentation", icon: <MdSegment /> },
+        { path: "/users", name: "All Users", icon: <MdPeople /> },
+        { path: "/users/create", name: "Add User", icon: <MdPersonAdd /> },
+        { path: "/users/form", name: "User Form", icon: <MdPersonOutline /> },
+        { path: "/users/role-permissions", name: "Role Permissions", icon: <MdAssignmentInd /> },
+        { path: "/profile", name: "User Profile", icon: <MdManageAccounts /> },
       ],
     },
-    { path: "/users", name: "User Management", icon: <MdGroup /> },
     {
       name: "Access Management",
       icon: <MdSecurity />,
       submenu: true,
       isOpen: accessSubmenuOpen,
-      toggle: toggleAccessSubmenu,
+      toggle: () => toggleSubmenu("access"),
       submenuItems: [
         { path: "/access", name: "Overview", icon: <MdSecurity /> },
-        { path: "/access/roles", name: "Roles", icon: <MdGroup /> },
-        { path: "/access/permissions", name: "Permissions", icon: <MdVpnKey /> },
+        { path: "/access/roles", name: "Role Management", icon: <MdGroup /> },
+        { path: "/access/permissions", name: "Permission Management", icon: <MdVpnKey /> },
       ],
     },
     {
@@ -150,11 +409,25 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdInsertChart />,
       submenu: true,
       isOpen: analyticsSubmenuOpen,
-      toggle: toggleAnalyticsSubmenu,
+      toggle: () => toggleSubmenu("analytics"),
       submenuItems: [
-        { path: "/analytics", name: "Overview", icon: <MdInsertChart /> },
+        { path: "/analytics", name: "Analytics Overview", icon: <MdInsertChart /> },
         { path: "/analytics/real-time", name: "Real-Time Results", icon: <MdRealTimeSync /> },
         { path: "/analytics/trends", name: "Trend Analysis", icon: <MdTrendingUp /> },
+        { path: "/analytics/custom-reports", name: "Custom Reports", icon: <MdBarChart /> },
+        { path: "/analytics/response-overview", name: "Response Overview", icon: <MdShowChart /> },
+      ],
+    },
+    {
+      name: "Audience Management",
+      icon: <MdPeople />,
+      submenu: true,
+      isOpen: audienceSubmenuOpen,
+      toggle: () => toggleSubmenu("audience"),
+      submenuItems: [
+        { path: "/audiences", name: "All Audiences", icon: <MdPeople /> },
+        { path: "/audiences/segmentation", name: "Audience Segmentation", icon: <MdSegment /> },
+        { path: "/audiences/contact-management", name: "Contact Management", icon: <MdContacts /> },
       ],
     },
     {
@@ -162,55 +435,65 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdEmail />,
       submenu: true,
       isOpen: communicationSubmenuOpen,
-      toggle: toggleCommunicationSubmenu,
+      toggle: () => toggleSubmenu("communication"),
       submenuItems: [
         { path: "/communication/emails", name: "Email Management", icon: <MdEmail /> },
-        { path: "/communication/templates", name: "Email Templates", icon: <MdTemplate /> },
-        { path: "/communication/notifications", name: "Notifications", icon: <MdNotifications /> },
+        { path: "/communication/templates", name: "Email Templates", icon: <MdDescription /> },
+        { path: "/communication/notifications", name: "Notification Center", icon: <MdNotifications /> },
       ],
     },
+    { path: "/support", name: "Support Tickets", icon: <MdSupport /> },
     {
       name: "Incentives & Rewards",
       icon: <MdCardGiftcard />,
       submenu: true,
-      isOpen: incentiveSubmenuOpen,
-      toggle: toggleIncentiveSubmenu,
+      isOpen: incentivesSubmenuOpen,
+      toggle: () => toggleSubmenu("incentives"),
       submenuItems: [
-        { path: "/incentives", name: "Incentive Management", icon: <MdCardGiftcard /> },
-        { path: "/incentives/rewards", name: "Reward System", icon: <MdCardGiftcard /> },
+        { path: "/incentives", name: "Reward System", icon: <MdCardGiftcard /> },
+        { path: "/incentives/management", name: "Incentive Management", icon: <MdCampaign /> },
       ],
     },
-    { path: "/support", name: "Support Tickets", icon: <MdSupport /> },
     { path: "/templates", name: "Templates", icon: <MdOutlineDashboardCustomize /> },
+    { path: "/integrations/api", name: "API Integrations", icon: <MdApi /> },
     {
-      name: "Content Management",
-      icon: <MdWeb />,
+      name: "Settings",
+      icon: <MdSettings />,
       submenu: true,
-      isOpen: contentSubmenuOpen,
-      toggle: toggleContentSubmenu,
+      isOpen: settingsSubmenuOpen,
+      toggle: () => toggleSubmenu("settings"),
       submenuItems: [
-        { path: "/content/integrations", name: "Integrations", icon: <MdIntegrationInstructions /> },
-        { path: "/content/api", name: "API Management", icon: <MdApi /> },
-        { path: "/content/testimonials", name: "Testimonials", icon: <MdComment /> },
-        { path: "/content/widgets", name: "Widgets", icon: <MdWidgets /> },
+        { path: "/settings", name: "General Settings", icon: <MdSettings /> },
+        { path: "/settings/billing-plans", name: "Billing Plans", icon: <MdPayment /> },
+        { path: "/settings/custom-thank-you", name: "Custom Thank You", icon: <MdThumbUp /> },
+        { path: "/settings/email-templates", name: "Email Templates", icon: <MdMailOutline /> },
+        { path: "/settings/notification-settings", name: "Notification Settings", icon: <MdNotifications /> },
+        { path: "/settings/smtp-config", name: "SMTP Configuration", icon: <MdEmail /> },
+        { path: "/settings/thank-you-page", name: "Thank You Page", icon: <MdThumbUp /> },
+        { path: "/settings/theme-settings", name: "Theme Settings", icon: <MdColorLens /> },
       ],
     },
-    { path: "/settings", name: "Settings", icon: <MdSettings /> },
   ]
+
+  const isActiveRoute = (path) => {
+    return location.pathname === path
+  }
 
   return (
     <div ref={sidebarRef} style={sidebarStyle} className="d-flex flex-column">
-         {/* Header */}
-      <div className="d-flex justify-content-between align-items-center p-3 border-bottom" 
-           style={{ height: "var(--header-height)" }}>
+      {/* Header */}
+      <div
+        className="d-flex justify-content-between align-items-center p-3 border-bottom"
+        style={{ height: "var(--header-height)" }}
+      >
         {!collapsed && <h4 className="mb-0 text-primary fw-bold">Rate Pro</h4>}
         <Button
           variant="link"
           className="p-1 text-decoration-none"
           onClick={handleCloseClick}
-          style={{ 
+          style={{
             color: "inherit",
-            marginLeft: collapsed ? "0" : "auto" // Ensures proper alignment
+            marginLeft: collapsed ? "0" : "auto",
           }}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
@@ -221,18 +504,26 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       {/* Navigation */}
       <Nav className="flex-column flex-fill p-2">
         {navItems.map((item, index) => (
-          <div key={index} className="mb-1">
+          <div key={index} className="mb-1 position-relative">
             {item.submenu ? (
               <>
                 <Button
                   variant="link"
-                  className={`w-100 text-start text-decoration-none d-flex align-items-center p-2 rounded ${item.isOpen ? "bg-primary bg-opacity-10" : ""
-                    }`}
-                  onClick={collapsed ? undefined : item.toggle}
+                  className="w-100 text-start text-decoration-none d-flex align-items-center p-2 rounded transition-all"
+                  onClick={collapsed ? () => handleCollapsedDropdownClick(item.name) : item.toggle}
+                  onMouseEnter={() => {
+                    setHoveredItem(item.name)
+                    if (collapsed) handleCollapsedDropdownHover(item.name)
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredItem(null)
+                    if (collapsed) handleCollapsedDropdownLeave()
+                  }}
                   style={{
-                    color: "inherit",
+                    color: hoveredItem === item.name ? "var(--primary-color)" : "inherit",
                     border: "none",
                     backgroundColor: "transparent",
+                    transition: "all 0.3s ease",
                   }}
                 >
                   <span className="me-3" style={{ minWidth: "24px" }}>
@@ -246,6 +537,50 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                   )}
                 </Button>
 
+                {/* Collapsed Dropdown */}
+                {collapsed && collapsedDropdownOpen === item.name && (
+                  <div
+                    className="position-absolute bg-dark text-white rounded shadow-lg"
+                    style={{
+                      left: "100%",
+                      top: "0",
+                      marginLeft: "10px",
+                      minWidth: "200px",
+                      zIndex: 1000,
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                    }}
+                    onMouseEnter={() => setCollapsedDropdownOpen(item.name)}
+                    onMouseLeave={() => setCollapsedDropdownOpen(null)}
+                  >
+                    <div className="p-2">
+                      <div className="fw-bold mb-2 text-primary">{item.name}</div>
+                      {item.submenuItems.map((subItem, subIndex) => (
+                        <Nav.Link
+                          key={subIndex}
+                          as={NavLink}
+                          to={subItem.path}
+                          className="d-flex align-items-center p-2 rounded text-decoration-none text-white small"
+                          onClick={() => {
+                            setCollapsedDropdownOpen(null)
+                            if (isMobile || isTablet) onClose()
+                          }}
+                          style={({ isActive }) => ({
+                            backgroundColor: isActive ? "var(--primary-color)" : "transparent",
+                            color: isActive ? "white" : "#e9ecef",
+                          })}
+                        >
+                          <span className="me-2" style={{ minWidth: "16px" }}>
+                            {subItem.icon}
+                          </span>
+                          <span>{subItem.name}</span>
+                        </Nav.Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Expanded Submenu */}
                 {!collapsed && (
                   <Collapse in={item.isOpen}>
                     <div className="ms-4">
@@ -259,7 +594,22 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                           style={({ isActive }) => ({
                             backgroundColor: isActive ? "var(--primary-color)" : "transparent",
                             color: isActive ? "white" : "inherit",
+                            transition: "all 0.3s ease",
                           })}
+                          onMouseEnter={(e) => {
+                            if (!isActiveRoute(subItem.path)) {
+                              e.target.style.backgroundColor = "var(--primary-color)"
+                              e.target.style.color = "white"
+                              e.target.style.opacity = "0.8"
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActiveRoute(subItem.path)) {
+                              e.target.style.backgroundColor = "transparent"
+                              e.target.style.color = "inherit"
+                              e.target.style.opacity = "1"
+                            }
+                          }}
                         >
                           <span className="me-3" style={{ minWidth: "20px" }}>
                             {subItem.icon}
@@ -277,9 +627,17 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                 to={item.path}
                 className="d-flex align-items-center p-2 rounded text-decoration-none position-relative"
                 onClick={() => (isMobile || isTablet) && onClose()}
+                onMouseEnter={() => setHoveredItem(item.name)}
+                onMouseLeave={() => setHoveredItem(null)}
                 style={({ isActive }) => ({
-                  backgroundColor: isActive ? "var(--primary-color)" : "transparent",
-                  color: isActive ? "white" : "inherit",
+                  backgroundColor: isActive
+                    ? "var(--primary-color)"
+                    : hoveredItem === item.name
+                      ? "var(--primary-color)"
+                      : "transparent",
+                  color: isActive || hoveredItem === item.name ? "white" : "inherit",
+                  opacity: hoveredItem === item.name && !isActiveRoute(item.path) ? "0.8" : "1",
+                  transition: "all 0.3s ease",
                 })}
               >
                 <span className="me-3" style={{ minWidth: "24px" }}>
@@ -297,13 +655,11 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                       transform: "translateY(-50%)",
                       marginLeft: "10px",
                       whiteSpace: "nowrap",
-                      opacity: 0,
+                      opacity: hoveredItem === item.name ? 1 : 0,
                       pointerEvents: "none",
                       transition: "opacity 0.2s",
                       zIndex: 1000,
                     }}
-                    onMouseEnter={(e) => (e.target.style.opacity = 1)}
-                    onMouseLeave={(e) => (e.target.style.opacity = 0)}
                   >
                     {item.name}
                   </div>

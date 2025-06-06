@@ -51,6 +51,11 @@ import EnterResetCode from "./pages/Auth/EnterResetCode.jsx"
 import ThankYou from "./pages/Settings/ThankYouPage.jsx"
 import CustomThankYou from "./pages/Settings/CustomThankYou.jsx"
 import NotFound from "./pages/NotFound/NotFound.jsx"
+import BillingPlans from "./pages/Settings/BillingPlans.jsx"
+import ThankYouPage from "./pages/Settings/ThankYouPage.jsx"
+import NotificationSettings from "./pages/Settings/NotificationSettings.jsx"
+import ThemeSettings from "./pages/Settings/ThemeSettings.jsx"
+import SMTPConfig from "./pages/Settings/SMTPConfig.jsx"
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -153,6 +158,12 @@ function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="settings/thank-you" element={<CustomThankYou />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="/settings/billing-plans" element={<BillingPlans />} />
+            <Route path="/settings/custom-thank-you" element={<ThankYouPage/>} />
+            <Route path="/settings/email-templates" element={<EmailTemplates/>} />
+            <Route path="/settings/notification-settings" element={<NotificationSettings/>} />
+            <Route path="/settings/smtp-config" element={<SMTPConfig/>} />
+            <Route path="/settings/theme-settings" element={<ThemeSettings/>} />
 
             {/* Content Management */}
             <Route path="content/integrations" element={<Integrations />} />

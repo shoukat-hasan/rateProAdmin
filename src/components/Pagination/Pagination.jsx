@@ -1,11 +1,10 @@
 "use client"
 
 import { Pagination as BootstrapPagination } from "react-bootstrap"
+import { MdChevronLeft, MdChevronRight, MdMoreHoriz } from "react-icons/md"
 
-const Pagination = ({ current, total, limit, onChange, showInfo = true }) => {
+const Pagination = ({ current, total, limit, onChange, darkMode }) => {
   const totalPages = Math.ceil(total / limit)
-  const startItem = (current - 1) * limit + 1
-  const endItem = Math.min(current * limit, total)
 
   if (totalPages <= 1) return null
 
@@ -35,34 +34,34 @@ const Pagination = ({ current, total, limit, onChange, showInfo = true }) => {
     return rangeWithDots
   }
 
-  const visiblePages = totalPages > 1 ? getVisiblePages() : [1]
+  const visiblePages = getVisiblePages()
 
   return (
-    <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
-      {showInfo && (
-        <div className="mb-2 mb-md-0">
-          <small className="text-muted">
-            Showing {startItem} to {endItem} of {total} entries
-          </small>
-        </div>
-      )}
+    <div className="d-flex justify-content-between align-items-center flex-wrap">
+      <small className={`text-muted mb-2 mb-md-0 ${darkMode ? "text-light" : ""}`}>
+        Showing {Math.min((current - 1) * limit + 1, total)} to {Math.min(current * limit, total)} of {total} entries
+      </small>
 
-      <BootstrapPagination className="mb-0">
-        <BootstrapPagination.Prev disabled={current === 1} onClick={() => onChange(current - 1)} />
+      <BootstrapPagination size="sm" className="mb-0 pagination-enhanced">
+        <BootstrapPagination.Prev disabled={current === 1} onClick={() => onChange(current - 1)}>
+          <MdChevronLeft size={16} />
+        </BootstrapPagination.Prev>
 
-        {visiblePages.map((page, index) => {
-          if (page === "...") {
-            return <BootstrapPagination.Ellipsis key={`ellipsis-${index}`} />
-          }
-
-          return (
-            <BootstrapPagination.Item key={page} active={page === current} onClick={() => onChange(page)}>
+        {visiblePages.map((page, index) =>
+          page === "..." ? (
+            <BootstrapPagination.Ellipsis key={index}>
+              <MdMoreHoriz size={16} />
+            </BootstrapPagination.Ellipsis>
+          ) : (
+            <BootstrapPagination.Item key={index} active={page === current} onClick={() => onChange(page)}>
               {page}
             </BootstrapPagination.Item>
-          )
-        })}
+          ),
+        )}
 
-        <BootstrapPagination.Next disabled={current === totalPages} onClick={() => onChange(current + 1)} />
+        <BootstrapPagination.Next disabled={current === totalPages} onClick={() => onChange(current + 1)}>
+          <MdChevronRight size={16} />
+        </BootstrapPagination.Next>
       </BootstrapPagination>
     </div>
   )

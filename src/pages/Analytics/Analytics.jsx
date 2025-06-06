@@ -3,15 +3,20 @@
 import { useState, useEffect } from "react"
 import { Container, Row, Col, Card, Form, Button, Table, Badge } from "react-bootstrap"
 import { MdTrendingUp, MdTrendingDown, MdBarChart, MdPieChart, MdDownload, MdRefresh } from "react-icons/md"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
 const Analytics = ({ darkMode }) => {
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState("30")
   const [selectedMetric, setSelectedMetric] = useState("responses")
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
 
   useEffect(() => {
     // Simulate loading
-    setTimeout(() => setLoading(false), 1000)
+    setTimeout(() => {
+      setPagination((prev) => ({ ...prev, total: 6 }))
+      setLoading(false)
+    }, 1000)
   }, [])
 
   const metrics = [
@@ -78,6 +83,20 @@ const Analytics = ({ darkMode }) => {
       avgRating: 3.9,
       category: "Market Research",
     },
+    {
+      name: "Website Usability Test",
+      responses: 143,
+      completion: 84,
+      avgRating: 4.1,
+      category: "UX Research",
+    },
+    {
+      name: "Brand Awareness Survey",
+      responses: 98,
+      completion: 71,
+      avgRating: 3.7,
+      category: "Marketing",
+    },
   ]
 
   const responseData = [
@@ -88,6 +107,8 @@ const Analytics = ({ darkMode }) => {
     { date: "2024-01-19", responses: 47, completion: 79 },
     { date: "2024-01-20", responses: 55, completion: 88 },
   ]
+
+  const currentSurveys = topSurveys.slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
 
   if (loading) {
     return (
@@ -100,7 +121,7 @@ const Analytics = ({ darkMode }) => {
   }
 
   return (
-    <Container fluid className="analytics-container py-4">
+    <Container fluid className="analytics-container py-4 fade-in">
       {/* Header */}
       <Row className="mb-4">
         <Col>
@@ -114,23 +135,19 @@ const Analytics = ({ darkMode }) => {
                 size="sm"
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                style={{
-                  width: "150px",
-                  backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
-                  borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
-                  color: darkMode ? "var(--dark-text)" : "var(--light-text)",
-                }}
+                style={{ width: "150px" }}
+                className="form-enhanced"
               >
                 <option value="7">Last 7 days</option>
                 <option value="30">Last 30 days</option>
                 <option value="90">Last 3 months</option>
                 <option value="365">Last year</option>
               </Form.Select>
-              <Button variant="outline-primary" size="sm">
+              <Button variant="outline-primary" size="sm" className="btn-enhanced">
                 <MdRefresh className="me-1" />
                 Refresh
               </Button>
-              <Button variant="primary" size="sm">
+              <Button variant="primary" size="sm" className="btn-enhanced">
                 <MdDownload className="me-1" />
                 Export
               </Button>
@@ -144,17 +161,9 @@ const Analytics = ({ darkMode }) => {
         {metrics.map((metric, index) => (
           <Col key={index} xs={12} sm={6} lg={3} className="mb-3">
             <Card
-              className="metric-card h-100 border-0 shadow-sm cursor-pointer"
+              className="metric-card h-100 border-0 shadow-sm cursor-pointer card-enhanced"
               style={{
-                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
                 borderLeft: `4px solid var(--${metric.color === "primary" ? "primary" : metric.color}-color)`,
-                transition: "transform 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)"
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)"
               }}
             >
               <Card.Body className="d-flex align-items-center">
@@ -191,30 +200,16 @@ const Analytics = ({ darkMode }) => {
       <Row>
         {/* Chart Area */}
         <Col lg={8} className="mb-4">
-          <Card
-            className="border-0 shadow-sm"
-            style={{
-              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-            }}
-          >
-            <Card.Header
-              className="border-0 pb-0"
-              style={{
-                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-              }}
-            >
+          <Card className="border-0 shadow-sm card-enhanced">
+            <Card.Header className="border-0 pb-0">
               <div className="d-flex justify-content-between align-items-center">
                 <h5 className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Response Trends</h5>
                 <Form.Select
                   size="sm"
                   value={selectedMetric}
                   onChange={(e) => setSelectedMetric(e.target.value)}
-                  style={{
-                    width: "150px",
-                    backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
-                    borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
-                    color: darkMode ? "var(--dark-text)" : "var(--light-text)",
-                  }}
+                  style={{ width: "150px" }}
+                  className="form-enhanced"
                 >
                   <option value="responses">Responses</option>
                   <option value="completion">Completion Rate</option>
@@ -244,31 +239,14 @@ const Analytics = ({ darkMode }) => {
 
         {/* Top Surveys */}
         <Col lg={4} className="mb-4">
-          <Card
-            className="border-0 shadow-sm h-100"
-            style={{
-              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-            }}
-          >
-            <Card.Header
-              className="border-0 pb-0"
-              style={{
-                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-              }}
-            >
+          <Card className="border-0 shadow-sm h-100 card-enhanced">
+            <Card.Header className="border-0 pb-0">
               <h5 className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Top Performing Surveys</h5>
             </Card.Header>
             <Card.Body className="p-0">
               <div className="list-group list-group-flush">
-                {topSurveys.map((survey, index) => (
-                  <div
-                    key={index}
-                    className="list-group-item border-0 px-3 py-3"
-                    style={{
-                      backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-                      borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"} !important`,
-                    }}
-                  >
+                {currentSurveys.map((survey, index) => (
+                  <div key={index} className="list-group-item border-0 px-3 py-3">
                     <div className="d-flex justify-content-between align-items-start">
                       <div className="flex-grow-1">
                         <h6 className={`mb-1 ${darkMode ? "text-white" : "text-dark"}`}>{survey.name}</h6>
@@ -278,12 +256,21 @@ const Analytics = ({ darkMode }) => {
                           <span className={darkMode ? "text-white" : "text-dark"}>{survey.completion}% completion</span>
                         </div>
                       </div>
-                      <Badge bg="primary" className="ms-2">
+                      <Badge bg="primary" className="ms-2 badge-enhanced">
                         {survey.avgRating}★
                       </Badge>
                     </div>
                   </div>
                 ))}
+              </div>
+              <div className="p-3 border-top">
+                <Pagination
+                  current={pagination.page}
+                  total={topSurveys.length}
+                  limit={pagination.limit}
+                  onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+                  darkMode={darkMode}
+                />
               </div>
             </Card.Body>
           </Card>
@@ -293,33 +280,14 @@ const Analytics = ({ darkMode }) => {
       {/* Recent Activity Table */}
       <Row>
         <Col>
-          <Card
-            className="border-0 shadow-sm"
-            style={{
-              backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-            }}
-          >
-            <Card.Header
-              className="border-0 pb-0"
-              style={{
-                backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-              }}
-            >
+          <Card className="border-0 shadow-sm card-enhanced">
+            <Card.Header className="border-0 pb-0">
               <h5 className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Daily Response Activity</h5>
             </Card.Header>
             <Card.Body className="p-0">
               <div className="table-responsive">
-                <Table
-                  className="mb-0"
-                  style={{
-                    color: darkMode ? "var(--dark-text)" : "var(--light-text)",
-                  }}
-                >
-                  <thead
-                    style={{
-                      backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
-                    }}
-                  >
+                <Table className="mb-0 table-enhanced" hover>
+                  <thead className="table-light">
                     <tr>
                       <th className="border-0 py-3 px-4">Date</th>
                       <th className="border-0 py-3">Responses</th>
@@ -329,19 +297,14 @@ const Analytics = ({ darkMode }) => {
                   </thead>
                   <tbody>
                     {responseData.map((data, index) => (
-                      <tr
-                        key={index}
-                        style={{
-                          borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
-                        }}
-                      >
-                        <td className="py-3 px-4">
+                      <tr key={index}>
+                        <td className="py-3 px-4 border-0">
                           <span className={darkMode ? "text-white" : "text-dark"}>{data.date}</span>
                         </td>
-                        <td className="py-3">
+                        <td className="py-3 border-0">
                           <span className={darkMode ? "text-white" : "text-dark"}>{data.responses}</span>
                         </td>
-                        <td className="py-3">
+                        <td className="py-3 border-0">
                           <div className="d-flex align-items-center">
                             <div className="progress me-2" style={{ width: "60px", height: "6px" }}>
                               <div className="progress-bar bg-primary" style={{ width: `${data.completion}%` }}></div>
@@ -349,7 +312,7 @@ const Analytics = ({ darkMode }) => {
                             <span className={`small ${darkMode ? "text-white" : "text-dark"}`}>{data.completion}%</span>
                           </div>
                         </td>
-                        <td className="py-3">
+                        <td className="py-3 border-0">
                           {index > 0 && responseData[index - 1] ? (
                             <span
                               className={
