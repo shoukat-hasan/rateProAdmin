@@ -33,7 +33,7 @@ import {
   MdQuestionAnswer,
   MdAnalytics,
   MdShare,
-  MdOutlineSettingsApplications as MdCustomize,
+ MdOutlineSettingsApplications as MdCustomize,
   MdViewList,
   MdDescription,
   MdLogin,
@@ -556,25 +556,32 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                     <div className="p-2">
                       <div className="fw-bold mb-2 text-primary">{item.name}</div>
                       {item.submenuItems.map((subItem, subIndex) => (
-                        <Nav.Link
+                        <div
                           key={subIndex}
-                          as={NavLink}
-                          to={subItem.path}
                           className="d-flex align-items-center p-2 rounded text-decoration-none text-white small"
                           onClick={() => {
                             setCollapsedDropdownOpen(null)
                             if (isMobile || isTablet) onClose()
                           }}
-                          style={({ isActive }) => ({
-                            backgroundColor: isActive ? "var(--primary-color)" : "transparent",
-                            color: isActive ? "white" : "#e9ecef",
-                          })}
+                          style={{
+                            backgroundColor: isActiveRoute(subItem.path) ? "var(--primary-color)" : "transparent",
+                            color: isActiveRoute(subItem.path) ? "white" : "#e9ecef",
+                            cursor: "pointer",
+                          }}
                         >
-                          <span className="me-2" style={{ minWidth: "16px" }}>
-                            {subItem.icon}
-                          </span>
-                          <span>{subItem.name}</span>
-                        </Nav.Link>
+                          <NavLink
+                            to={subItem.path}
+                            className="d-flex align-items-center text-decoration-none w-100"
+                            style={{
+                              color: "inherit",
+                            }}
+                          >
+                            <span className="me-2" style={{ minWidth: "16px" }}>
+                              {subItem.icon}
+                            </span>
+                            <span>{subItem.name}</span>
+                          </NavLink>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -585,17 +592,14 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                   <Collapse in={item.isOpen}>
                     <div className="ms-4">
                       {item.submenuItems.map((subItem, subIndex) => (
-                        <Nav.Link
+                        <div
                           key={subIndex}
-                          as={NavLink}
-                          to={subItem.path}
-                          className="d-flex align-items-center p-2 rounded text-decoration-none"
-                          onClick={() => (isMobile || isTablet) && onClose()}
-                          style={({ isActive }) => ({
-                            backgroundColor: isActive ? "var(--primary-color)" : "transparent",
-                            color: isActive ? "white" : "inherit",
+                          className="d-flex align-items-center p-2 rounded text-decoration-none mb-1"
+                          style={{
+                            backgroundColor: isActiveRoute(subItem.path) ? "var(--primary-color)" : "transparent",
+                            color: isActiveRoute(subItem.path) ? "white" : "inherit",
                             transition: "all 0.3s ease",
-                          })}
+                          }}
                           onMouseEnter={(e) => {
                             if (!isActiveRoute(subItem.path)) {
                               e.target.style.backgroundColor = "var(--primary-color)"
@@ -611,39 +615,54 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                             }
                           }}
                         >
-                          <span className="me-3" style={{ minWidth: "20px" }}>
-                            {subItem.icon}
-                          </span>
-                          <span>{subItem.name}</span>
-                        </Nav.Link>
+                          <NavLink
+                            to={subItem.path}
+                            className="d-flex align-items-center text-decoration-none w-100"
+                            onClick={() => (isMobile || isTablet) && onClose()}
+                            style={{
+                              color: "inherit",
+                            }}
+                          >
+                            <span className="me-3" style={{ minWidth: "20px" }}>
+                              {subItem.icon}
+                            </span>
+                            <span>{subItem.name}</span>
+                          </NavLink>
+                        </div>
                       ))}
                     </div>
                   </Collapse>
                 )}
               </>
             ) : (
-              <Nav.Link
-                as={NavLink}
-                to={item.path}
-                className="d-flex align-items-center p-2 rounded text-decoration-none position-relative"
-                onClick={() => (isMobile || isTablet) && onClose()}
-                onMouseEnter={() => setHoveredItem(item.name)}
-                onMouseLeave={() => setHoveredItem(null)}
-                style={({ isActive }) => ({
-                  backgroundColor: isActive
+              <div
+                className="d-flex align-items-center p-2 rounded text-decoration-none position-relative mb-1"
+                style={{
+                  backgroundColor: isActiveRoute(item.path)
                     ? "var(--primary-color)"
                     : hoveredItem === item.name
                       ? "var(--primary-color)"
                       : "transparent",
-                  color: isActive || hoveredItem === item.name ? "white" : "inherit",
+                  color: isActiveRoute(item.path) || hoveredItem === item.name ? "white" : "inherit",
                   opacity: hoveredItem === item.name && !isActiveRoute(item.path) ? "0.8" : "1",
                   transition: "all 0.3s ease",
-                })}
+                }}
+                onMouseEnter={() => setHoveredItem(item.name)}
+                onMouseLeave={() => setHoveredItem(null)}
               >
-                <span className="me-3" style={{ minWidth: "24px" }}>
-                  {item.icon}
-                </span>
-                {!collapsed && <span>{item.name}</span>}
+                <NavLink
+                  to={item.path}
+                  className="d-flex align-items-center text-decoration-none w-100"
+                  onClick={() => (isMobile || isTablet) && onClose()}
+                  style={{
+                    color: "inherit",
+                  }}
+                >
+                  <span className="me-3" style={{ minWidth: "24px" }}>
+                    {item.icon}
+                  </span>
+                  {!collapsed && <span>{item.name}</span>}
+                </NavLink>
 
                 {/* Tooltip for collapsed state */}
                 {collapsed && (
@@ -664,7 +683,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                     {item.name}
                   </div>
                 )}
-              </Nav.Link>
+              </div>
             )}
           </div>
         ))}
