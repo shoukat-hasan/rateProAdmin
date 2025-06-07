@@ -1,3 +1,4 @@
+// src\pages\Settings\SMTPConfig.jsx
 "use client"
 
 import { useState } from "react"

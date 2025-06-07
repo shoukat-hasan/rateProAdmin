@@ -5,7 +5,7 @@
 
 
 import { useParams } from "react-router-dom"
-import { Container, Row, Col, Card, Badge, Button } from "react-bootstrap"
+import { Container, Row, Col, Card, Badge, Button, Form } from "react-bootstrap"
 import { MdEdit, MdShare, MdAnalytics } from "react-icons/md"
 
 const SurveyDetail = () => {

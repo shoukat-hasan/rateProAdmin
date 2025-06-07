@@ -65,6 +65,8 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   const [communicationSubmenuOpen, setCommunicationSubmenuOpen] = useState(false)
   const [settingsSubmenuOpen, setSettingsSubmenuOpen] = useState(false)
   const [incentivesSubmenuOpen, setIncentivesSubmenuOpen] = useState(false)
+    const [contentmanagement, setcontentmanagement] = useState(false)
+
   const [hoveredItem, setHoveredItem] = useState(null)
   const [collapsedDropdownOpen, setCollapsedDropdownOpen] = useState(null)
   const sidebarRef = useRef()
@@ -81,6 +83,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setAudienceSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
       setCollapsedDropdownOpen(null)
     }
   }, [collapsed])
@@ -108,6 +111,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setCommunicationSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     } else if (currentPath.startsWith("/surveys")) {
       setSurveySubmenuOpen(true)
       setAuthSubmenuOpen(false)
@@ -118,6 +122,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setCommunicationSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     } else if (currentPath.startsWith("/users") || currentPath === "/profile") {
       setUserSubmenuOpen(true)
       setAuthSubmenuOpen(false)
@@ -128,6 +133,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setCommunicationSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     } else if (currentPath.startsWith("/access")) {
       setAccessSubmenuOpen(true)
       setAuthSubmenuOpen(false)
@@ -138,6 +144,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setCommunicationSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     } else if (currentPath.startsWith("/analytics")) {
       setAnalyticsSubmenuOpen(true)
       setAuthSubmenuOpen(false)
@@ -148,6 +155,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setCommunicationSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     } else if (currentPath.startsWith("/audiences")) {
       setAudienceSubmenuOpen(true)
       setAuthSubmenuOpen(false)
@@ -158,6 +166,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setCommunicationSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     } else if (currentPath.startsWith("/communication")) {
       setCommunicationSubmenuOpen(true)
       setAuthSubmenuOpen(false)
@@ -168,6 +177,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setAudienceSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     } else if (currentPath.startsWith("/incentives")) {
       setIncentivesSubmenuOpen(true)
       setAuthSubmenuOpen(false)
@@ -178,6 +188,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setAudienceSubmenuOpen(false)
       setCommunicationSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
+      setcontentmanagement(false)
     } else if (currentPath.startsWith("/settings")) {
       setSettingsSubmenuOpen(true)
       setAuthSubmenuOpen(false)
@@ -188,6 +199,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setAudienceSubmenuOpen(false)
       setCommunicationSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     } else {
       // Close all submenus for single pages
       setAuthSubmenuOpen(false)
@@ -199,6 +211,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       setCommunicationSubmenuOpen(false)
       setSettingsSubmenuOpen(false)
       setIncentivesSubmenuOpen(false)
+      setcontentmanagement(false)
     }
   }, [location.pathname])
 
@@ -257,6 +270,9 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       case "settings":
         isCurrentlyOpen = settingsSubmenuOpen
         break
+      case "content":
+        isCurrentlyOpen = contentmanagement
+        break
     }
 
     // Close all submenus first
@@ -269,6 +285,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
     setCommunicationSubmenuOpen(false)
     setSettingsSubmenuOpen(false)
     setIncentivesSubmenuOpen(false)
+    setcontentmanagement(false)
 
     // If the clicked submenu was not open, open it
     if (!isCurrentlyOpen) {
@@ -299,6 +316,9 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
           break
         case "settings":
           setSettingsSubmenuOpen(true)
+          break
+        case "content":
+          setcontentmanagement(true)
           break
       }
     }
@@ -368,10 +388,10 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
         { path: "/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline /> },
         { path: "/surveys/templates", name: "Survey Templates", icon: <MdTemplate /> },
         { path: "/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule /> },
-        { path: "/surveys/responses", name: "Survey Responses", icon: <MdQuestionAnswer /> },
+        { path: "/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer /> },
         { path: "/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics /> },
-        { path: "/surveys/customization", name: "Customization", icon: <MdCustomize /> },
-        { path: "/surveys/sharing", name: "Survey Sharing", icon: <MdShare /> },
+        { path: "/surveys/:id/customize", name: "Customization", icon: <MdCustomize /> },
+        { path: "/surveys/:id/share", name: "Survey Sharing", icon: <MdShare /> },
         { path: "/surveys/settings", name: "Survey Settings", icon: <MdSettings /> },
         { path: "/surveys/detail", name: "Survey Detail", icon: <MdVisibility /> },
         { path: "/surveys/list", name: "Survey List", icon: <MdList /> },
@@ -389,7 +409,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
         { path: "/users/create", name: "Add User", icon: <MdPersonAdd /> },
         { path: "/users/form", name: "User Form", icon: <MdPersonOutline /> },
         { path: "/users/role-permissions", name: "Role Permissions", icon: <MdAssignmentInd /> },
-        { path: "/profile", name: "User Profile", icon: <MdManageAccounts /> },
+
       ],
     },
     {
@@ -451,11 +471,10 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       toggle: () => toggleSubmenu("incentives"),
       submenuItems: [
         { path: "/incentives", name: "Reward System", icon: <MdCardGiftcard /> },
-        { path: "/incentives/management", name: "Incentive Management", icon: <MdCampaign /> },
+        { path: "/incentives/rewards", name: "Incentive Management", icon: <MdCampaign /> },
       ],
     },
-    { path: "/templates", name: "Templates", icon: <MdOutlineDashboardCustomize /> },
-    { path: "/integrations/api", name: "API Integrations", icon: <MdApi /> },
+    
     {
       name: "Settings",
       icon: <MdSettings />,
@@ -469,8 +488,22 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
         { path: "/settings/email-templates", name: "Email Templates", icon: <MdMailOutline /> },
         { path: "/settings/notification-settings", name: "Notification Settings", icon: <MdNotifications /> },
         { path: "/settings/smtp-config", name: "SMTP Configuration", icon: <MdEmail /> },
-        { path: "/settings/thank-you-page", name: "Thank You Page", icon: <MdThumbUp /> },
+        { path: "/settings/custom-thank-you", name: "Thank You Page", icon: <MdThumbUp /> },
         { path: "/settings/theme-settings", name: "Theme Settings", icon: <MdColorLens /> },
+      ],
+    },
+    {
+      name: "Content Management",
+      icon: <MdSettings />,
+      submenu: true,
+      isOpen: contentmanagement,
+      toggle: () => toggleSubmenu("content"),
+      submenuItems: [
+        { path: "/features", name: "Features", icon: <MdSettings /> },
+        { path: "/content/pricing", name: "Pricing", icon: <MdPayment /> },
+        { path: "/content/testimonials", name: "Testimonials", icon: <MdThumbUp /> },
+        { path: "/content/widgets", name: "Widgets", icon: <MdMailOutline /> },
+      
       ],
     },
   ]

@@ -1,3 +1,5 @@
+// src\pages\Communication\EmailManagement.jsx
+
 "use client"
 
 import { useState, useEffect } from "react"

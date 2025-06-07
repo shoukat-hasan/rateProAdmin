@@ -8,6 +8,7 @@ import Layout from "./components/Layout/Layout.jsx"
 import Dashboard from "./pages/Dashboard/Dashboard.jsx"
 import SurveyList from "./pages/Surveys/SurveyList.jsx"
 import CreateSurvey from "./pages/Surveys/CreateSurvey.jsx"
+import SurveySettings from "./pages/Surveys/SurveySettings.jsx"
 import SurveyDetail from "./pages/Surveys/SurveyDetail.jsx"
 import SurveyResponses from "./pages/Surveys/SurveyResponses.jsx"
 import SurveyAnalytics from "./pages/Surveys/SurveyAnalytics.jsx"
@@ -35,8 +36,7 @@ import NotificationCenter from "./pages/Communication/NotificationCenter.jsx"
 import SupportTickets from "./pages/Support/SupportTickets.jsx"
 import TicketDetail from "./pages/Support/TicketDetail.jsx"
 import CreateTicket from "./pages/Support/CreateTicket.jsx"
-import Integrations from "./pages/ContentManagement/Integrations.jsx"
-import APIManagement from "./pages/ContentManagement/APIManagement.jsx"
+
 import Testimonials from "./pages/ContentManagement/Testimonials.jsx"
 import Widgets from "./pages/ContentManagement/Widgets.jsx"
 import IncentiveManagement from "./pages/Incentives/IncentiveManagement.jsx"
@@ -56,6 +56,9 @@ import ThankYouPage from "./pages/Settings/ThankYouPage.jsx"
 import NotificationSettings from "./pages/Settings/NotificationSettings.jsx"
 import ThemeSettings from "./pages/Settings/ThemeSettings.jsx"
 import SMTPConfig from "./pages/Settings/SMTPConfig.jsx"
+import CustomReports from "./pages/Analytics/CustomReports.jsx"
+import Features from "./pages/ContentManagement/Features.jsx"
+import Pricing from "./pages/ContentManagement/Pricing.jsx"
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -107,14 +110,16 @@ function App() {
             <Route path="surveys" element={<SurveyList />} />
             <Route path="surveys/create" element={<CreateSurvey />} />
             <Route path="surveys/:id/edit" element={<CreateSurvey />} />
-            <Route path="surveys/:id/detail" element={<SurveyDetail />} />
+            <Route path="surveys/detail" element={<SurveyDetail />} />
             <Route path="surveys/:id/responses" element={<SurveyResponses />} />
-            <Route path="surveys/:id/analytics" element={<SurveyAnalytics />} />
+            <Route path="surveys/analytics" element={<SurveyAnalytics />} />
             <Route path="surveys/:id/customize" element={<SurveyCustomization />} />
             <Route path="surveys/:id/share" element={<SurveySharing />} />
             <Route path="surveys/scheduling" element={<SurveyScheduling />} />
             <Route path="surveys/templates" element={<SurveyTemplates />} />
             <Route path="surveys/takesurvey" element={<TakeSurvey />} />
+          <Route path="surveys/list" element={<SurveyList />} />
+          <Route path="surveys/settings" element={<SurveySettings />} />
 
 
 
@@ -122,6 +127,8 @@ function App() {
             <Route path="users" element={<UserList />} />
             <Route path="users/create" element={<UserForm />} />
             <Route path="users/:id/edit" element={<UserForm />} />
+            <Route path="users/form" element={<UserForm />} />
+            <Route path="users/role-permissions" element={<PermissionManagement />} />
 
             {/* Access Management */}
             <Route path="access" element={<AccessManagement />} />
@@ -134,6 +141,7 @@ function App() {
 
             {/* Analytics & Reporting */}
             <Route path="analytics" element={<Analytics />} />
+            <Route path="analytics/custom-reports" element={<CustomReports />} />
             <Route path="analytics/real-time" element={<RealTimeResults />} />
             <Route path="analytics/trends" element={<TrendAnalysis />} />
 
@@ -166,8 +174,8 @@ function App() {
             <Route path="/settings/theme-settings" element={<ThemeSettings/>} />
 
             {/* Content Management */}
-            <Route path="content/integrations" element={<Integrations />} />
-            <Route path="content/api" element={<APIManagement />} />
+            <Route path="features" element={<Features />} />
+            <Route path="content/pricing" element={<Pricing />} />
             <Route path="content/testimonials" element={<Testimonials />} />
             <Route path="content/widgets" element={<Widgets />} />
           </Route>

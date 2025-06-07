@@ -1,102 +1,107 @@
-// src\pages\ContentManagement\Widgets.jsx
-// src/pages/Widgets/Widgets.jsx
+// src/pages/Features/Features.jsx
 "use client"
 
 import { useState, useEffect } from "react"
 import { 
   Container, Row, Col, Card, Table, Badge, Button, 
-  Form, Modal, InputGroup, Spinner 
+  Form, Modal, InputGroup, Spinner, Alert 
 } from "react-bootstrap"
 import { 
   MdAdd, MdEdit, MdDelete, MdSearch, MdRefresh,
-  MdWidgets, MdVisibility, MdVisibilityOff 
+  MdStar, MdStarOutline, MdLabel, MdCategory 
 } from "react-icons/md"
 import Pagination from "./components/Pagination/Pagination.jsx"
 import TableControls from "./components/TableControls/TableControls.jsx"
 
-const Widgets = ({ darkMode }) => {
-  // State for widgets data
-  const [widgets, setWidgets] = useState([])
+const Features = ({ darkMode }) => {
+  // State for features data
+  const [features, setFeatures] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   
   // State for CRUD operations
   const [showModal, setShowModal] = useState(false)
-  const [currentWidget, setCurrentWidget] = useState(null)
+  const [currentFeature, setCurrentFeature] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   
   // State for table controls
   const [searchTerm, setSearchTerm] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
+  const [filterCategory, setFilterCategory] = useState("all")
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
 
-  // Status options for filter
-  const statusOptions = [
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'draft', label: 'Draft' }
+  // Category options for filter
+  const categoryOptions = [
+    { value: 'survey', label: 'Survey' },
+    { value: 'analytics', label: 'Analytics' },
+    { value: 'reporting', label: 'Reporting' },
+    { value: 'integration', label: 'Integration' }
   ]
 
-  // Fetch widgets data
+  // Fetch features data
   useEffect(() => {
-    const fetchWidgets = async () => {
+    const fetchFeatures = async () => {
       try {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000))
         
-        const dummyWidgets = [
+        const dummyFeatures = [
           {
             id: 1,
-            name: "Survey Stats",
-            description: "Displays survey statistics and completion rates",
+            title: "Advanced Survey Builder",
+            description: "Create complex surveys with multiple question types",
+            category: "survey",
+            isPremium: true,
             status: "active",
-            position: "dashboard",
-            visibility: true,
+            icon: "poll",
             createdAt: "2024-01-15"
           },
           {
             id: 2,
-            name: "Recent Responses",
-            description: "Shows most recent survey responses",
+            title: "Real-time Analytics",
+            description: "View response data as it comes in",
+            category: "analytics",
+            isPremium: true,
             status: "active",
-            position: "dashboard",
-            visibility: true,
+            icon: "analytics",
             createdAt: "2024-01-14"
           },
           {
             id: 3,
-            name: "Response Map",
-            description: "Geographical distribution of responses",
-            status: "inactive",
-            position: "analytics",
-            visibility: false,
+            title: "Basic Reporting",
+            description: "Generate simple reports and charts",
+            category: "reporting",
+            isPremium: false,
+            status: "active",
+            icon: "insert_chart",
             createdAt: "2024-01-10"
           },
-          // Add more widgets as needed
+          // Add more features as needed
         ]
         
-        setWidgets(dummyWidgets)
-        setPagination(prev => ({ ...prev, total: dummyWidgets.length }))
+        setFeatures(dummyFeatures)
+        setPagination(prev => ({ ...prev, total: dummyFeatures.length }))
       } catch (error) {
-        console.error("Error fetching widgets:", error)
+        setError("Failed to load features. Please try again later.")
+        console.error("Error fetching features:", error)
       } finally {
         setLoading(false)
       }
     }
     
-    fetchWidgets()
+    fetchFeatures()
   }, [])
 
-  // Filter widgets based on search and status
-  const filteredWidgets = widgets.filter(widget => {
+  // Filter features based on search and category
+  const filteredFeatures = features.filter(feature => {
     const matchesSearch = 
-      widget.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      widget.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === "all" || widget.status === filterStatus
-    return matchesSearch && matchesStatus
+      feature.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      feature.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = filterCategory === "all" || feature.category === filterCategory
+    return matchesSearch && matchesCategory
   })
 
-  // Paginate widgets
-  const paginatedWidgets = filteredWidgets.slice(
+  // Paginate features
+  const paginatedFeatures = filteredFeatures.slice(
     (pagination.page - 1) * pagination.limit,
     pagination.page * pagination.limit
   )
@@ -104,7 +109,7 @@ const Widgets = ({ darkMode }) => {
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
-    setCurrentWidget(prev => ({
+    setCurrentFeature(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }))
@@ -115,18 +120,19 @@ const Widgets = ({ darkMode }) => {
     e.preventDefault()
     
     if (isEditing) {
-      // Update existing widget
-      setWidgets(widgets.map(w => 
-        w.id === currentWidget.id ? currentWidget : w
+      // Update existing feature
+      setFeatures(features.map(f => 
+        f.id === currentFeature.id ? currentFeature : f
       ))
     } else {
-      // Add new widget
-      const newWidget = {
-        ...currentWidget,
+      // Add new feature
+      const newFeature = {
+        ...currentFeature,
         id: Date.now(),
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split('T')[0],
+        status: "active"
       }
-      setWidgets([...widgets, newWidget])
+      setFeatures([...features, newFeature])
       setPagination(prev => ({ ...prev, total: prev.total + 1 }))
     }
     
@@ -134,24 +140,24 @@ const Widgets = ({ darkMode }) => {
   }
 
   // Handle edit action
-  const handleEdit = (widget) => {
-    setCurrentWidget(widget)
+  const handleEdit = (feature) => {
+    setCurrentFeature(feature)
     setIsEditing(true)
     setShowModal(true)
   }
 
   // Handle delete action
   const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this widget?")) {
-      setWidgets(widgets.filter(w => w.id !== id))
+    if (window.confirm("Are you sure you want to delete this feature?")) {
+      setFeatures(features.filter(f => f.id !== id))
       setPagination(prev => ({ ...prev, total: prev.total - 1 }))
     }
   }
 
-  // Toggle widget visibility
-  const toggleVisibility = (id) => {
-    setWidgets(widgets.map(w => 
-      w.id === id ? { ...w, visibility: !w.visibility } : w
+  // Toggle premium status
+  const togglePremium = (id) => {
+    setFeatures(features.map(f => 
+      f.id === id ? { ...f, isPremium: !f.isPremium } : f
     ))
   }
 
@@ -159,8 +165,8 @@ const Widgets = ({ darkMode }) => {
   const getStatusBadge = (status) => {
     const variants = {
       active: "success",
-      inactive: "danger",
-      draft: "warning"
+      inactive: "secondary",
+      coming_soon: "info"
     }
     return variants[status] || "secondary"
   }
@@ -173,6 +179,14 @@ const Widgets = ({ darkMode }) => {
     )
   }
 
+  if (error) {
+    return (
+      <Container fluid className="py-4">
+        <Alert variant="danger">{error}</Alert>
+      </Container>
+    )
+  }
+
   return (
     <Container fluid className={`py-4 ${darkMode ? "bg-dark" : ""}`}>
       {/* Header */}
@@ -181,27 +195,27 @@ const Widgets = ({ darkMode }) => {
           <div className="d-flex justify-content-between align-items-center">
             <div>
               <h1 className={`h3 mb-1 ${darkMode ? "text-light" : ""}`}>
-                <MdWidgets className="me-2" /> Widget Management
+                <MdCategory className="me-2" /> Feature Management
               </h1>
               <p className={`text-muted mb-0 ${darkMode ? "text-light" : ""}`}>
-                Create and manage dashboard widgets
+                Manage your platform features and offerings
               </p>
             </div>
             <Button 
               variant="primary" 
               onClick={() => {
-                setCurrentWidget({
-                  name: "",
+                setCurrentFeature({
+                  title: "",
                   description: "",
-                  status: "active",
-                  position: "dashboard",
-                  visibility: true
+                  category: "survey",
+                  isPremium: false,
+                  icon: "poll"
                 })
                 setIsEditing(false)
                 setShowModal(true)
               }}
             >
-              <MdAdd className="me-2" /> Add Widget
+              <MdAdd className="me-2" /> Add Feature
             </Button>
           </div>
         </Col>
@@ -211,80 +225,83 @@ const Widgets = ({ darkMode }) => {
       <TableControls
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        filterOptions={statusOptions}
-        selectedFilter={filterStatus}
-        setSelectedFilter={setFilterStatus}
+        filterOptions={categoryOptions}
+        selectedFilter={filterCategory}
+        setSelectedFilter={setFilterCategory}
         onRefresh={() => window.location.reload()}
         darkMode={darkMode}
-        placeholder="Search widgets..."
+        placeholder="Search features..."
       />
 
-      {/* Widgets Table */}
+      {/* Features Table */}
       <Card className={`border-0 shadow-sm ${darkMode ? "bg-dark" : ""}`}>
         <Card.Body className="p-0">
           <div className="table-responsive">
             <Table hover className={`mb-0 ${darkMode ? "table-dark" : ""}`}>
               <thead className={darkMode ? "table-dark" : "table-light"}>
                 <tr>
-                  <th className={darkMode ? "text-light" : ""}>Name</th>
+                  <th className={darkMode ? "text-light" : ""}>Title</th>
                   <th className={darkMode ? "text-light" : ""}>Description</th>
+                  <th className={darkMode ? "text-light" : ""}>Category</th>
+                  <th className={darkMode ? "text-light" : ""}>Premium</th>
                   <th className={darkMode ? "text-light" : ""}>Status</th>
-                  <th className={darkMode ? "text-light" : ""}>Position</th>
-                  <th className={darkMode ? "text-light" : ""}>Visibility</th>
                   <th className={darkMode ? "text-light" : ""}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {paginatedWidgets.map(widget => (
-                  <tr key={widget.id}>
+                {paginatedFeatures.map(feature => (
+                  <tr key={feature.id}>
                     <td className={darkMode ? "text-light" : ""}>
-                      <div className="fw-medium">{widget.name}</div>
+                      <div className="fw-medium">
+                        <MdLabel className="me-2" />
+                        {feature.title}
+                      </div>
                       <small className={darkMode ? "text-light" : "text-muted"}>
-                        Created: {widget.createdAt}
+                        Added: {feature.createdAt}
                       </small>
                     </td>
                     <td className={darkMode ? "text-light" : ""}>
                       <div className="text-truncate" style={{ maxWidth: '300px' }}>
-                        {widget.description}
+                        {feature.description}
                       </div>
                     </td>
                     <td>
-                      <Badge bg={getStatusBadge(widget.status)} className="text-capitalize">
-                        {widget.status}
-                      </Badge>
-                    </td>
-                    <td className={darkMode ? "text-light" : ""}>
                       <Badge bg="info" className="text-capitalize">
-                        {widget.position}
+                        {feature.category}
                       </Badge>
                     </td>
                     <td>
                       <Button 
-                        variant={widget.visibility ? "outline-success" : "outline-secondary"}
+                        variant={feature.isPremium ? "outline-warning" : "outline-secondary"}
                         size="sm"
-                        onClick={() => toggleVisibility(widget.id)}
+                        onClick={() => togglePremium(feature.id)}
                       >
-                        {widget.visibility ? (
-                          <MdVisibility className="me-1" />
+                        {feature.isPremium ? (
+                          <MdStar className="me-1" />
                         ) : (
-                          <MdVisibilityOff className="me-1" />
+                          <MdStarOutline className="me-1" />
                         )}
-                        {widget.visibility ? "Visible" : "Hidden"}
+                        {feature.isPremium ? "Premium" : "Standard"}
                       </Button>
+                    </td>
+                    <td>
+                      <Badge bg={getStatusBadge(feature.status)} className="text-capitalize">
+                        {feature.status.replace('_', ' ')}
+                      </Badge>
                     </td>
                     <td>
                       <div className="d-flex gap-2">
                         <Button 
                           variant="outline-primary" 
                           size="sm"
-                          onClick={() => handleEdit(widget)}
+                          onClick={() => handleEdit(feature)}
                         >
                           <MdEdit />
                         </Button>
                         <Button 
                           variant="outline-danger" 
                           size="sm"
-                          onClick={() => handleDelete(widget.id)}
+                          onClick={() => handleDelete(feature.id)}
                         >
                           <MdDelete />
                         </Button>
@@ -300,7 +317,7 @@ const Widgets = ({ darkMode }) => {
           <div className="p-3 border-top">
             <Pagination
               current={pagination.page}
-              total={filteredWidgets.length}
+              total={filteredFeatures.length}
               limit={pagination.limit}
               onChange={(page) => setPagination(prev => ({ ...prev, page }))}
               darkMode={darkMode}
@@ -309,24 +326,24 @@ const Widgets = ({ darkMode }) => {
         </Card.Body>
       </Card>
 
-      {/* Add/Edit Widget Modal */}
+      {/* Add/Edit Feature Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header 
           closeButton 
           className={darkMode ? "bg-dark border-dark text-light" : ""}
         >
           <Modal.Title>
-            {isEditing ? "Edit Widget" : "Add New Widget"}
+            {isEditing ? "Edit Feature" : "Add New Feature"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className={darkMode ? "bg-dark text-light" : ""}>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
-              <Form.Label>Widget Name</Form.Label>
+              <Form.Label>Feature Title</Form.Label>
               <Form.Control
                 type="text"
-                name="name"
-                value={currentWidget?.name || ""}
+                name="title"
+                value={currentFeature?.title || ""}
                 onChange={handleInputChange}
                 required
                 className={darkMode ? "bg-dark border-dark text-light" : ""}
@@ -339,7 +356,7 @@ const Widgets = ({ darkMode }) => {
                 as="textarea"
                 rows={3}
                 name="description"
-                value={currentWidget?.description || ""}
+                value={currentFeature?.description || ""}
                 onChange={handleInputChange}
                 className={darkMode ? "bg-dark border-dark text-light" : ""}
               />
@@ -348,31 +365,34 @@ const Widgets = ({ darkMode }) => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Status</Form.Label>
+                  <Form.Label>Category</Form.Label>
                   <Form.Select
-                    name="status"
-                    value={currentWidget?.status || "active"}
+                    name="category"
+                    value={currentFeature?.category || "survey"}
                     onChange={handleInputChange}
                     className={darkMode ? "bg-dark border-dark text-light" : ""}
                   >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="draft">Draft</option>
+                    {categoryOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </Form.Select>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Position</Form.Label>
+                  <Form.Label>Icon</Form.Label>
                   <Form.Select
-                    name="position"
-                    value={currentWidget?.position || "dashboard"}
+                    name="icon"
+                    value={currentFeature?.icon || "poll"}
                     onChange={handleInputChange}
                     className={darkMode ? "bg-dark border-dark text-light" : ""}
                   >
-                    <option value="dashboard">Dashboard</option>
+                    <option value="poll">Poll</option>
                     <option value="analytics">Analytics</option>
-                    <option value="sidebar">Sidebar</option>
+                    <option value="insert_chart">Chart</option>
+                    <option value="people">People</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -381,9 +401,9 @@ const Widgets = ({ darkMode }) => {
             <Form.Group className="mb-3">
               <Form.Check
                 type="checkbox"
-                label="Visible"
-                name="visibility"
-                checked={currentWidget?.visibility || false}
+                label="Premium Feature"
+                name="isPremium"
+                checked={currentFeature?.isPremium || false}
                 onChange={handleInputChange}
                 className={darkMode ? "text-light" : ""}
               />
@@ -400,7 +420,7 @@ const Widgets = ({ darkMode }) => {
                 variant="primary" 
                 type="submit"
               >
-                {isEditing ? "Update Widget" : "Add Widget"}
+                {isEditing ? "Update Feature" : "Add Feature"}
               </Button>
             </div>
           </Form>
@@ -410,4 +430,4 @@ const Widgets = ({ darkMode }) => {
   )
 }
 
-export default Widgets
+export default Features
