@@ -1,3 +1,4 @@
+// src\components\Header\Header.jsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -77,6 +78,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             marginLeft: "auto",
             marginRight: "1rem",
             transition: "all 0.3s ease",
+            color: darkMode ? "text-white" : "#000",
           }}
         >
           <InputGroup
@@ -88,6 +90,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
                   : "0 0 0 0.2rem rgba(31, 218, 228, 0.25)"
                 : "none",
               borderRadius: "0.375rem",
+              color: darkMode ? "text-white" : "#000",
             }}
           >
             <InputGroup.Text
@@ -95,7 +98,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               style={{
                 borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
                 backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
-                color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                color: darkMode ? "text-white" : "#000",
               }}
             >
               <MdSearch />
@@ -106,9 +109,8 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               className={`border-start-0 search-input`}
               style={{
                 backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
-                color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                color: darkMode ? "text-white" : "#000",
                 borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
-                "--placeholder-color": darkMode ? "#ffffff" : "#6c757d",
               }}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}

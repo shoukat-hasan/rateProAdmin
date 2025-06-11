@@ -248,14 +248,14 @@ const Testimonial = ({ darkMode }) => {
                 <Table striped bordered hover variant={darkMode ? "dark" : ""} className="mb-0">
                   <thead>
                     <tr>
-                      <th>Avatar</th>
-                      <th>Name</th>
-                      <th>Role</th>
-                      <th>Content</th>
-                      <th>Rating</th>
-                      <th>Status</th>
-                      <th>Created</th>
-                      <th>Actions</th>
+                      <th style={{color:"white"}} >Avatar</th>
+                      <th style={{color:"white"}} >Name</th>
+                      <th style={{color:"white"}} >Role</th>
+                      <th style={{color:"white"}} >Content</th>
+                      <th style={{color:"white"}} >Rating</th>
+                      <th style={{color:"white"}} >Status</th>
+                      <th style={{color:"white"}} >Created</th>
+                      <th style={{color:"white"}} >Actions</th>
                     </tr>
                   </thead>
                   <tbody>

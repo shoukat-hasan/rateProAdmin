@@ -1,4 +1,4 @@
-// src/pages/Features/Features.jsx
+// src/pages/ContentManagement/Features.jsx
 "use client"
 
 import { useState, useEffect } from "react"

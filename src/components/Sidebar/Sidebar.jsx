@@ -1,3 +1,4 @@
+// src\components\Sidebar\Sidebar.jsx
 "use client"
 
 import { useState, useEffect, useRef } from "react"

@@ -280,16 +280,16 @@ const Pricing = ({ darkMode }) => {
             <Card.Body className="p-0">
               <div className="table-responsive">
                 <Table striped bordered hover variant={darkMode ? "dark" : ""} className="mb-0">
-                  <thead>
+                  <thead  >
                     <tr>
-                      <th>Name</th>
-                      <th>Tier</th>
-                      <th>Price</th>
-                      <th>Features</th>
-                      <th>Status</th>
-                      <th>Popular</th>
-                      <th>Created</th>
-                      <th>Actions</th>
+                      <th style={{color:"white"}}>Name</th>
+                      <th  style={{color:"white"}}>Tier</th>
+                      <th style={{color:"white"}}>Price</th>
+                      <th style={{color:"white"}}>Features</th>
+                      <th style={{color:"white"}}>Status</th>
+                      <th style={{color:"white"}}>Popular</th>
+                      <th style={{color:"white"}}>Created</th>
+                      <th style={{color:"white"}}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -41,14 +41,14 @@ body {
   --light-text: #212529;
   --light-border: #dee2e6;
   --light-card: #ffffff;
-  --light-hover: #f8f9fa;
+  --light-hover: #1fdae4;
 
   /* Dark theme */
   --dark-bg: #1a1d23;
-  --dark-text: #e9ecef;
+  --dark-text: #ffff;
   --dark-border: #343a40;
   --dark-card: #2a2e35;
-  --dark-hover: #343a40;
+  --dark-hover: #1fdae4;
 
   /* Layout variables */
   --sidebar-width: 280px;
@@ -152,16 +152,14 @@ body {
 .dark .form-control,
 .dark .form-select {
   background-color: var(--dark-bg) !important;
-  border-color: var(--dark-border) !important;
   color: var(--dark-text) !important;
 }
 
 .dark .form-control:focus,
+.dark .form-control::placeholder,
 .dark .form-select:focus {
   background-color: var(--dark-bg) !important;
-  border-color: var(--primary-color) !important;
-  color: var(--dark-text) !important;
-  box-shadow: 0 0 0 0.2rem rgba(31, 218, 228, 0.25) !important;
+  color:  #ffffff;
 }
 
 .dark .table {
@@ -169,9 +167,13 @@ body {
   --bs-table-bg: var(--dark-card);
 }
 
-.dark .table th,
+.dark .table th
+{
+  color: #000;
+}
 .dark .table td {
   border-color: var(--dark-border) !important;
+  color:var(--dark-text);
 }
 
 .dark .table-striped > tbody > tr:nth-of-type(odd) > td {
@@ -796,6 +798,7 @@ body {
 
 .dark .table-enhanced th {
   background-color: var(--dark-bg);
+ color: #ffffff !important;
 }
 
 .table-enhanced tbody tr:hover {

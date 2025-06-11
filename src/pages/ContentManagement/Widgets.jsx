@@ -1,5 +1,5 @@
 // src\pages\ContentManagement\Widgets.jsx
-// src/pages/Widgets/Widgets.jsx
+
 "use client"
 
 import { useState, useEffect } from "react"

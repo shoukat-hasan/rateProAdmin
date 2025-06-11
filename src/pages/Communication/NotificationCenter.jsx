@@ -352,10 +352,10 @@ const NotificationCenter = ({ darkMode }) => {
       {/* Notifications Table */}
       <Row>
         <Col>
-          <Card className="border-0 shadow-sm card-enhanced">
+          <Card className="border-0 card-enhanced">
             <Card.Body className="p-0">
               <div className="table-responsive">
-                <Table className="mb-0 table-enhanced" hover>
+                <Table className="mb-0 table-enhanced" >
                   <thead className="table-light">
                     <tr>
                       <th className="border-0 py-3 px-4">
@@ -376,7 +376,6 @@ const NotificationCenter = ({ darkMode }) => {
                     {currentNotifications.map((notification) => (
                       <tr
                         key={notification.id}
-                        className={!notification.isRead ? "table-warning" : ""}
                         style={{ opacity: notification.isRead ? 0.8 : 1 }}
                       >
                         <td className="py-3 px-4 border-0">

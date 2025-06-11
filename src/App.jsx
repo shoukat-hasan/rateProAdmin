@@ -59,6 +59,8 @@ import SMTPConfig from "./pages/Settings/SMTPConfig.jsx"
 import CustomReports from "./pages/Analytics/CustomReports.jsx"
 import Features from "./pages/ContentManagement/Features.jsx"
 import Pricing from "./pages/ContentManagement/Pricing.jsx"
+import ResponseOverview from "./pages/Analytics/ResponseOverview.jsx"
+import ContactManagement from "./pages/Audiences/ContactManagement.jsx"
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -138,12 +140,14 @@ function App() {
             {/* Audience Management */}
             <Route path="audiences" element={<Audiences />} />
             <Route path="audiences/segmentation" element={<AudienceSegmentation />} />
+            <Route path="audiences/contact-management" element={<ContactManagement />} />
 
             {/* Analytics & Reporting */}
             <Route path="analytics" element={<Analytics />} />
             <Route path="analytics/custom-reports" element={<CustomReports />} />
             <Route path="analytics/real-time" element={<RealTimeResults />} />
             <Route path="analytics/trends" element={<TrendAnalysis />} />
+            <Route path="analytics/response-overview" element={<ResponseOverview />} />
 
             {/* Communication */}
             <Route path="communication/emails" element={<EmailManagement />} />
