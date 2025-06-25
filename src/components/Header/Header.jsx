@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../../context/AuthContext"
 import { Navbar, Dropdown, Form, InputGroup, Button } from "react-bootstrap"
 import {
   MdMenu,
@@ -23,6 +24,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
   // Handle scroll effect
   useEffect(() => {
@@ -34,8 +36,11 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
   }, [])
 
   const handleLogout = () => {
+    // localStorage.removeItem("authUser")
+    logout()
     navigate("/login")
   }
+  
 
   return (
     <Navbar

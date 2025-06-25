@@ -34,7 +34,7 @@ import {
   MdQuestionAnswer,
   MdAnalytics,
   MdShare,
- MdOutlineSettingsApplications as MdCustomize,
+  MdOutlineSettingsApplications as MdCustomize,
   MdViewList,
   MdDescription,
   MdLogin,
@@ -54,8 +54,10 @@ import {
   MdCode,
   MdCampaign,
 } from "react-icons/md"
+import { useAuth } from "../../context/AuthContext"
 
 const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onToggle }) => {
+  const { user } = useAuth()
   const location = useLocation()
   const [authSubmenuOpen, setAuthSubmenuOpen] = useState(false)
   const [surveySubmenuOpen, setSurveySubmenuOpen] = useState(false)
@@ -66,7 +68,9 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   const [communicationSubmenuOpen, setCommunicationSubmenuOpen] = useState(false)
   const [settingsSubmenuOpen, setSettingsSubmenuOpen] = useState(false)
   const [incentivesSubmenuOpen, setIncentivesSubmenuOpen] = useState(false)
-    const [contentmanagement, setcontentmanagement] = useState(false)
+  const [contentmanagement, setcontentmanagement] = useState(false)
+
+  console.log(user)
 
   const [hoveredItem, setHoveredItem] = useState(null)
   const [collapsedDropdownOpen, setCollapsedDropdownOpen] = useState(null)
@@ -344,15 +348,9 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       }, 300)
     }
   }
-
   const sidebarStyle = {
-    width: collapsed ? "70px" : "280px",
-    height: "100vh",
-    position: "fixed",
-    top: 0,
-    left: isMobile || isTablet ? (isOpen ? 0 : "-280px") : 0,
-    zIndex: 1050,
-    transition: "all 0.3s ease",
+    width: collapsed ? "70px" : "280px", height: "100vh", position: "fixed", top: 0,
+    left: isMobile || isTablet ? (isOpen ? 0 : "-280px") : 0, zIndex: 1050, transition: "all 0.3s ease",
     backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
     borderRight: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
     boxShadow: "var(--shadow-md)",
@@ -369,13 +367,13 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       isOpen: authSubmenuOpen,
       toggle: () => toggleSubmenu("auth"),
       submenuItems: [
-        { path: "/login", name: "Login", icon: <MdLogin /> },
-        { path: "/signup", name: "Sign Up", icon: <MdPersonAdd /> },
-        { path: "/company-registration", name: "Company Registration", icon: <MdBusiness /> },
-        { path: "/forgot-password", name: "Forgot Password", icon: <MdLock /> },
-        { path: "/reset-password", name: "Reset Password", icon: <MdLock /> },
-        { path: "/enter-email", name: "Enter Email", icon: <MdEmail /> },
-        { path: "/enter-reset-code", name: "Enter Reset Code", icon: <MdCode /> },
+        { path: "/login", name: "Login", icon: <MdLogin />, roles: ["admin", "company"] },
+        { path: "/signup", name: "Sign Up", icon: <MdPersonAdd />, roles: ["admin"] },
+        { path: "/company-registration", name: "Company Registration", icon: <MdBusiness />, roles: ["admin"] },
+        { path: "/forgot-password", name: "Forgot Password", icon: <MdLock />, roles: ["admin"] },
+        { path: "/reset-password", name: "Reset Password", icon: <MdLock />, roles: ["admin"] },
+        { path: "/enter-email", name: "Enter Email", icon: <MdEmail />, roles: ["admin"] },
+        { path: "/enter-reset-code", name: "Enter Reset Code", icon: <MdCode />, roles: ["admin", "company"] },
       ],
     },
     {
@@ -475,7 +473,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
         { path: "/incentives/rewards", name: "Incentive Management", icon: <MdCampaign /> },
       ],
     },
-    
+
     {
       name: "Settings",
       icon: <MdSettings />,
@@ -504,7 +502,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
         { path: "/content/pricing", name: "Pricing", icon: <MdPayment /> },
         { path: "/content/testimonials", name: "Testimonials", icon: <MdThumbUp /> },
         { path: "/content/widgets", name: "Widgets", icon: <MdMailOutline /> },
-      
+
       ],
     },
   ]
@@ -589,84 +587,98 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                   >
                     <div className="p-2">
                       <div className="fw-bold mb-2 text-primary">{item.name}</div>
-                      {item.submenuItems.map((subItem, subIndex) => (
-                        <div
-                          key={subIndex}
-                          className="d-flex align-items-center p-2 rounded text-decoration-none text-white small"
-                          onClick={() => {
-                            setCollapsedDropdownOpen(null)
-                            if (isMobile || isTablet) onClose()
-                          }}
-                          style={{
-                            backgroundColor: isActiveRoute(subItem.path) ? "var(--primary-color)" : "transparent",
-                            color: isActiveRoute(subItem.path) ? "white" : "#e9ecef",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <NavLink
-                            to={subItem.path}
-                            className="d-flex align-items-center text-decoration-none w-100"
+                      {item.submenuItems
+                        .filter(
+                          (subItem) =>
+                            !subItem.roles || subItem.roles.includes(user?.role)
+                        )
+                        .map((subItem, subIndex) => (
+                          <div
+                            key={subIndex}
+                            className="d-flex align-items-center p-2 rounded text-decoration-none text-white small"
+                            onClick={() => {
+                              setCollapsedDropdownOpen(null)
+                              if (isMobile || isTablet) onClose()
+                            }}
                             style={{
-                              color: "inherit",
+                              backgroundColor: isActiveRoute(subItem.path) ? "var(--primary-color)" : "transparent",
+                              color: isActiveRoute(subItem.path) ? "white" : "#e9ecef",
+                              cursor: "pointer",
                             }}
                           >
-                            <span className="me-2" style={{ minWidth: "16px" }}>
-                              {subItem.icon}
-                            </span>
-                            <span>{subItem.name}</span>
-                          </NavLink>
-                        </div>
-                      ))}
+                            <NavLink
+                              to={subItem.path}
+                              className="d-flex align-items-center text-decoration-none w-100"
+                              style={{
+                                color: "inherit",
+                              }}
+                            >
+                              <span className="me-2" style={{ minWidth: "16px" }}>
+                                {subItem.icon}
+                              </span>
+                              <span>{subItem.name}</span>
+                            </NavLink>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 )}
 
                 {/* Expanded Submenu */}
+                {/* Expanded Submenu */}
                 {!collapsed && (
                   <Collapse in={item.isOpen}>
                     <div className="ms-4">
-                      {item.submenuItems.map((subItem, subIndex) => (
-                        <div
-                          key={subIndex}
-                          className="d-flex align-items-center p-2 rounded text-decoration-none mb-1"
-                          style={{
-                            backgroundColor: isActiveRoute(subItem.path) ? "var(--primary-color)" : "transparent",
-                            color: isActiveRoute(subItem.path) ? "white" : "inherit",
-                            transition: "all 0.3s ease",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isActiveRoute(subItem.path)) {
-                              e.target.style.backgroundColor = "var(--primary-color)"
-                              e.target.style.color = "white"
-                              e.target.style.opacity = "0.8"
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isActiveRoute(subItem.path)) {
-                              e.target.style.backgroundColor = "transparent"
-                              e.target.style.color = "inherit"
-                              e.target.style.opacity = "1"
-                            }
-                          }}
-                        >
-                          <NavLink
-                            to={subItem.path}
-                            className="d-flex align-items-center text-decoration-none w-100"
-                            onClick={() => (isMobile || isTablet) && onClose()}
+                      {item.submenuItems
+                        .filter(
+                          (subItem) =>
+                            !subItem.roles || subItem.roles.includes(user?.role)
+                        )
+                        .map((subItem, subIndex) => (
+                          <div
+                            key={subIndex}
+                            className="d-flex align-items-center p-2 rounded text-decoration-none mb-1"
                             style={{
-                              color: "inherit",
+                              backgroundColor: isActiveRoute(subItem.path)
+                                ? "var(--primary-color)"
+                                : "transparent",
+                              color: isActiveRoute(subItem.path) ? "white" : "inherit",
+                              transition: "all 0.3s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isActiveRoute(subItem.path)) {
+                                e.target.style.backgroundColor = "var(--primary-color)"
+                                e.target.style.color = "white"
+                                e.target.style.opacity = "0.8"
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isActiveRoute(subItem.path)) {
+                                e.target.style.backgroundColor = "transparent"
+                                e.target.style.color = "inherit"
+                                e.target.style.opacity = "1"
+                              }
                             }}
                           >
-                            <span className="me-3" style={{ minWidth: "20px" }}>
-                              {subItem.icon}
-                            </span>
-                            <span>{subItem.name}</span>
-                          </NavLink>
-                        </div>
-                      ))}
+                            <NavLink
+                              to={subItem.path}
+                              className="d-flex align-items-center text-decoration-none w-100"
+                              onClick={() => (isMobile || isTablet) && onClose()}
+                              style={{
+                                color: "inherit",
+                              }}
+                            >
+                              <span className="me-3" style={{ minWidth: "20px" }}>
+                                {subItem.icon}
+                              </span>
+                              <span>{subItem.name}</span>
+                            </NavLink>
+                          </div>
+                        ))}
                     </div>
                   </Collapse>
                 )}
+
               </>
             ) : (
               <div

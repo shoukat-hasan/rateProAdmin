@@ -5,6 +5,8 @@
 import { useState } from "react"
 import { Container, Row, Col, Card, Form, Button, Alert } from "react-bootstrap"
 import { useNavigate, Link } from "react-router-dom"
+import { useAuth } from "../../context/AuthContext"
+
 
 const Login = () => {
   const [email, setEmail] = useState("")
@@ -12,18 +14,24 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError("")
-
+  
     try {
-      // Simulate login
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      navigate("/dashboard")
+      await new Promise((resolve) => setTimeout(resolve, 500))
+  
+      const success = login(email, password)
+      if (success) {
+        navigate("/app")
+      } else {
+        setError("Invalid email or password.")
+      }
     } catch (err) {
-      setError("Login failed. Please try again.")
+      setError("An error occurred. Please try again.")
     } finally {
       setLoading(false)
     }
