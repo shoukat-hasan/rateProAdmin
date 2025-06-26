@@ -365,15 +365,16 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdLogin />,
       submenu: true,
       isOpen: authSubmenuOpen,
+      roles: ["admin"],
       toggle: () => toggleSubmenu("auth"),
       submenuItems: [
-        { path: "/login", name: "Login", icon: <MdLogin />, roles: ["admin", "company"] },
-        { path: "/signup", name: "Sign Up", icon: <MdPersonAdd />, roles: ["admin"] },
-        { path: "/company-registration", name: "Company Registration", icon: <MdBusiness />, roles: ["admin"] },
-        { path: "/forgot-password", name: "Forgot Password", icon: <MdLock />, roles: ["admin"] },
-        { path: "/reset-password", name: "Reset Password", icon: <MdLock />, roles: ["admin"] },
-        { path: "/enter-email", name: "Enter Email", icon: <MdEmail />, roles: ["admin"] },
-        { path: "/enter-reset-code", name: "Enter Reset Code", icon: <MdCode />, roles: ["admin", "company"] },
+        { path: "/login", name: "Login", icon: <MdLogin />},
+        { path: "/signup", name: "Sign Up", icon: <MdPersonAdd />},
+        { path: "/company-registration", name: "Company Registration", icon: <MdBusiness />},
+        { path: "/forgot-password", name: "Forgot Password", icon: <MdLock />},
+        { path: "/reset-password", name: "Reset Password", icon: <MdLock />},
+        { path: "/enter-email", name: "Enter Email", icon: <MdEmail />},
+        { path: "/enter-reset-code", name: "Enter Reset Code", icon: <MdCode />},
       ],
     },
     {
@@ -381,6 +382,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdAssignment />,
       submenu: true,
       isOpen: surveySubmenuOpen,
+      roles: ["admin", "company"],
       toggle: () => toggleSubmenu("survey"),
       submenuItems: [
         { path: "/surveys", name: "All Surveys", icon: <MdViewList /> },
@@ -416,6 +418,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdSecurity />,
       submenu: true,
       isOpen: accessSubmenuOpen,
+      roles: ["admin"],
       toggle: () => toggleSubmenu("access"),
       submenuItems: [
         { path: "/access", name: "Overview", icon: <MdSecurity /> },
@@ -454,6 +457,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdEmail />,
       submenu: true,
       isOpen: communicationSubmenuOpen,
+      roles: ["admin"],
       toggle: () => toggleSubmenu("communication"),
       submenuItems: [
         { path: "/communication/emails", name: "Email Management", icon: <MdEmail /> },
@@ -467,6 +471,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdCardGiftcard />,
       submenu: true,
       isOpen: incentivesSubmenuOpen,
+      roles: ["admin"],
       toggle: () => toggleSubmenu("incentives"),
       submenuItems: [
         { path: "/incentives", name: "Reward System", icon: <MdCardGiftcard /> },
@@ -496,6 +501,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdSettings />,
       submenu: true,
       isOpen: contentmanagement,
+      roles: ["admin"],
       toggle: () => toggleSubmenu("content"),
       submenuItems: [
         { path: "/features", name: "Features", icon: <MdSettings /> },
