@@ -3,8 +3,8 @@ import { createContext, useContext, useState, useEffect } from "react"
 const AuthContext = createContext()
 
 const demoUsers = [
-  { email: "company@ratepro.com", password: "company123", role: "company" },
-  { email: "admin@ratepro.com", password: "admin123", role: "admin" },
+  { email: "company@ratepro.com", password: "company123", role: "Company", },
+  { email: "admin@ratepro.com", password: "admin123", role: "Admin",  },
 ]
 
 export const AuthProvider = ({ children }) => {

@@ -70,7 +70,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   const [incentivesSubmenuOpen, setIncentivesSubmenuOpen] = useState(false)
   const [contentmanagement, setcontentmanagement] = useState(false)
 
-  console.log(user)
+  
 
   const [hoveredItem, setHoveredItem] = useState(null)
   const [collapsedDropdownOpen, setCollapsedDropdownOpen] = useState(null)
@@ -359,24 +359,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   }
 
   const navItems = [
-    { path: "/", name: "Dashboard", icon: <MdDashboard /> },
-    {
-      name: "Authentication",
-      icon: <MdLogin />,
-      submenu: true,
-      isOpen: authSubmenuOpen,
-      roles: ["admin"],
-      toggle: () => toggleSubmenu("auth"),
-      submenuItems: [
-        { path: "/login", name: "Login", icon: <MdLogin /> },
-        { path: "/signup", name: "Sign Up", icon: <MdPersonAdd /> },
-        { path: "/company-registration", name: "Company Registration", icon: <MdBusiness /> },
-        { path: "/forgot-password", name: "Forgot Password", icon: <MdLock /> },
-        { path: "/reset-password", name: "Reset Password", icon: <MdLock /> },
-        { path: "/enter-email", name: "Enter Email", icon: <MdEmail /> },
-        { path: "/enter-reset-code", name: "Enter Reset Code", icon: <MdCode /> },
-      ],
-    },
+    { path: "/app", name: "Dashboard", icon: <MdDashboard />, roles: ["admin"] },
     {
       name: "Survey Management",
       icon: <MdAssignment />,
@@ -385,18 +368,18 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       roles: ["admin", "company"],
       toggle: () => toggleSubmenu("survey"),
       submenuItems: [
-        { path: "/surveys", name: "All Surveys", icon: <MdViewList /> },
-        { path: "/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline /> },
-        { path: "/surveys/templates", name: "Survey Templates", icon: <MdTemplate /> },
-        { path: "/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule /> },
-        { path: "/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer /> },
-        { path: "/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics /> },
-        { path: "/surveys/:id/customize", name: "Customization", icon: <MdCustomize /> },
-        { path: "/surveys/:id/share", name: "Survey Sharing", icon: <MdShare /> },
-        { path: "/surveys/settings", name: "Survey Settings", icon: <MdSettings /> },
-        { path: "/surveys/detail", name: "Survey Detail", icon: <MdVisibility /> },
-        { path: "/surveys/list", name: "Survey List", icon: <MdList /> },
-        { path: "/surveys/takesurvey", name: "Take Survey", icon: <MdAssignment /> },
+        { path: "/app/surveys", name: "All Surveys", icon: <MdViewList /> },
+        { path: "/app/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline /> },
+        { path: "/app/surveys/templates", name: "Survey Templates", icon: <MdTemplate /> },
+        { path: "/app/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule /> },
+        { path: "/app/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer /> },
+        { path: "/app/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics /> },
+        { path: "/app/surveys/:id/customize", name: "Customization", icon: <MdCustomize /> },
+        { path: "/app/surveys/:id/share", name: "Survey Sharing", icon: <MdShare /> },
+        { path: "/app/surveys/settings", name: "Survey Settings", icon: <MdSettings /> },
+        { path: "/app/surveys/detail", name: "Survey Detail", icon: <MdVisibility /> },
+        { path: "/app/surveys/list", name: "Survey List", icon: <MdList /> },
+        { path: "/app/surveys/takesurvey", name: "Take Survey", icon: <MdAssignment /> },
       ],
     },
     {
@@ -406,10 +389,10 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       isOpen: userSubmenuOpen,
       toggle: () => toggleSubmenu("user"),
       submenuItems: [
-        { path: "/users", name: "All Users", icon: <MdPeople /> },
-        { path: "/users/create", name: "Add User", icon: <MdPersonAdd /> },
-        { path: "/users/form", name: "User Form", icon: <MdPersonOutline /> },
-        { path: "/users/role-permissions", name: "Role Permissions", icon: <MdAssignmentInd /> },
+        { path: "/app/users", name: "All Users", icon: <MdPeople /> },
+        { path: "/app/users/create", name: "Add User", icon: <MdPersonAdd /> },
+        { path: "/app/users/form", name: "User Form", icon: <MdPersonOutline /> },
+        { path: "/app/users/role-permissions", name: "Role Permissions", icon: <MdAssignmentInd /> },
 
       ],
     },
@@ -421,9 +404,9 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       roles: ["admin"],
       toggle: () => toggleSubmenu("access"),
       submenuItems: [
-        { path: "/access", name: "Overview", icon: <MdSecurity /> },
-        { path: "/access/roles", name: "Role Management", icon: <MdGroup /> },
-        { path: "/access/permissions", name: "Permission Management", icon: <MdVpnKey /> },
+        { path: "/app/access", name: "Overview", icon: <MdSecurity /> },
+        { path: "/app/access/roles", name: "Role Management", icon: <MdGroup /> },
+        { path: "/app/access/permissions", name: "Permission Management", icon: <MdVpnKey /> },
       ],
     },
     {
@@ -433,11 +416,11 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       isOpen: analyticsSubmenuOpen,
       toggle: () => toggleSubmenu("analytics"),
       submenuItems: [
-        { path: "/analytics", name: "Analytics Overview", icon: <MdInsertChart /> },
-        { path: "/analytics/real-time", name: "Real-Time Results", icon: <MdRealTimeSync /> },
-        { path: "/analytics/trends", name: "Trend Analysis", icon: <MdTrendingUp /> },
-        { path: "/analytics/custom-reports", name: "Custom Reports", icon: <MdBarChart /> },
-        { path: "/analytics/response-overview", name: "Response Overview", icon: <MdShowChart /> },
+        { path: "/app/analytics", name: "Analytics Overview", icon: <MdInsertChart /> },
+        { path: "/app/analytics/real-time", name: "Real-Time Results", icon: <MdRealTimeSync /> },
+        { path: "/app/analytics/trends", name: "Trend Analysis", icon: <MdTrendingUp /> },
+        { path: "/app/analytics/custom-reports", name: "Custom Reports", icon: <MdBarChart /> },
+        { path: "/app/analytics/response-overview", name: "Response Overview", icon: <MdShowChart /> },
       ],
     },
     {
@@ -447,53 +430,9 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       isOpen: audienceSubmenuOpen,
       toggle: () => toggleSubmenu("audience"),
       submenuItems: [
-        { path: "/audiences", name: "All Audiences", icon: <MdPeople /> },
-        { path: "/audiences/segmentation", name: "Audience Segmentation", icon: <MdSegment /> },
-        { path: "/audiences/contact-management", name: "Contact Management", icon: <MdContacts /> },
-      ],
-    },
-    {
-      name: "Communication",
-      icon: <MdEmail />,
-      submenu: true,
-      isOpen: communicationSubmenuOpen,
-      roles: ["admin"],
-      toggle: () => toggleSubmenu("communication"),
-      submenuItems: [
-        { path: "/communication/emails", name: "Email Management", icon: <MdEmail /> },
-        { path: "/communication/templates", name: "Email Templates", icon: <MdDescription /> },
-        { path: "/communication/notifications", name: "Notification Center", icon: <MdNotifications /> },
-      ],
-    },
-    { path: "/support", name: "Support Tickets", icon: <MdSupport />, roles: ["admin"],  },
-    {
-      name: "Incentives & Rewards",
-      icon: <MdCardGiftcard />,
-      submenu: true,
-      isOpen: incentivesSubmenuOpen,
-      roles: ["admin"],
-      toggle: () => toggleSubmenu("incentives"),
-      submenuItems: [
-        { path: "/incentives", name: "Reward System", icon: <MdCardGiftcard /> },
-        { path: "/incentives/rewards", name: "Incentive Management", icon: <MdCampaign /> },
-      ],
-    },
-
-    {
-      name: "Settings",
-      icon: <MdSettings />,
-      submenu: true,
-      isOpen: settingsSubmenuOpen,
-      toggle: () => toggleSubmenu("settings"),
-      submenuItems: [
-        { path: "/settings", name: "General Settings", icon: <MdSettings /> },
-        { path: "/settings/billing-plans", name: "Billing Plans", icon: <MdPayment /> },
-        { path: "/settings/custom-thank-you", name: "Custom Thank You", icon: <MdThumbUp /> },
-        { path: "/settings/email-templates", name: "Email Templates", icon: <MdMailOutline /> },
-        { path: "/settings/notification-settings", name: "Notification Settings", icon: <MdNotifications /> },
-        { path: "/settings/smtp-config", name: "SMTP Configuration", icon: <MdEmail /> },
-        { path: "/settings/custom-thank-you", name: "Thank You Page", icon: <MdThumbUp /> },
-        { path: "/settings/theme-settings", name: "Theme Settings", icon: <MdColorLens /> },
+        { path: "/app/audiences", name: "All Audiences", icon: <MdPeople /> },
+        { path: "/app/audiences/segmentation", name: "Audience Segmentation", icon: <MdSegment /> },
+        { path: "/app/audiences/contact-management", name: "Contact Management", icon: <MdContacts /> },
       ],
     },
     {
@@ -504,11 +443,54 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       roles: ["admin"],
       toggle: () => toggleSubmenu("content"),
       submenuItems: [
-        { path: "/features", name: "Features", icon: <MdSettings /> },
-        { path: "/content/pricing", name: "Pricing", icon: <MdPayment /> },
-        { path: "/content/testimonials", name: "Testimonials", icon: <MdThumbUp /> },
-        { path: "/content/widgets", name: "Widgets", icon: <MdMailOutline /> },
+        { path: "/app/features", name: "Features", icon: <MdSettings /> },
+        { path: "/app/content/pricing", name: "Pricing", icon: <MdPayment /> },
+        { path: "/app/content/testimonials", name: "Testimonials", icon: <MdThumbUp /> },
+        { path: "/app/content/widgets", name: "Widgets", icon: <MdMailOutline /> },
 
+      ],
+    },
+    {
+      name: "Communication",
+      icon: <MdEmail />,
+      submenu: true,
+      isOpen: communicationSubmenuOpen,
+      roles: ["admin"],
+      toggle: () => toggleSubmenu("communication"),
+      submenuItems: [
+        { path: "/app/communication/emails", name: "Email Management", icon: <MdEmail /> },
+        { path: "/app/communication/templates", name: "Email Templates", icon: <MdDescription /> },
+        { path: "/app/communication/notifications", name: "Notification Center", icon: <MdNotifications /> },
+      ],
+    },
+    { path: "/app/support", name: "Support Tickets", icon: <MdSupport />, roles: ["admin"] },
+    {
+      name: "Incentives & Rewards",
+      icon: <MdCardGiftcard />,
+      submenu: true,
+      isOpen: incentivesSubmenuOpen,
+      roles: ["admin"],
+      toggle: () => toggleSubmenu("incentives"),
+      submenuItems: [
+        { path: "/app/incentives", name: "Reward System", icon: <MdCardGiftcard /> },
+        { path: "/app/incentives/rewards", name: "Incentive Management", icon: <MdCampaign /> },
+      ],
+    },
+    {
+      name: "Settings",
+      icon: <MdSettings />,
+      submenu: true,
+      isOpen: settingsSubmenuOpen,
+      toggle: () => toggleSubmenu("settings"),
+      submenuItems: [
+        { path: "/app/settings", name: "General Settings", icon: <MdSettings />, roles: ["admin", "company"] },
+        { path: "/app/settings/billing-plans", name: "Billing Plans", icon: <MdPayment />, roles: ["admin"] },
+        { path: "/app/settings/custom-thank-you", name: "Custom Thank You", icon: <MdThumbUp />, roles: ["admin"] },
+        { path: "/app/settings/email-templates", name: "Email Templates", icon: <MdMailOutline />, roles: ["admin"] },
+        { path: "/app/settings/notification-settings", name: "Notification Settings", icon: <MdNotifications />, roles: ["admin"] },
+        { path: "/app/settings/smtp-config", name: "SMTP Configuration", icon: <MdEmail />, roles: ["admin"] },
+        { path: "/app/settings/custom-thank-you", name: "Thank You Page", icon: <MdThumbUp />, roles: ["admin"] },
+        { path: "/app/settings/theme-settings", name: "Theme Settings", icon: <MdColorLens />, roles: ["admin"] },
       ],
     },
   ]

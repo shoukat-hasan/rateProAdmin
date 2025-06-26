@@ -18,13 +18,16 @@ import {
   MdAccountCircle,
 } from "react-icons/md"
 import LanguageSelector from "../LanguageSelector/LanguageSelector.jsx"
+import { capitalize } from "../../utilities/capitalize"
 
 const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, sidebarOpen, sidebarCollapsed }) => {
   const [searchFocused, setSearchFocused] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
+
+  console.log(user)
 
   // Handle scroll effect
   useEffect(() => {
@@ -327,7 +330,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               >
                 <MdPerson className={darkMode ? "text-white" : "text-secondary"} />
               </div>
-              <span className="d-none d-lg-inline ms-2">Admin</span>
+              <span className="d-none d-lg-inline ms-2">{capitalize(user?.role)}</span>
             </Dropdown.Toggle>
 
             <Dropdown.Menu
@@ -339,8 +342,8 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               }}
             >
               <Dropdown.Header style={{ color: darkMode ? "#fff" : "#000" }}>
-                <h6 className="mb-0">Admin</h6>
-                <small className="text-muted">admin@ratepro.com</small>
+                <h6 className="mb-0">{capitalize(user?.role)}</h6>
+                <small className="text-muted">{ user.email }</small>
               </Dropdown.Header>
               <Dropdown.Item
                 as={Link}
