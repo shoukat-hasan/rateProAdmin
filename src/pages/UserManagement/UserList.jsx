@@ -6,8 +6,9 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { Container, Row, Col, Table, Badge, Button, InputGroup, Form, Card } from "react-bootstrap"
 import { MdEdit, MdDelete, MdSearch, MdAdd, MdPerson } from "react-icons/md"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const UserList = () => {
+const UserList = ({ darkMode }) => {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -15,6 +16,7 @@ const UserList = () => {
     role: "",
     status: "",
   })
+  const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -105,6 +107,10 @@ const UserList = () => {
     return <div className="text-center py-4">Loading users...</div>
   }
 
+  const startIndex = (pagination.page - 1) * pagination.limit
+  const endIndex = startIndex + pagination.limit
+  const currentUsers = users.slice(startIndex, endIndex)
+
   return (
     <Container fluid className="py-4">
       {/* Header */}
@@ -172,7 +178,7 @@ const UserList = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {currentUsers.map((user) => (
                   <tr key={user.id}>
                     <td>
                       <div className="d-flex align-items-center">
@@ -211,6 +217,22 @@ const UserList = () => {
             </Table>
           </div>
         </Card.Body>
+
+        {/* 👇 Correctly placed Card.Footer */}
+        <Card.Footer>
+          <div className="d-flex justify-content-between align-items-center">
+            <small className="text-muted">
+              Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, users.length)} of {users.length} users
+            </small>
+            <Pagination
+              current={pagination.page}
+              total={users.length}
+              limit={pagination.limit}
+              onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+              darkMode={darkMode}
+            />
+          </div>
+        </Card.Footer>
       </Card>
     </Container>
   )

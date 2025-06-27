@@ -7,12 +7,12 @@ import { Container, Row, Col, Card, Form, Button, Table, Badge, Modal } from "re
 import { MdSchedule, MdAdd, MdEdit, MdDelete, MdPlayArrow as MdPlay, MdPause } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const SurveyScheduling = () => {
+const SurveyScheduling = ({ darkMode }) => {
   const [scheduledSurveys, setScheduledSurveys] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingSchedule, setEditingSchedule] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
   const [formData, setFormData] = useState({
     surveyId: "",
     title: "",
@@ -208,6 +208,10 @@ const SurveyScheduling = () => {
     }
   }
 
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, total: scheduledSurveys.length }))
+  }, [scheduledSurveys])
+
   if (loading) {
     return (
       <Container fluid className="py-4">
@@ -220,6 +224,8 @@ const SurveyScheduling = () => {
       </Container>
     )
   }
+ 
+  
 
   return (
     <Container fluid className="py-4">
@@ -256,71 +262,73 @@ const SurveyScheduling = () => {
                 </tr>
               </thead>
               <tbody>
-                {scheduledSurveys.map((schedule) => (
-                  <tr key={schedule.id}>
-                    <td>
-                      <div>
-                        <div className="fw-medium">{schedule.title}</div>
-                        <small className="text-muted">ID: {schedule.surveyId}</small>
-                      </div>
-                    </td>
-                    <td>
-                      <div>
-                        <div className="small">
-                          <strong>Start:</strong> {new Date(schedule.startDate).toLocaleString()}
+                {scheduledSurveys
+                  .slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
+                  .map((schedule) => (
+                    <tr key={schedule.id}>
+                      <td>
+                        <div>
+                          <div className="fw-medium">{schedule.title}</div>
+                          <small className="text-muted">ID: {schedule.surveyId}</small>
                         </div>
-                        <div className="small">
-                          <strong>End:</strong> {new Date(schedule.endDate).toLocaleString()}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <Badge bg="secondary">{schedule.frequency}</Badge>
-                    </td>
-                    <td>
-                      <Badge bg={getStatusVariant(schedule.status)}>{schedule.status}</Badge>
-                    </td>
-                    <td>
-                      <div>
-                        <div className="small">
-                          {schedule.responses} / {schedule.maxResponses || "∞"} responses
-                        </div>
-                        {schedule.maxResponses && (
-                          <div className="progress mt-1" style={{ height: "4px" }}>
-                            <div
-                              className="progress-bar bg-primary"
-                              style={{
-                                width: `${Math.min((schedule.responses / schedule.maxResponses) * 100, 100)}%`,
-                              }}
-                            />
+                      </td>
+                      <td>
+                        <div>
+                          <div className="small">
+                            <strong>Start:</strong> {new Date(schedule.startDate).toLocaleString()}
                           </div>
-                        )}
-                      </div>
-                    </td>
-                    <td>{schedule.targetAudience}</td>
-                    <td>
-                      <div className="d-flex justify-content-center gap-1">
-                        {getStatusActions(schedule)}
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => handleEditSchedule(schedule)}
-                          title="Edit"
-                        >
-                          <MdEdit />
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleDeleteSchedule(schedule.id)}
-                          title="Delete"
-                        >
-                          <MdDelete />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          <div className="small">
+                            <strong>End:</strong> {new Date(schedule.endDate).toLocaleString()}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <Badge bg="secondary">{schedule.frequency}</Badge>
+                      </td>
+                      <td>
+                        <Badge bg={getStatusVariant(schedule.status)}>{schedule.status}</Badge>
+                      </td>
+                      <td>
+                        <div>
+                          <div className="small">
+                            {schedule.responses} / {schedule.maxResponses || "∞"} responses
+                          </div>
+                          {schedule.maxResponses && (
+                            <div className="progress mt-1" style={{ height: "4px" }}>
+                              <div
+                                className="progress-bar bg-primary"
+                                style={{
+                                  width: `${Math.min((schedule.responses / schedule.maxResponses) * 100, 100)}%`,
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td>{schedule.targetAudience}</td>
+                      <td>
+                        <div className="d-flex justify-content-center gap-1">
+                          {getStatusActions(schedule)}
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => handleEditSchedule(schedule)}
+                            title="Edit"
+                          >
+                            <MdEdit />
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDeleteSchedule(schedule.id)}
+                            title="Delete"
+                          >
+                            <MdDelete />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </Table>
           </div>

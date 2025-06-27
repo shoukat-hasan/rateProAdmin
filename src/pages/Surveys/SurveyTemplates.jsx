@@ -1,13 +1,14 @@
 // src\pages\Surveys\SurveyTemplates.jsx
+// "use client"
 
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Container, Row, Col, Card, Button, Badge, Form, InputGroup } from "react-bootstrap"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const SurveyTemplates = () => {
+const SurveyTemplates = ({ darkMode }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
 
   const categories = [
     { value: "all", label: "All Categories" },
@@ -83,6 +84,11 @@ const SurveyTemplates = () => {
     return matchesSearch && matchesCategory
   })
 
+  // update total count when filteredTemplates changes
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, total: filteredTemplates.length }))
+  }, [filteredTemplates])
+
   const getCategoryBadge = (category) => {
     const colors = {
       customer: "primary",
@@ -137,51 +143,62 @@ const SurveyTemplates = () => {
       </Row>
 
       <Row>
-        {filteredTemplates.map((template) => (
-          <Col key={template.id} lg={4} md={6} className="mb-4">
-            <Card className="h-100 template-card">
-              <Card.Body className="d-flex flex-column">
-                <div className="d-flex justify-content-between align-items-start mb-3">
-                  <div>
-                    {getCategoryBadge(template.category)}
-                    {template.popular && (
-                      <Badge bg="danger" className="ms-2">
-                        <i className="fas fa-fire me-1"></i>
-                        Popular
-                      </Badge>
-                    )}
+        {filteredTemplates
+          .slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
+          .map((template) => (
+            <Col key={template.id} lg={4} md={6} className="mb-4">
+              <Card className="h-100 template-card">
+                <Card.Body className="d-flex flex-column">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      {getCategoryBadge(template.category)}
+                      {template.popular && (
+                        <Badge bg="danger" className="ms-2">
+                          <i className="fas fa-fire me-1"></i>
+                          Popular
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <h5 className="card-title">{template.name}</h5>
-                <p className="card-text text-muted flex-grow-1">{template.description}</p>
+                  <h5 className="card-title">{template.name}</h5>
+                  <p className="card-text text-muted flex-grow-1">{template.description}</p>
 
-                <div className="template-stats mb-3">
-                  <div className="d-flex justify-content-between text-muted small">
-                    <span>
-                      <i className="fas fa-question-circle me-1"></i>
-                      {template.questions} questions
-                    </span>
-                    <span>
-                      <i className="fas fa-clock me-1"></i>
-                      {template.estimatedTime}
-                    </span>
+                  <div className="template-stats mb-3">
+                    <div className="d-flex justify-content-between text-muted small">
+                      <span>
+                        <i className="fas fa-question-circle me-1"></i>
+                        {template.questions} questions
+                      </span>
+                      <span>
+                        <i className="fas fa-clock me-1"></i>
+                        {template.estimatedTime}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="d-flex gap-2">
-                  <Button variant="primary" className="flex-grow-1">
-                    <i className="fas fa-rocket me-2"></i>
-                    Use Template
-                  </Button>
-                  <Button variant="outline-secondary">
-                    <i className="fas fa-eye"></i>
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
+                  <div className="d-flex gap-2">
+                    <Button variant="primary" className="flex-grow-1">
+                      <i className="fas fa-rocket me-2"></i>
+                      Use Template
+                    </Button>
+                    <Button variant="outline-secondary">
+                      <i className="fas fa-eye"></i>
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        <div className="p-3 border-top">
+          <Pagination
+            current={pagination.page}
+            total={filteredTemplates.length}
+            limit={pagination.limit}
+            onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+            darkMode={darkMode}
+          />
+        </div>
       </Row>
 
       {filteredTemplates.length === 0 && (
@@ -195,6 +212,7 @@ const SurveyTemplates = () => {
           </Col>
         </Row>
       )}
+
     </Container>
   )
 }

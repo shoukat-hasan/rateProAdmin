@@ -3,15 +3,17 @@
 "use client"
 
 import { useState } from "react"
-import { Container, Row, Col, Card, Table, Badge, Button, Form, InputGroup, Pagination, Modal } from "react-bootstrap"
+import { Container, Row, Col, Card, Table, Badge, Button, Form, InputGroup, Modal } from "react-bootstrap"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const SurveyList = () => {
+const SurveyList = ({ darkMode }) => {
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(10)
+  const [itemsPerPage] = useState(3)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedSurvey, setSelectedSurvey] = useState(null)
+  // const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
 
   const [surveys, setSurveys] = useState([
     {
@@ -84,7 +86,7 @@ const SurveyList = () => {
     return matchesSearch && matchesFilter
   })
 
-  const totalPages = Math.ceil(filteredSurveys.length / itemsPerPage)
+  // const totalPages = Math.ceil(filteredSurveys.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const currentSurveys = filteredSurveys.slice(startIndex, startIndex + itemsPerPage)
 
@@ -189,6 +191,8 @@ const SurveyList = () => {
                           </div>
                         </td>
                       </tr>
+
+
                     ))}
                   </tbody>
                 </Table>
@@ -200,7 +204,16 @@ const SurveyList = () => {
                   Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredSurveys.length)} of{" "}
                   {filteredSurveys.length} surveys
                 </small>
-                <Pagination size="sm" className="mb-0">
+                <div className="p-3 border-top">
+                  <Pagination
+                    current={currentPage}
+                    total={filteredSurveys.length}
+                    limit={itemsPerPage}
+                    onChange={(page) => setCurrentPage(page)}
+                    darkMode={darkMode}
+                  />
+                </div>
+                {/* <Pagination size="sm" className="mb-0">
                   <Pagination.Prev disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)} />
                   {[...Array(totalPages)].map((_, index) => (
                     <Pagination.Item
@@ -215,7 +228,7 @@ const SurveyList = () => {
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
                   />
-                </Pagination>
+                </Pagination> */}
               </div>
             </Card.Footer>
           </Card>
