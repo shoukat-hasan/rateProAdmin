@@ -27,8 +27,6 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
   const navigate = useNavigate()
   const { logout, user } = useAuth()
 
-  console.log(user)
-
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {

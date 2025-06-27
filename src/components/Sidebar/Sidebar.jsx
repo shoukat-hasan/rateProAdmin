@@ -70,7 +70,8 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   const [incentivesSubmenuOpen, setIncentivesSubmenuOpen] = useState(false)
   const [contentmanagement, setcontentmanagement] = useState(false)
 
-  
+  const role = user?.role?.toLowerCase()
+
 
   const [hoveredItem, setHoveredItem] = useState(null)
   const [collapsedDropdownOpen, setCollapsedDropdownOpen] = useState(null)
@@ -358,8 +359,9 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
     overflowX: "hidden",
   }
 
+
   const navItems = [
-    { path: "/app", name: "Dashboard", icon: <MdDashboard />, roles: ["admin"] },
+    { path: "/app", name: "Dashboard", icon: <MdDashboard />, roles: ["admin", "company"], },
     {
       name: "Survey Management",
       icon: <MdAssignment />,
@@ -524,7 +526,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       {/* Navigation */}
       <Nav className="flex-column flex-fill p-2">
         {navItems
-          .filter(item => !item.roles || item.roles.includes(user?.role)) // 👈 role-based filtering
+          .filter(item => !item.roles || item.roles.includes(role)) // 👈 role-based filtering
           .map((item, index) => (
             <div key={index} className="mb-1 position-relative">
               {item.submenu ? (
@@ -577,12 +579,11 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                     >
                       <div className="p-2">
                         <div className="fw-bold mb-2 text-primary">{item.name}</div>
+
                         {item.submenuItems
-                          .filter(
-                            (subItem) =>
-                              !subItem.roles || subItem.roles.includes(user?.role)
-                          )
-                          .map((subItem, subIndex) => (
+                          .filter(subItem =>
+                            !subItem.roles || subItem.roles.map(r => r.toLowerCase()).includes(role)
+                          ).map((subItem, subIndex) => (
                             <div
                               key={subIndex}
                               className="d-flex align-items-center p-2 rounded text-decoration-none text-white small"
@@ -615,15 +616,11 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                   )}
 
                   {/* Expanded Submenu */}
-                  {/* Expanded Submenu */}
                   {!collapsed && (
                     <Collapse in={item.isOpen}>
                       <div className="ms-4">
                         {item.submenuItems
-                          .filter(
-                            (subItem) =>
-                              !subItem.roles || subItem.roles.includes(user?.role)
-                          )
+                          .filter(subItem => !subItem.roles || subItem.roles.map(r => r.toLowerCase()).includes(role))
                           .map((subItem, subIndex) => (
                             <div
                               key={subIndex}

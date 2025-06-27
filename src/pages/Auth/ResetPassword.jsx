@@ -1,11 +1,13 @@
 // src\pages\Auth\ResetPassword.jsx
-"use client"
+// "use client"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { FaEye, FaEyeSlash } from "react-icons/fa"
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
 
@@ -28,20 +30,54 @@ const ResetPassword = () => {
       <form style={styles.form} onSubmit={handleSubmit}>
         <h2 style={styles.heading}>Reset Password</h2>
         <p style={styles.text}>Create your new password below.</p>
-        <input
-          type="password"
-          placeholder="New password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
-        />
-        <input
-          type="password"
-          placeholder="Confirm new password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          style={styles.input}
-        />
+        <div className="position-relative">
+          <input
+            style={styles.input}
+            type={showPassword ? "text" : "password"}
+            placeholder="New password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: "absolute",
+              top: "50%",
+              right: "18px",
+              transform: "translateY(-50%)",
+              cursor: "pointer",
+              color: "#6c757d",
+              fontSize: "1.1rem"
+            }}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+        <div className="position-relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            style={styles.input}
+            required
+          />
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: "absolute",
+              top: "50%",
+              right: "18px",
+              transform: "translateY(-50%)",
+              cursor: "pointer",
+              color: "#6c757d",
+              fontSize: "1.1rem"
+            }}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
         {error && <p style={styles.error}>{error}</p>}
         <button type="submit" style={styles.button}>Reset Password</button>
       </form>

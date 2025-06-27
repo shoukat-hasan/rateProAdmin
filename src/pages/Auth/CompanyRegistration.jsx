@@ -54,7 +54,7 @@ const CompanyRegistration = () => {
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       // Redirect to dashboard
-      navigate("/")
+      navigate("/app")
     } catch (error) {
       setError("Registration failed. Please try again.")
     } finally {

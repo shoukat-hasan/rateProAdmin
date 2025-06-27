@@ -4,7 +4,8 @@ const AuthContext = createContext()
 
 const demoUsers = [
   { email: "company@ratepro.com", password: "company123", role: "Company", },
-  { email: "admin@ratepro.com", password: "admin123", role: "Admin",  },
+  { email: "admin@ratepro.com", password: "admin123", role: "Admin", },
+  { email: "user@ratepro.com", password: "user123", role: "User", },
 ]
 
 export const AuthProvider = ({ children }) => {
