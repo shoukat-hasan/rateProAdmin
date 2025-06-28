@@ -297,13 +297,9 @@ function App() {
   })
 
   useEffect(() => {
-    localStorage.setItem("darkMode", JSON.stringify(darkMode))
     document.documentElement.classList.toggle("dark", darkMode)
+    localStorage.setItem("darkMode", JSON.stringify(darkMode))
   }, [darkMode])
-
-  const toggleTheme = () => {
-    setDarkMode((prev) => !prev)
-  }
 
   return (
     <Router>
