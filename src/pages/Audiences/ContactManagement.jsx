@@ -14,11 +14,13 @@ import {
   Form,
   Modal,
   InputGroup,
-  Pagination,
   Dropdown,
 } from "react-bootstrap"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const ContactManagement = () => {
+
+const ContactManagement = ({ darkMode }) => {
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
   const [contacts, setContacts] = useState([
     {
       id: 1,
@@ -70,8 +72,8 @@ const ContactManagement = () => {
   const [filterSegment, setFilterSegment] = useState("all")
   const [filterStatus, setFilterStatus] = useState("all")
   const [selectedContacts, setSelectedContacts] = useState([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(10)
+  // const [currentPage, setCurrentPage] = useState(1)
+  // const [itemsPerPage] = useState(10)
 
   const segments = ["High-Value Customers", "New Users", "Inactive Users", "Enterprise", "SMB"]
 
@@ -128,9 +130,14 @@ const ContactManagement = () => {
     return matchesSearch && matchesSegment && matchesStatus
   })
 
-  const totalPages = Math.ceil(filteredContacts.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const currentContacts = filteredContacts.slice(startIndex, startIndex + itemsPerPage)
+  // const totalPages = Math.ceil(filteredContacts.length / itemsPerPage)
+  // const startIndex = (currentPage - 1) * itemsPerPage
+  // const currentContacts = filteredContacts.slice(startIndex, startIndex + itemsPerPage)
+
+  const totalPages = Math.ceil(filteredContacts.length / pagination.limit)
+  const startIndex = (pagination.page - 1) * pagination.limit
+  const currentContacts = filteredContacts.slice(startIndex, startIndex + pagination.limit)
+
 
   return (
     <Container fluid>
@@ -300,27 +307,14 @@ const ContactManagement = () => {
               </div>
             </Card.Body>
             <Card.Footer>
-              <div className="d-flex justify-content-between align-items-center">
-                <small className="text-muted">
-                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredContacts.length)} of{" "}
-                  {filteredContacts.length} contacts
-                </small>
-                <Pagination size="sm" className="mb-0">
-                  <Pagination.Prev disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)} />
-                  {[...Array(totalPages)].map((_, index) => (
-                    <Pagination.Item
-                      key={index + 1}
-                      active={index + 1 === currentPage}
-                      onClick={() => setCurrentPage(index + 1)}
-                    >
-                      {index + 1}
-                    </Pagination.Item>
-                  ))}
-                  <Pagination.Next
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                  />
-                </Pagination>
+              <div className="p-3 border-top">
+                <Pagination
+                  current={pagination.page}
+                  total={filteredContacts.length}
+                  limit={pagination.limit}
+                  onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+                  darkMode={darkMode}
+                />
               </div>
             </Card.Footer>
           </Card>

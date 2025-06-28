@@ -4,8 +4,10 @@
 
 import { useState } from "react"
 import { Container, Row, Col, Card, Table, Badge, Button, Form, Modal } from "react-bootstrap"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const AudienceSegmentation = () => {
+const AudienceSegmentation = ({ darkMode }) => {
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
   const [segments, setSegments] = useState([
     {
       id: 1,
@@ -81,6 +83,11 @@ const AudienceSegmentation = () => {
   const deleteSegment = (id) => {
     setSegments(segments.filter((s) => s.id !== id))
   }
+
+  const indexOfLastItem = pagination.page * pagination.limit
+const indexOfFirstItem = indexOfLastItem - pagination.limit
+const currentSegments = segments.slice(indexOfFirstItem, indexOfLastItem)
+
 
   return (
     <Container fluid>
@@ -203,7 +210,7 @@ const AudienceSegmentation = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {segments.map((segment) => (
+                    {currentSegments.map((segment) => (
                       <tr key={segment.id}>
                         <td>
                           <div className="fw-medium">{segment.name}</div>
@@ -249,6 +256,15 @@ const AudienceSegmentation = () => {
                     ))}
                   </tbody>
                 </Table>
+                <div className="p-3 border-top">
+                  <Pagination
+                    current={pagination.page}
+                    total={segments.length}
+                    limit={pagination.limit}
+                    onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+                    darkMode={darkMode}
+                  />
+                </div>
               </div>
             </Card.Body>
           </Card>

@@ -3,8 +3,9 @@
 
 import { useState } from "react"
 import { MdAdd, MdEdit, MdDelete, MdImportExport, MdFilterAlt, MdSave, MdClose } from "react-icons/md"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const Audiences = () => {
+const Audiences = ({ darkMode }) => {
   const [audiences, setAudiences] = useState([
     { id: 1, name: "Premium Customers", count: 245, filters: [{ field: "rating", operator: ">=", value: "4" }] },
     { id: 2, name: "US Customers", count: 189, filters: [{ field: "country", operator: "=", value: "US" }] }
@@ -16,6 +17,8 @@ const Audiences = () => {
   })
   const [importModal, setImportModal] = useState(false)
   const [file, setFile] = useState(null)
+  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
+
 
   const addFilter = () => {
     setCurrentAudience(prev => ({
@@ -39,7 +42,7 @@ const Audiences = () => {
   const saveAudience = (e) => {
     e.preventDefault()
     if (currentAudience.id) {
-      setAudiences(audiences.map(a => 
+      setAudiences(audiences.map(a =>
         a.id === currentAudience.id ? currentAudience : a
       ))
     } else {
@@ -60,6 +63,11 @@ const Audiences = () => {
     setImportModal(false)
     setFile(null)
   }
+
+  const indexOfLastItem = pagination.page * pagination.limit
+const indexOfFirstItem = indexOfLastItem - pagination.limit
+const currentAudiences = audiences.slice(indexOfFirstItem, indexOfLastItem)
+
 
   return (
     <div className="audiences-page">
@@ -84,7 +92,7 @@ const Audiences = () => {
               <input
                 type="text"
                 value={currentAudience.name}
-                onChange={(e) => setCurrentAudience({...currentAudience, name: e.target.value})}
+                onChange={(e) => setCurrentAudience({ ...currentAudience, name: e.target.value })}
                 required
               />
             </div>
@@ -205,7 +213,7 @@ const Audiences = () => {
             </tr>
           </thead>
           <tbody>
-            {audiences.map(audience => (
+            {currentAudiences.map(audience => (
               <tr key={audience.id}>
                 <td>{audience.name}</td>
                 <td>{audience.count}</td>
@@ -237,6 +245,15 @@ const Audiences = () => {
             ))}
           </tbody>
         </table>
+        <div className="p-3 border-top">
+          <Pagination
+            current={pagination.page}
+            total={audiences.length}
+            limit={pagination.limit}
+            onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+            darkMode={darkMode}
+          />
+        </div>
       </div>
     </div>
   )
