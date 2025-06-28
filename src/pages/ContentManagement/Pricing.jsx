@@ -3,13 +3,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { 
-  Container, Row, Col, Card, Table, Badge, Button, 
-  Form, Modal, InputGroup, Spinner, Alert 
+import {
+  Container, Row, Col, Card, Table, Badge, Button,
+  Form, Modal, InputGroup, Spinner, Alert
 } from "react-bootstrap"
-import { 
+import {
   MdAdd, MdEdit, MdDelete, MdSearch, MdRefresh,
-  MdAttachMoney, MdCheck, MdClose 
+  MdAttachMoney, MdCheck, MdClose
 } from "react-icons/md"
 import Pagination from "./components/Pagination/Pagination.jsx"
 import TableControls from "./components/TableControls/TableControls.jsx"
@@ -19,16 +19,16 @@ const Pricing = ({ darkMode }) => {
   const [plans, setPlans] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  
+
   // State for CRUD operations
   const [showModal, setShowModal] = useState(false)
   const [currentPlan, setCurrentPlan] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
-  
+
   // State for table controls
   const [searchTerm, setSearchTerm] = useState("")
   const [filterTier, setFilterTier] = useState("all")
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   // Tier options for filter
   const tierOptions = [
@@ -44,7 +44,7 @@ const Pricing = ({ darkMode }) => {
       try {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000))
-        
+
         const dummyPlans = [
           {
             id: 1,
@@ -84,7 +84,7 @@ const Pricing = ({ darkMode }) => {
           },
           // Add more plans as needed
         ]
-        
+
         setPlans(dummyPlans)
         setPagination(prev => ({ ...prev, total: dummyPlans.length }))
       } catch (error) {
@@ -94,14 +94,14 @@ const Pricing = ({ darkMode }) => {
         setLoading(false)
       }
     }
-    
+
     fetchPlans()
   }, [])
 
   // Filter plans based on search and tier
   const filteredPlans = plans.filter(plan => {
-    const matchesSearch = 
-      plan.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch =
+      plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       plan.tier.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesTier = filterTier === "all" || plan.tier === filterTier
     return matchesSearch && matchesTier
@@ -153,10 +153,10 @@ const Pricing = ({ darkMode }) => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault()
-    
+
     if (isEditing) {
       // Update existing plan
-      setPlans(plans.map(p => 
+      setPlans(plans.map(p =>
         p.id === currentPlan.id ? currentPlan : p
       ))
     } else {
@@ -169,7 +169,7 @@ const Pricing = ({ darkMode }) => {
       setPlans([...plans, newPlan])
       setPagination(prev => ({ ...prev, total: prev.total + 1 }))
     }
-    
+
     setShowModal(false)
   }
 
@@ -190,14 +190,14 @@ const Pricing = ({ darkMode }) => {
 
   // Toggle plan status
   const toggleStatus = (id) => {
-    setPlans(plans.map(p => 
+    setPlans(plans.map(p =>
       p.id === id ? { ...p, isActive: !p.isActive } : p
     ))
   }
 
   // Toggle popular status
   const togglePopular = (id) => {
-    setPlans(plans.map(p => 
+    setPlans(plans.map(p =>
       p.id === id ? { ...p, isPopular: !p.isPopular } : p
     ))
   }
@@ -238,8 +238,8 @@ const Pricing = ({ darkMode }) => {
                 Configure your pricing plans and tiers
               </p>
             </div>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               onClick={() => {
                 setCurrentPlan({
                   name: "",
@@ -282,14 +282,14 @@ const Pricing = ({ darkMode }) => {
                 <Table striped bordered hover variant={darkMode ? "dark" : ""} className="mb-0">
                   <thead  >
                     <tr>
-                      <th style={{color:"white"}}>Name</th>
-                      <th  style={{color:"white"}}>Tier</th>
-                      <th style={{color:"white"}}>Price</th>
-                      <th style={{color:"white"}}>Features</th>
-                      <th style={{color:"white"}}>Status</th>
-                      <th style={{color:"white"}}>Popular</th>
-                      <th style={{color:"white"}}>Created</th>
-                      <th style={{color:"white"}}>Actions</th>
+                      <th style={{ color: "white" }}>Name</th>
+                      <th style={{ color: "white" }}>Tier</th>
+                      <th style={{ color: "white" }}>Price</th>
+                      <th style={{ color: "white" }}>Features</th>
+                      <th style={{ color: "white" }}>Status</th>
+                      <th style={{ color: "white" }}>Popular</th>
+                      <th style={{ color: "white" }}>Created</th>
+                      <th style={{ color: "white" }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -298,11 +298,11 @@ const Pricing = ({ darkMode }) => {
                         <tr key={plan.id}>
                           <td>{plan.name}</td>
                           <td>
-                            <Badge 
+                            <Badge
                               bg={
                                 plan.tier === 'basic' ? 'secondary' :
-                                plan.tier === 'standard' ? 'primary' :
-                                plan.tier === 'premium' ? 'warning' : 'success'
+                                  plan.tier === 'standard' ? 'primary' :
+                                    plan.tier === 'premium' ? 'warning' : 'success'
                               }
                             >
                               {plan.tier}
@@ -317,7 +317,7 @@ const Pricing = ({ darkMode }) => {
                             </ul>
                           </td>
                           <td>
-                            <Form.Check 
+                            <Form.Check
                               type="switch"
                               id={`active-${plan.id}`}
                               checked={plan.isActive}
@@ -326,7 +326,7 @@ const Pricing = ({ darkMode }) => {
                             />
                           </td>
                           <td>
-                            <Form.Check 
+                            <Form.Check
                               type="switch"
                               id={`popular-${plan.id}`}
                               checked={plan.isPopular}
@@ -367,9 +367,10 @@ const Pricing = ({ darkMode }) => {
             </Card.Body>
             <Card.Footer className={`${darkMode ? "bg-dark border-top border-secondary" : ""}`}>
               <Pagination
-                currentPage={pagination.page}
-                totalPages={Math.ceil(filteredPlans.length / pagination.limit)}
-                onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
+                current={pagination.page}
+                total={filteredPlans.length}
+                limit={pagination.limit}
+                onChange={(page) => setPagination(prev => ({ ...prev, page }))}
                 darkMode={darkMode}
               />
             </Card.Footer>
@@ -471,8 +472,8 @@ const Pricing = ({ darkMode }) => {
                         onChange={(e) => handleFeatureChange(index, e.target.value)}
                         className={darkMode ? "bg-dark text-light" : ""}
                       />
-                      <Button 
-                        variant="outline-danger" 
+                      <Button
+                        variant="outline-danger"
                         onClick={() => removeFeature(index)}
                       >
                         <MdClose />

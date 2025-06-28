@@ -29,7 +29,7 @@ const NotificationCenter = ({ darkMode }) => {
   const [filterType, setFilterType] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedNotification, setSelectedNotification] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
 
   useEffect(() => {
     setTimeout(() => {

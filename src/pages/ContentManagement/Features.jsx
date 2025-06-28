@@ -18,6 +18,7 @@ const Features = ({ darkMode }) => {
   const [features, setFeatures] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
   
   // State for CRUD operations
   const [showModal, setShowModal] = useState(false)
@@ -27,7 +28,7 @@ const Features = ({ darkMode }) => {
   // State for table controls
   const [searchTerm, setSearchTerm] = useState("")
   const [filterCategory, setFilterCategory] = useState("all")
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
 
   // Category options for filter
   const categoryOptions = [

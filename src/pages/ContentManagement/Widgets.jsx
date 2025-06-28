@@ -27,7 +27,7 @@ const Widgets = ({ darkMode }) => {
   // State for table controls
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
 
   // Status options for filter
   const statusOptions = [

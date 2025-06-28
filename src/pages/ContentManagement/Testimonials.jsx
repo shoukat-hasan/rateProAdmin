@@ -19,16 +19,16 @@ const Testimonial = ({ darkMode }) => {
   const [testimonials, setTestimonials] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  
+
   // State for CRUD operations
   const [showModal, setShowModal] = useState(false)
   const [currentTestimonial, setCurrentTestimonial] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
-  
+
   // State for table controls
   const [searchTerm, setSearchTerm] = useState("")
   const [filterRating, setFilterRating] = useState("all")
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
 
   // Rating options for filter
   const ratingOptions = [
@@ -45,7 +45,7 @@ const Testimonial = ({ darkMode }) => {
       try {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000))
-        
+
         const dummyTestimonials = [
           {
             id: 1,
@@ -78,7 +78,7 @@ const Testimonial = ({ darkMode }) => {
             createdAt: "2024-01-10"
           },
         ]
-        
+
         setTestimonials(dummyTestimonials)
         setPagination(prev => ({ ...prev, total: dummyTestimonials.length }))
       } catch (error) {
@@ -88,14 +88,14 @@ const Testimonial = ({ darkMode }) => {
         setLoading(false)
       }
     }
-    
+
     fetchTestimonials()
   }, [])
 
   // Filter testimonials based on search and rating
   const filteredTestimonials = testimonials.filter(testimonial => {
-    const matchesSearch = 
-      testimonial.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch =
+      testimonial.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       testimonial.content.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRating = filterRating === "all" || testimonial.rating.toString() === filterRating
     return matchesSearch && matchesRating
@@ -119,10 +119,10 @@ const Testimonial = ({ darkMode }) => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault()
-    
+
     if (isEditing) {
       // Update existing testimonial
-      setTestimonials(testimonials.map(t => 
+      setTestimonials(testimonials.map(t =>
         t.id === currentTestimonial.id ? currentTestimonial : t
       ))
     } else {
@@ -135,7 +135,7 @@ const Testimonial = ({ darkMode }) => {
       setTestimonials([...testimonials, newTestimonial])
       setPagination(prev => ({ ...prev, total: prev.total + 1 }))
     }
-    
+
     setShowModal(false)
   }
 
@@ -156,7 +156,7 @@ const Testimonial = ({ darkMode }) => {
 
   // Toggle approval status
   const toggleApproval = (id) => {
-    setTestimonials(testimonials.map(t => 
+    setTestimonials(testimonials.map(t =>
       t.id === id ? { ...t, isApproved: !t.isApproved } : t
     ))
   }
@@ -166,10 +166,10 @@ const Testimonial = ({ darkMode }) => {
     return (
       <div className="d-flex">
         {[...Array(5)].map((_, i) => (
-          <MdStar 
-            key={i} 
-            color={i < rating ? "#ffc107" : "#e4e5e9"} 
-            size={20} 
+          <MdStar
+            key={i}
+            color={i < rating ? "#ffc107" : "#e4e5e9"}
+            size={20}
           />
         ))}
       </div>
@@ -206,8 +206,8 @@ const Testimonial = ({ darkMode }) => {
                 Manage customer testimonials and reviews
               </p>
             </div>
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               onClick={() => {
                 setCurrentTestimonial({
                   name: "",
@@ -248,14 +248,14 @@ const Testimonial = ({ darkMode }) => {
                 <Table striped bordered hover variant={darkMode ? "dark" : ""} className="mb-0">
                   <thead>
                     <tr>
-                      <th style={{color:"white"}} >Avatar</th>
-                      <th style={{color:"white"}} >Name</th>
-                      <th style={{color:"white"}} >Role</th>
-                      <th style={{color:"white"}} >Content</th>
-                      <th style={{color:"white"}} >Rating</th>
-                      <th style={{color:"white"}} >Status</th>
-                      <th style={{color:"white"}} >Created</th>
-                      <th style={{color:"white"}} >Actions</th>
+                      <th style={{ color: "white" }} >Avatar</th>
+                      <th style={{ color: "white" }} >Name</th>
+                      <th style={{ color: "white" }} >Role</th>
+                      <th style={{ color: "white" }} >Content</th>
+                      <th style={{ color: "white" }} >Rating</th>
+                      <th style={{ color: "white" }} >Status</th>
+                      <th style={{ color: "white" }} >Created</th>
+                      <th style={{ color: "white" }} >Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -264,11 +264,11 @@ const Testimonial = ({ darkMode }) => {
                         <tr key={testimonial.id}>
                           <td>
                             {testimonial.avatar ? (
-                              <Image 
-                                src={testimonial.avatar} 
-                                roundedCircle 
-                                width={40} 
-                                height={40} 
+                              <Image
+                                src={testimonial.avatar}
+                                roundedCircle
+                                width={40}
+                                height={40}
                                 alt={testimonial.name}
                               />
                             ) : (
@@ -323,9 +323,10 @@ const Testimonial = ({ darkMode }) => {
             </Card.Body>
             <Card.Footer className={`${darkMode ? "bg-dark border-top border-secondary" : ""}`}>
               <Pagination
-                currentPage={pagination.page}
-                totalPages={Math.ceil(filteredTestimonials.length / pagination.limit)}
-                onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
+                current={pagination.page}
+                total={filteredTestimonials.length}
+                limit={pagination.limit}
+                onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
                 darkMode={darkMode}
               />
             </Card.Footer>
