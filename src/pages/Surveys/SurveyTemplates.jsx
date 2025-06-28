@@ -85,9 +85,19 @@ const SurveyTemplates = ({ darkMode }) => {
   })
 
   // update total count when filteredTemplates changes
+  // useEffect(() => {
+  //   setPagination((prev) => ({ ...prev, total: filteredTemplates.length }))
+  // }, [filteredTemplates])
+
   useEffect(() => {
-    setPagination((prev) => ({ ...prev, total: filteredTemplates.length }))
+    setPagination((prev) => {
+      if (prev.total !== filteredTemplates.length) {
+        return { ...prev, total: filteredTemplates.length }
+      }
+      return prev
+    })
   }, [filteredTemplates])
+  
 
   const getCategoryBadge = (category) => {
     const colors = {
