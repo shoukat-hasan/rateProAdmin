@@ -8,12 +8,12 @@ import { Container, Row, Col, Card, Table, Badge, Button, Form, InputGroup } fro
 import { MdAdd, MdEdit, MdDelete, MdSearch, MdSecurity, MdGroup, MdVpnKey } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const AccessManagement = () => {
+const AccessManagement = ({ darkMode }) => {
   const [users, setUsers] = useState([])
   const [roles, setRoles] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
 
   useEffect(() => {
     // Simulate loading data
@@ -115,6 +115,11 @@ const AccessManagement = () => {
       </Container>
     )
   }
+
+  const paginatedUsers = users.slice(
+    (pagination.page - 1) * pagination.limit,
+    pagination.page * pagination.limit
+  )
 
   return (
     <Container fluid className="py-4">
@@ -228,7 +233,7 @@ const AccessManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user) => (
+                    {paginatedUsers.map((user) => (
                       <tr key={user.id}>
                         <td>
                           <div>
@@ -245,7 +250,7 @@ const AccessManagement = () => {
                         <td>{user.lastLogin}</td>
                         <td>
                           <div className="d-flex justify-content-center gap-1">
-                            <Button as={Link} to={`/users/${user.id}/edit`} variant="outline-primary" size="sm">
+                            <Button as={Link} to={`/app/users/${user.id}/edit`} variant="outline-primary" size="sm">
                               <MdEdit />
                             </Button>
                             <Button variant="outline-danger" size="sm">

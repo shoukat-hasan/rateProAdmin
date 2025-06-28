@@ -345,7 +345,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               </Dropdown.Header>
               <Dropdown.Item
                 as={Link}
-                to="/profile"
+                to="/app/profile"
                 className="d-flex align-items-center"
                 style={{ color: darkMode ? "#fff" : "#000" }}
               >
@@ -354,7 +354,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               </Dropdown.Item>
               <Dropdown.Item
                 as={Link}
-                to="/settings"
+                to="/app/settings"
                 className="d-flex align-items-center"
                 style={{ color: darkMode ? "#fff" : "#000" }}
               >

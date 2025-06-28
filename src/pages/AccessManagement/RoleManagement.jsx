@@ -5,6 +5,7 @@
 import { useState, useEffect } from "react"
 import { Container, Row, Col, Card, Table, Badge, Button, Form, Modal } from "react-bootstrap"
 import { MdAdd, MdEdit, MdDelete, MdSave, MdCancel } from "react-icons/md"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
 const RoleManagement = () => {
   const [roles, setRoles] = useState([])
@@ -17,11 +18,12 @@ const RoleManagement = () => {
     description: "",
     permissions: [],
   })
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
 
   useEffect(() => {
     // Simulate loading data
     setTimeout(() => {
-      setRoles([
+      const loadedRoles = [
         {
           id: 1,
           name: "Super Admin",
@@ -54,8 +56,11 @@ const RoleManagement = () => {
           userCount: 12,
           isSystem: false,
         },
-      ])
-
+      ]
+  
+      setRoles(loadedRoles)
+      setPagination((prev) => ({ ...prev, total: loadedRoles.length }))
+  
       setPermissions([
         { id: "read", name: "Read", description: "View content and data" },
         { id: "write", name: "Write", description: "Create and edit content" },
@@ -66,10 +71,11 @@ const RoleManagement = () => {
         { id: "view_analytics", name: "View Analytics", description: "Access analytics and reports" },
         { id: "export_data", name: "Export Data", description: "Export system data" },
       ])
-
+  
       setLoading(false)
     }, 1000)
   }, [])
+  
 
   const handleCreateRole = () => {
     setEditingRole(null)
@@ -145,6 +151,11 @@ const RoleManagement = () => {
     )
   }
 
+  const paginatedRoles = roles.slice(
+    (pagination.page - 1) * pagination.limit,
+    pagination.page * pagination.limit
+  )
+
   return (
     <Container fluid className="py-4">
       {/* Header */}
@@ -178,7 +189,7 @@ const RoleManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {roles.map((role) => (
+                {paginatedRoles.map((role) => (
                   <tr key={role.id}>
                     <td>
                       <div className="d-flex align-items-center">
@@ -235,7 +246,16 @@ const RoleManagement = () => {
               </tbody>
             </Table>
           </div>
+
         </Card.Body>
+        <div className="p-3">
+          <Pagination
+            current={pagination.page}
+            total={pagination.total}
+            limit={pagination.limit}
+            onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+          />
+        </div>
       </Card>
 
       {/* Create/Edit Role Modal */}

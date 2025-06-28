@@ -394,7 +394,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
         { path: "/app/users", name: "All Users", icon: <MdPeople /> },
         { path: "/app/users/create", name: "Add User", icon: <MdPersonAdd /> },
         { path: "/app/users/form", name: "User Form", icon: <MdPersonOutline /> },
-        { path: "/app/users/role-permissions", name: "Role Permissions", icon: <MdAssignmentInd /> },
+        { path: "/app/users/role-permissions", name: "Role Permissions", icon: <MdAssignmentInd />, roles: ["admin"] },
 
       ],
     },

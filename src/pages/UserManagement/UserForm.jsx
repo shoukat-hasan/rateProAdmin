@@ -43,7 +43,7 @@ const UserForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     console.log("User saved:", user)
-    navigate("/users")
+    navigate("/app/users")
   }
 
   if (loading) {
@@ -55,7 +55,7 @@ const UserForm = () => {
       <Row className="mb-4">
         <Col>
           <div className="d-flex align-items-center">
-            <Button variant="outline-secondary" className="me-3" onClick={() => navigate("/users")}>
+            <Button variant="outline-secondary" className="me-3" onClick={() => navigate("/app/users")}>
               <MdArrowBack />
             </Button>
             <h1 className="h3 mb-0">{isEditMode ? "Edit User" : "Create User"}</h1>
