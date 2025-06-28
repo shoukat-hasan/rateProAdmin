@@ -18,6 +18,9 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000,
   },
+  server: {
+    historyApiFallback: true
+  },
   optimizeDeps: {
     include: ["react", "react-dom", "react-router-dom", "bootstrap", "react-bootstrap"],
   },
