@@ -132,11 +132,11 @@ const AccessManagement = ({ darkMode }) => {
               <p className="text-muted mb-0">Manage user roles and permissions</p>
             </div>
             <div className="d-flex gap-2">
-              <Button as={Link} to="/access/roles" variant="outline-primary">
+              <Button as={Link} to="/app/access/roles" variant="outline-primary">
                 <MdGroup className="me-2" />
                 Manage Roles
               </Button>
-              <Button as={Link} to="/access/permissions" variant="outline-secondary">
+              <Button as={Link} to="/app/access/permissions" variant="outline-secondary">
                 <MdVpnKey className="me-2" />
                 Manage Permissions
               </Button>
@@ -199,7 +199,7 @@ const AccessManagement = ({ darkMode }) => {
           <Card className="mb-4 border-0 shadow-sm">
             <Card.Header className="bg-transparent d-flex justify-content-between align-items-center">
               <h5 className="mb-0">User Access</h5>
-              <Button as={Link} to="/users/create" variant="primary" size="sm">
+              <Button as={Link} to="/app/users/create" variant="primary" size="sm">
                 <MdAdd className="me-2" />
                 Add User
               </Button>
@@ -281,7 +281,7 @@ const AccessManagement = ({ darkMode }) => {
           <Card className="border-0 shadow-sm">
             <Card.Header className="bg-transparent d-flex justify-content-between align-items-center">
               <h5 className="mb-0">Roles Overview</h5>
-              <Button as={Link} to="/access/roles" variant="outline-primary" size="sm">
+              <Button as={Link} to="/app/access/roles" variant="outline-primary" size="sm">
                 View All
               </Button>
             </Card.Header>

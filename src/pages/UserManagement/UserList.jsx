@@ -118,7 +118,7 @@ const UserList = ({ darkMode }) => {
         <Col>
           <div className="d-flex justify-content-between align-items-center">
             <h1 className="h3 mb-0">User Management</h1>
-            <Button as={Link} to="/users/create" variant="primary">
+            <Button as={Link} to="/app/users/create" variant="primary">
               <MdAdd className="me-2" />
               Create User
             </Button>

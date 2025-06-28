@@ -11,15 +11,21 @@ const Analytics = ({ darkMode }) => {
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState("30")
   const [selectedMetric, setSelectedMetric] = useState("responses")
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+
+  // Separate paginations
+  const [surveyPagination, setSurveyPagination] = useState({ page: 1, limit: 5, total: 0 })
+  const [activityPagination, setActivityPagination] = useState({ page: 1, limit: 4, total: 0 })
+
 
   useEffect(() => {
     // Simulate loading
     setTimeout(() => {
-      setPagination((prev) => ({ ...prev, total: 6 }))
+      setSurveyPagination((prev) => ({ ...prev, total: topSurveys.length }))
+      setActivityPagination((prev) => ({ ...prev, total: responseData.length }))
       setLoading(false)
     }, 1000)
   }, [])
+  
 
   const metrics = [
     {
@@ -110,7 +116,17 @@ const Analytics = ({ darkMode }) => {
     { date: "2024-01-20", responses: 55, completion: 88 },
   ]
 
-  const currentSurveys = topSurveys.slice((pagination.page - 1) * pagination.limit, pagination.page * pagination.limit)
+  const currentSurveys = topSurveys.slice(
+    (surveyPagination.page - 1) * surveyPagination.limit,
+    surveyPagination.page * surveyPagination.limit
+  )
+
+  const currentResponses = responseData.slice(
+    (activityPagination.page - 1) * activityPagination.limit,
+    activityPagination.page * activityPagination.limit
+  )
+  
+  
 
   if (loading) {
     return (
@@ -267,11 +283,10 @@ const Analytics = ({ darkMode }) => {
               </div>
               <div className="p-3 border-top">
                 <Pagination
-                  current={pagination.page}
-                  total={topSurveys.length}
-                  limit={pagination.limit}
-                  onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
-                  darkMode={darkMode}
+                  current={surveyPagination.page}
+                  total={surveyPagination.total}
+                  limit={surveyPagination.limit}
+                  onChange={(page) => setSurveyPagination((prev) => ({ ...prev, page }))}
                 />
               </div>
             </Card.Body>
@@ -298,7 +313,7 @@ const Analytics = ({ darkMode }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {responseData.map((data, index) => (
+                    {currentResponses.map((data, index) => (
                       <tr key={index}>
                         <td className="py-3 px-4 border-0">
                           <span className={darkMode ? "text-white" : "text-dark"}>{data.date}</span>
@@ -335,6 +350,14 @@ const Analytics = ({ darkMode }) => {
                     ))}
                   </tbody>
                 </Table>
+                <div className="p-3 border-top">
+                  <Pagination
+                    current={activityPagination.page}
+                    total={activityPagination.total}
+                    limit={activityPagination.limit}
+                    onChange={(page) => setActivityPagination((prev) => ({ ...prev, page }))}
+                  />
+                </div>
               </div>
             </Card.Body>
           </Card>

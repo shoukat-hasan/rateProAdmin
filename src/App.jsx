@@ -282,6 +282,7 @@ import RewardSystem from "./pages/Incentives/RewardSystem"
 import Features from "./pages/ContentManagement/Features"
 import Pricing from "./pages/ContentManagement/Pricing"
 import ContactManagement from "./pages/Audiences/ContactManagement"
+import Support from "./pages/Support/CreateTicket"
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -326,6 +327,7 @@ function App() {
             <Route path="/survey/:id/password" element={<TakeSurvey />} />
             <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/thank-you/:surveyId" element={<CustomThankYou />} />
+            <Route path="/support" element={<Support />} />
 
             {/* Protected Layout */}
             <Route

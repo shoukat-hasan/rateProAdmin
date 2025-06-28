@@ -302,7 +302,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               <Dropdown.Divider style={{ backgroundColor: darkMode ? "var(--dark-border)" : "var(--light-border)" }} />
               <Dropdown.Item
                 as={Link}
-                to="/notifications"
+                to="/app/notifications"
                 className="text-center"
                 style={{ color: darkMode ? "#fff" : "#000" }}
               >

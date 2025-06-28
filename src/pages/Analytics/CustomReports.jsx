@@ -2,13 +2,15 @@
 // src\pages\Analytics\CustomReports.jsx
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Container, Row, Col, Card, Form, Button, Table, Badge } from "react-bootstrap"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const CustomReports = () => {
+const CustomReports = ({ darkMode }) => {
   const [reportType, setReportType] = useState("summary")
   const [dateRange, setDateRange] = useState("30d")
   const [selectedSurveys, setSelectedSurveys] = useState([])
+  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
 
   const surveys = [
     { id: 1, name: "Customer Satisfaction Q4" },
@@ -41,6 +43,15 @@ const CustomReports = () => {
     }
     return <Badge bg={variants[status] || "secondary"}>{status}</Badge>
   }
+
+  const currentReports = savedReports.slice(
+    (pagination.page - 1) * pagination.limit,
+    pagination.page * pagination.limit
+  )
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, total: savedReports.length }))
+  }, [])
 
   return (
     <Container fluid>
@@ -170,7 +181,7 @@ const CustomReports = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {savedReports.map((report) => (
+                    {currentReports.map((report) => (
                       <tr key={report.id}>
                         <td>{report.name}</td>
                         <td>{report.type}</td>
@@ -193,6 +204,15 @@ const CustomReports = () => {
                     ))}
                   </tbody>
                 </Table>
+              </div>
+              <div className="p-3 border-top">
+                <Pagination
+                  current={pagination.page}
+                  total={savedReports.length}
+                  limit={pagination.limit}
+                  onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+                  darkMode={darkMode}
+                />
               </div>
             </Card.Body>
           </Card>

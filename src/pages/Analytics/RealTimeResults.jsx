@@ -5,11 +5,14 @@
 import { useState, useEffect } from "react"
 import { Container, Row, Col, Card, Badge, Form, Table } from "react-bootstrap"
 import { Line, Doughnut } from "react-chartjs-2"
+import Pagination from "../../components/Pagination/Pagination.jsx"
 
-const RealTimeResults = () => {
+const RealTimeResults = ({ darkMode }) => {
   const [selectedSurvey, setSelectedSurvey] = useState("1")
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [lastUpdated, setLastUpdated] = useState(new Date())
+  const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
+
 
   const surveys = [
     { id: "1", name: "Customer Satisfaction Q4", responses: 156 },
@@ -86,6 +89,16 @@ const RealTimeResults = () => {
     }
     return () => clearInterval(interval)
   }, [autoRefresh])
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, total: recentResponses.length }))
+  }, [])
+
+  const currentResponses = recentResponses.slice(
+    (pagination.page - 1) * pagination.limit,
+    pagination.page * pagination.limit
+  )
+
 
   const getStatusBadge = (status) => {
     const variants = {
@@ -255,7 +268,7 @@ const RealTimeResults = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentResponses.map((response) => (
+                    {currentResponses.map((response) => (
                       <tr key={response.id}>
                         <td>{response.timestamp}</td>
                         <td>{response.location}</td>
@@ -270,6 +283,15 @@ const RealTimeResults = () => {
                     ))}
                   </tbody>
                 </Table>
+              </div>
+              <div className="p-3 border-top">
+                <Pagination
+                  current={pagination.page}
+                  total={recentResponses.length}
+                  limit={pagination.limit}
+                  onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+                  darkMode={darkMode}
+                />
               </div>
             </Card.Body>
           </Card>
