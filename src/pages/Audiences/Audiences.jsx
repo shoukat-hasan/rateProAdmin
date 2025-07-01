@@ -17,7 +17,7 @@ const Audiences = ({ darkMode }) => {
   })
   const [importModal, setImportModal] = useState(false)
   const [file, setFile] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
 
   const addFilter = () => {

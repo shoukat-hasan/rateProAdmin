@@ -258,7 +258,7 @@ import TrendAnalysis from "./pages/Analytics/TrendAnalysis"
 import CustomReports from "./pages/Analytics/CustomReports"
 import ResponseOverview from "./pages/Analytics/ResponseOverview"
 import Settings from "./pages/Settings/Settings"
-import BillingPlans from "./pages/Settings/BillingPlans"
+// import BillingPlans from "./pages/Settings/BillingPlans"
 import ThankYouPage from "./pages/Settings/ThankYouPage"
 import NotificationSettings from "./pages/Settings/NotificationSettings"
 import ThemeSettings from "./pages/Settings/ThemeSettings"
@@ -269,7 +269,7 @@ import UserForm from "./pages/UserManagement/UserForm"
 import AccessManagement from "./pages/AccessManagement/AccessManagement"
 import RoleManagement from "./pages/AccessManagement/RoleManagement"
 import PermissionManagement from "./pages/AccessManagement/PermissionManagement"
-import EmailManagement from "./pages/Communication/EmailManagement"
+// import EmailManagement from "./pages/Communication/EmailManagement"
 import EmailTemplates from "./pages/Communication/EmailTemplates"
 import NotificationCenter from "./pages/Communication/NotificationCenter"
 import SupportTickets from "./pages/Support/SupportTickets"
@@ -277,8 +277,8 @@ import TicketDetail from "./pages/Support/TicketDetail"
 import CreateTicket from "./pages/Support/CreateTicket"
 import Testimonials from "./pages/ContentManagement/Testimonials"
 import Widgets from "./pages/ContentManagement/Widgets"
-import IncentiveManagement from "./pages/Incentives/IncentiveManagement"
-import RewardSystem from "./pages/Incentives/RewardSystem"
+// import IncentiveManagement from "./pages/Incentives/IncentiveManagement"
+// import RewardSystem from "./pages/Incentives/RewardSystem"
 import Features from "./pages/ContentManagement/Features"
 import Pricing from "./pages/ContentManagement/Pricing"
 import ContactManagement from "./pages/Audiences/ContactManagement"
@@ -351,8 +351,8 @@ function App() {
               <Route path="surveys/:id/share" element={<SurveySharing />} />
               <Route path="surveys/scheduling" element={<SurveyScheduling />} />
               <Route path="surveys/templates" element={<SurveyTemplates />} />
-              <Route path="surveys/takesurvey" element={<TakeSurvey />} />
-              <Route path="surveys/list" element={<SurveyList />} />
+              {/* <Route path="surveys/takesurvey" element={<TakeSurvey />} /> */}
+              {/* <Route path="surveys/list" element={<SurveyList />} /> */}
               <Route path="surveys/settings" element={<SurveySettings />} />
 
               {/* Users */}
@@ -380,9 +380,9 @@ function App() {
               <Route path="analytics/response-overview" element={<ResponseOverview />} />
 
               {/* Communication */}
-              <Route path="communication/emails" element={<EmailManagement />} />
+              {/* <Route path="communication/emails" element={<EmailManagement />} />
               <Route path="communication/templates" element={<EmailTemplates />} />
-              <Route path="communication/notifications" element={<NotificationCenter />} />
+              <Route path="communication/notifications" element={<NotificationCenter />} /> */}
 
               {/* Support */}
               <Route path="support" element={<SupportTickets />} />
@@ -390,8 +390,8 @@ function App() {
               <Route path="support/:id" element={<TicketDetail />} />
 
               {/* Incentives */}
-              <Route path="incentives" element={<IncentiveManagement />} />
-              <Route path="incentives/rewards" element={<RewardSystem />} />
+              {/* <Route path="incentives" element={<IncentiveManagement />} />
+              <Route path="incentives/rewards" element={<RewardSystem />} /> */}
 
               {/* Templates */}
               <Route path="templates" element={<Templates />} />
@@ -399,7 +399,7 @@ function App() {
               {/* Settings */}
               <Route path="settings" element={<Settings />} />
               <Route path="settings/thank-you" element={<CustomThankYou />} />
-              <Route path="settings/billing-plans" element={<BillingPlans />} />
+              {/* <Route path="settings/billing-plans" element={<BillingPlans />} /> */}
               <Route path="settings/custom-thank-you" element={<ThankYouPage />} />
               <Route path="settings/email-templates" element={<EmailTemplates />} />
               <Route path="settings/notification-settings" element={<NotificationSettings />} />

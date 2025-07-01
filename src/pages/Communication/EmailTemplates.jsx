@@ -26,7 +26,7 @@ const EmailTemplates = ({ darkMode }) => {
   const [filterCategory, setFilterCategory] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     setTimeout(() => {

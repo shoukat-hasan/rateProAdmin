@@ -29,7 +29,7 @@ const SupportTickets = ({ darkMode }) => {
   const [filterStatus, setFilterStatus] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedTicket, setSelectedTicket] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     setTimeout(() => {

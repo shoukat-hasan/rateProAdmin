@@ -26,7 +26,7 @@ const SurveyResponses = ({ darkMode }) => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
-  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     setTimeout(() => {

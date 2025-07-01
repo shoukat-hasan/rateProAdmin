@@ -244,7 +244,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
                   </h6>
                 </div>
 
-                <Dropdown.Item className="py-2" style={{ color: darkMode ? "#fff" : "#000" }}>
+                <Dropdown.Item className="py-2" as={Link} to="/app/communication/notifications" style={{ color: darkMode ? "#fff" : "#000" }}>
                   <div className="d-flex">
                     <div
                       className="rounded-circle bg-success d-flex align-items-center justify-content-center me-3"
@@ -262,7 +262,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
                   </div>
                 </Dropdown.Item>
 
-                <Dropdown.Item className="py-2" style={{ color: darkMode ? "#fff" : "#000" }}>
+                <Dropdown.Item className="py-2" as={Link} to="/app/communication/notifications" style={{ color: darkMode ? "#fff" : "#000" }}>
                   <div className="d-flex">
                     <div
                       className="rounded-circle bg-info d-flex align-items-center justify-content-center me-3"
@@ -274,7 +274,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
                       <h6 className="mb-1 small" style={{ color: darkMode ? "#fff" : "#000" }}>
                         Survey Completed
                       </h6>
-                      <p className="mb-1 small text-muted">Customer Satisfaction survey reached 100 responses</p>
+                      <p className="mb-1 small text-muted">Customer survey reached 100 responses</p>
                       <small className="text-muted">1 hour ago</small>
                     </div>
                   </div>
@@ -302,7 +302,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               <Dropdown.Divider style={{ backgroundColor: darkMode ? "var(--dark-border)" : "var(--light-border)" }} />
               <Dropdown.Item
                 as={Link}
-                to="/app/notifications"
+                to="/app/communication/notifications"
                 className="text-center"
                 style={{ color: darkMode ? "#fff" : "#000" }}
               >

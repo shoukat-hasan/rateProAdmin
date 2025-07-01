@@ -29,7 +29,7 @@ const Surveys = ({ darkMode }) => {
   const [filterStatus, setFilterStatus] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedSurvey, setSelectedSurvey] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 8, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     // Simulate API call

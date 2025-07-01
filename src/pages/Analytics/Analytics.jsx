@@ -13,8 +13,8 @@ const Analytics = ({ darkMode }) => {
   const [selectedMetric, setSelectedMetric] = useState("responses")
 
   // Separate paginations
-  const [surveyPagination, setSurveyPagination] = useState({ page: 1, limit: 5, total: 0 })
-  const [activityPagination, setActivityPagination] = useState({ page: 1, limit: 4, total: 0 })
+  const [surveyPagination, setSurveyPagination] = useState({ page: 1, limit: 1, total: 0 })
+  const [activityPagination, setActivityPagination] = useState({ page: 1, limit: 1, total: 0 })
 
 
   useEffect(() => {

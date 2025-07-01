@@ -28,7 +28,7 @@ const Features = ({ darkMode }) => {
   // State for table controls
   const [searchTerm, setSearchTerm] = useState("")
   const [filterCategory, setFilterCategory] = useState("all")
-  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   // Category options for filter
   const categoryOptions = [

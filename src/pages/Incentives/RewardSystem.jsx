@@ -25,7 +25,7 @@ const RewardSystem = ({ darkMode }) => {
   const [filterType, setFilterType] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedReward, setSelectedReward] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     setTimeout(() => {

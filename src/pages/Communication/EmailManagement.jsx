@@ -28,7 +28,7 @@ const EmailManagement = ({ darkMode }) => {
   const [filterStatus, setFilterStatus] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedEmail, setSelectedEmail] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     setTimeout(() => {

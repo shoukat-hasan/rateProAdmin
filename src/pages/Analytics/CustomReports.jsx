@@ -10,7 +10,7 @@ const CustomReports = ({ darkMode }) => {
   const [reportType, setReportType] = useState("summary")
   const [dateRange, setDateRange] = useState("30d")
   const [selectedSurveys, setSelectedSurveys] = useState([])
-  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   const surveys = [
     { id: 1, name: "Customer Satisfaction Q4" },

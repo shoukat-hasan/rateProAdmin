@@ -34,6 +34,7 @@ import {
   MdPieChart,
 } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
+import { useNavigate } from "react-router-dom"
 
 // Register Chart.js components including Filler
 ChartJS.register(
@@ -58,8 +59,22 @@ const Dashboard = ({ darkMode }) => {
   })
 
   const [recentSurveys, setRecentSurveys] = useState([])
-  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate();
+
+  const createNewSurvey = () => {
+    navigate("/app/surveys/create");
+  };
+
+  const ViewTrendsAnalytics = () => {
+    navigate("/app/analytics/trends");
+  };
+
+  const ViewRecentSurveys = () => {
+    navigate("/app/surveys");
+  };
+
 
   useEffect(() => {
     // Simulate loading
@@ -250,7 +265,7 @@ const Dashboard = ({ darkMode }) => {
                 <MdDownload className="me-1" />
                 Export
               </Button>
-              <Button variant="primary" size="sm" className="btn-enhanced">
+              <Button variant="primary" onClick={ createNewSurvey } size="sm" className="btn-enhanced">
                 <MdAdd className="me-1" />
                 New Survey
               </Button>
@@ -352,7 +367,7 @@ const Dashboard = ({ darkMode }) => {
                 <MdShowChart className="text-primary me-2" size={20} />
                 <Card.Title className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Response Trends</Card.Title>
               </div>
-              <Button variant="outline-primary" size="sm" className="btn-enhanced">
+              <Button variant="outline-primary" onClick={ ViewTrendsAnalytics } size="sm" className="btn-enhanced">
                 <MdBarChart className="me-1" />
                 View Details
               </Button>
@@ -390,7 +405,7 @@ const Dashboard = ({ darkMode }) => {
                 <MdPoll className="text-primary me-2" size={20} />
                 <Card.Title className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Recent Surveys</Card.Title>
               </div>
-              <Button variant="outline-primary" size="sm" className="btn-enhanced">
+              <Button variant="outline-primary" onClick={ ViewRecentSurveys } size="sm" className="btn-enhanced">
                 <MdVisibility className="me-1" />
                 View All
               </Button>

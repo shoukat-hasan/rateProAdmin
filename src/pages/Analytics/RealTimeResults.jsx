@@ -11,7 +11,7 @@ const RealTimeResults = ({ darkMode }) => {
   const [selectedSurvey, setSelectedSurvey] = useState("1")
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [lastUpdated, setLastUpdated] = useState(new Date())
-  const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
 
   const surveys = [

@@ -20,7 +20,7 @@ import Pagination from "../../components/Pagination/Pagination.jsx"
 
 
 const ContactManagement = ({ darkMode }) => {
-  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
   const [contacts, setContacts] = useState([
     {
       id: 1,

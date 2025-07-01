@@ -24,7 +24,7 @@ const UsersManagement = ({ darkMode }) => {
   const [filterRole, setFilterRole] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     // Simulate API call

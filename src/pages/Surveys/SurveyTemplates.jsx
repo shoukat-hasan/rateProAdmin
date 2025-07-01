@@ -8,7 +8,7 @@ import Pagination from "../../components/Pagination/Pagination.jsx"
 const SurveyTemplates = ({ darkMode }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   const categories = [
     { value: "all", label: "All Categories" },

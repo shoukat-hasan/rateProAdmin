@@ -28,7 +28,7 @@ const Testimonial = ({ darkMode }) => {
   // State for table controls
   const [searchTerm, setSearchTerm] = useState("")
   const [filterRating, setFilterRating] = useState("all")
-  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   // Rating options for filter
   const ratingOptions = [

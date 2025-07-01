@@ -18,7 +18,7 @@ const RoleManagement = () => {
     description: "",
     permissions: [],
   })
-  const [pagination, setPagination] = useState({ page: 1, limit: 2, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     // Simulate loading data

@@ -16,7 +16,7 @@ const UserList = ({ darkMode }) => {
     role: "",
     status: "",
   })
-  const [pagination, setPagination] = useState({ page: 1, limit: 3, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     const fetchUsers = async () => {

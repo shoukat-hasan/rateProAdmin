@@ -48,7 +48,7 @@ const PermissionManagement = () => {
       const paginations = {}
       loadedCategories.forEach((category) => {
         const total = loadedPermissions.filter((perm) => perm.category === category.id).length
-        paginations[category.id] = { page: 1, limit: 2, total }
+        paginations[category.id] = { page: 1, limit: 1, total }
       })
       setPaginationStates(paginations)
 
@@ -99,7 +99,7 @@ const PermissionManagement = () => {
         const prevTotal = prev[formData.category]?.total || 0
         return {
           ...prev,
-          [formData.category]: { page: 1, limit: 2, total: prevTotal + 1 },
+          [formData.category]: { page: 1, limit: 1, total: prevTotal + 1 },
         }
       })
     }
