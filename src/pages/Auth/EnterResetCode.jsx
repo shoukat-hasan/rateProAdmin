@@ -128,9 +128,14 @@ const EnterResetCode = () => {
     setError("")
 
     try {
+      const email = localStorage.getItem("resetEmail")
+      const otp = code.toString()
+      
+      console.log("Sending data", { email, otp });
+      
       const res = await axiosInstance.post("/auth/verify-reset-code", {
-        email: localStorage.getItem("resetEmail"),
-        otp: code.toString()
+        email,
+        otp
       })
       
       // ✅ Save verified OTP for reset-password
