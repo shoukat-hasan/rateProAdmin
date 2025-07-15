@@ -355,7 +355,6 @@ function App() {
 
               {/* Users */}
               <Route path="users" element={<UserList />} />
-              <Route path="users/create" element={<UserForm />} />
               <Route path="users/:id/edit" element={<UserForm />} />
               <Route path="users/form" element={<UserForm />} />
               <Route path="users/role-permissions" element={<PermissionManagement />} />

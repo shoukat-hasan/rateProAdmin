@@ -10,15 +10,15 @@ const axiosInstance = axios.create({
 });
 
 // Optional: Request interceptor (if token based header lagana ho future me)
-// axiosInstance.interceptors.request.use((config) => {
-//   const token = localStorage.getItem('token');
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// }, (error) => {
-//   return Promise.reject(error);
-// });
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 // Response interceptor for centralized error handling
 axiosInstance.interceptors.response.use(

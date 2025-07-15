@@ -7,6 +7,7 @@ import { Link } from "react-router-dom"
 import { Container, Row, Col, Table, Badge, Button, InputGroup, Form, Card } from "react-bootstrap"
 import { MdEdit, MdDelete, MdSearch, MdAdd, MdPerson } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
+import axiosInstance from "../../api/axiosInstance.js"
 
 const UserList = ({ darkMode }) => {
   const [users, setUsers] = useState([])
@@ -16,61 +17,47 @@ const UserList = ({ darkMode }) => {
     role: "",
     status: "",
   })
-  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
 
   useEffect(() => {
     const fetchUsers = async () => {
-      setLoading(true)
-      setTimeout(() => {
-        const mockUsers = [
-          {
-            id: 1,
-            name: "John Doe",
-            email: "john@example.com",
-            role: "Admin",
-            status: "Active",
-            lastLogin: "2023-06-15",
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get("/user", {
+          params: {
+            page: pagination.page,
+            limit: pagination.limit,
+            search: searchTerm,
+            role: filters.role,
+            isActive: filters.status,
           },
-          {
-            id: 2,
-            name: "Jane Smith",
-            email: "jane@example.com",
-            role: "Editor",
-            status: "Active",
-            lastLogin: "2023-06-14",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,  // ya jahan se tu token store kar raha hai
           },
-          {
-            id: 3,
-            name: "Bob Johnson",
-            email: "bob@example.com",
-            role: "Viewer",
-            status: "Inactive",
-            lastLogin: "2023-06-10",
-          },
-          {
-            id: 4,
-            name: "Alice Brown",
-            email: "alice@example.com",
-            role: "Editor",
-            status: "Pending",
-            lastLogin: "2023-06-12",
-          },
-          {
-            id: 5,
-            name: "Charlie Wilson",
-            email: "charlie@example.com",
-            role: "Viewer",
-            status: "Active",
-            lastLogin: "2023-06-13",
-          },
-        ]
-        setUsers(mockUsers)
-        setLoading(false)
-      }, 500)
-    }
+        });
 
-    fetchUsers()
-  }, [searchTerm, filters])
+        const { data, count, pagination: serverPagination } = response.data;
+
+        setUsers(data);
+        setPagination((prev) => ({
+          ...prev,
+          total: count,
+          page: serverPagination?.next?.page
+            ? pagination.page
+            : pagination.page > 1 && count === 0
+              ? pagination.page - 1
+              : pagination.page,
+        }));
+
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [searchTerm, filters, pagination.page]);
 
   const getRoleVariant = (role) => {
     switch (role) {
@@ -179,7 +166,7 @@ const UserList = ({ darkMode }) => {
               </thead>
               <tbody>
                 {currentUsers.map((user) => (
-                  <tr key={user.id}>
+                  <tr key={user._id}>
                     <td>
                       <div className="d-flex align-items-center">
                         <div
@@ -221,8 +208,11 @@ const UserList = ({ darkMode }) => {
         {/* 👇 Correctly placed Card.Footer */}
         <Card.Footer>
           <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">
+            {/* <small className="text-muted">
               Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, users.length)} of {users.length} users
+            </small> */}
+            <small className="text-muted">
+              Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} users
             </small>
             <Pagination
               current={pagination.page}
