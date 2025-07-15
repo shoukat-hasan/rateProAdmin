@@ -34,7 +34,7 @@ import {
   MdPieChart,
 } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 // Register Chart.js components including Filler
 ChartJS.register(
@@ -50,7 +50,7 @@ ChartJS.register(
   Filler,
 )
 
-const Dashboard = ({ darkMode }) => {
+const Dashboard = ({ darkMode, limit = 5 }) => {
   const [stats, setStats] = useState({
     totalSurveys: 24,
     activeResponses: 1247,
@@ -59,9 +59,10 @@ const Dashboard = ({ darkMode }) => {
   })
 
   const [recentSurveys, setRecentSurveys] = useState([])
-  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate();
+  const [responses, setResponses] = useState([])
 
   const createNewSurvey = () => {
     navigate("/app/surveys/create");
@@ -72,7 +73,7 @@ const Dashboard = ({ darkMode }) => {
   };
 
   const ViewRecentSurveys = () => {
-    navigate("/app/surveys");
+    navigate("/app/surveys/responses");
   };
 
 
@@ -231,6 +232,68 @@ const Dashboard = ({ darkMode }) => {
     pagination.page * pagination.limit,
   )
 
+  useEffect(() => {
+    setTimeout(() => {
+      const dummyResponses = [
+        {
+          id: 1,
+          surveyId: 1,
+          surveyTitle: "Customer Satisfaction Survey",
+          respondent: "John Doe",
+          email: "john.doe@example.com",
+          submittedAt: "2023-06-01 14:32",
+          satisfaction: 4.5,
+        },
+        {
+          id: 2,
+          surveyId: 1,
+          surveyTitle: "Customer Satisfaction Survey",
+          respondent: "Jane Smith",
+          email: "jane.smith@example.com",
+          submittedAt: "2023-06-01 13:15",
+          satisfaction: 3.8,
+        },
+        {
+          id: 3,
+          surveyId: 2,
+          surveyTitle: "Product Feedback Survey",
+          respondent: "Robert Johnson",
+          email: "robert.j@example.com",
+          submittedAt: "2023-06-01 11:45",
+          satisfaction: 4.2,
+        },
+        {
+          id: 4,
+          surveyId: 4,
+          surveyTitle: "Website Usability Survey",
+          respondent: "Emily Davis",
+          email: "emily.d@example.com",
+          submittedAt: "2023-05-31 16:20",
+          satisfaction: 4.0,
+        },
+        {
+          id: 5,
+          surveyId: 1,
+          surveyTitle: "Customer Satisfaction Survey",
+          respondent: "Michael Wilson",
+          email: "michael.w@example.com",
+          submittedAt: "2023-05-31 15:10",
+          satisfaction: 4.7,
+        },
+      ]
+
+      setResponses(dummyResponses.slice(0, limit))
+      setLoading(false)
+    }, 800)
+  }, [limit])
+
+  const getSatisfactionVariant = (score) => {
+    if (score >= 4.5) return "success"
+    if (score >= 3.5) return "primary"
+    if (score >= 2.5) return "warning"
+    return "danger"
+  }
+
   if (loading) {
     return (
       <Container fluid className="dashboard-container py-4">
@@ -265,7 +328,7 @@ const Dashboard = ({ darkMode }) => {
                 <MdDownload className="me-1" />
                 Export
               </Button>
-              <Button variant="primary" onClick={ createNewSurvey } size="sm" className="btn-enhanced">
+              <Button variant="primary" onClick={createNewSurvey} size="sm" className="btn-enhanced">
                 <MdAdd className="me-1" />
                 New Survey
               </Button>
@@ -367,7 +430,7 @@ const Dashboard = ({ darkMode }) => {
                 <MdShowChart className="text-primary me-2" size={20} />
                 <Card.Title className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Response Trends</Card.Title>
               </div>
-              <Button variant="outline-primary" onClick={ ViewTrendsAnalytics } size="sm" className="btn-enhanced">
+              <Button variant="outline-primary" onClick={ViewTrendsAnalytics} size="sm" className="btn-enhanced">
                 <MdBarChart className="me-1" />
                 View Details
               </Button>
@@ -403,9 +466,9 @@ const Dashboard = ({ darkMode }) => {
             <Card.Header className="d-flex justify-content-between align-items-center border-0">
               <div className="d-flex align-items-center">
                 <MdPoll className="text-primary me-2" size={20} />
-                <Card.Title className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Recent Surveys</Card.Title>
+                <Card.Title className={`mb-0 ${darkMode ? "text-white" : "text-dark"}`}>Recent Surveys Response</Card.Title>
               </div>
-              <Button variant="outline-primary" onClick={ ViewRecentSurveys } size="sm" className="btn-enhanced">
+              <Button variant="outline-primary" onClick={ViewRecentSurveys} size="sm" className="btn-enhanced">
                 <MdVisibility className="me-1" />
                 View All
               </Button>
@@ -424,21 +487,45 @@ const Dashboard = ({ darkMode }) => {
                       <th className="border-0 py-3 d-none d-md-table-cell">
                         <div className="d-flex align-items-center">
                           <MdPeople className="me-2" size={16} />
-                          Responses
+                          Respondent
                         </div>
                       </th>
-                      <th className="border-0 py-3">Status</th>
+                      <th className="border-0 py-3">Satisfaction</th>
                       <th className="border-0 py-3 d-none d-lg-table-cell">
                         <div className="d-flex align-items-center">
                           <MdTrendingUp className="me-2" size={16} />
-                          Completion
+                          Actions
                         </div>
                       </th>
                       <th className="border-0 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {currentSurveys.map((survey) => (
+                    {responses.map((response) => (
+                      <tr key={response.id}>
+                        <td>
+                          <Link to={`/surveys/${response.surveyId}`} className="text-primary text-decoration-none fw-medium">
+                            {response.surveyTitle}
+                          </Link>
+                        </td>
+                        <td>
+                          <div>
+                            <div className="fw-medium">{response.respondent}</div>
+                            <small className="text-muted">{response.email}</small>
+                          </div>
+                        </td>
+                        <td>{response.submittedAt}</td>
+                        <td className="text-center">
+                          <Badge bg={getSatisfactionVariant(response.satisfaction)}>{response.satisfaction.toFixed(1)}</Badge>
+                        </td>
+                        <td className="text-center">
+                          <button className="btn btn-sm btn-outline-primary" title="View Response">
+                            <MdVisibility />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {/* {currentSurveys.map((survey) => (
                       <tr key={survey.id}>
                         <td className="border-0 py-3 px-4">
                           <div className={`fw-medium ${darkMode ? "text-white" : "text-dark"}`}>{survey.name}</div>
@@ -472,7 +559,7 @@ const Dashboard = ({ darkMode }) => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ))} */}
                   </tbody>
                 </Table>
               </div>

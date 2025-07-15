@@ -2,17 +2,12 @@ import { createContext, useContext, useState, useEffect } from "react"
 
 const AuthContext = createContext()
 
-const demoUsers = [
-  { email: "company@ratepro.com", password: "company123", role: "Company", },
-  { email: "admin@ratepro.com", password: "admin123", role: "Admin", },
-  { email: "user@ratepro.com", password: "user123", role: "User", },
-]
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("authUser")
-    return saved ? JSON.parse(saved) : null
-  })
+    const storedUser = localStorage.getItem("authUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  
 
   const login = (email, password) => {
     const foundUser = demoUsers.find(
@@ -29,10 +24,11 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null)
     localStorage.removeItem("authUser")
+    localStorage.removeItem("token")
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   )

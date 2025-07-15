@@ -16,6 +16,13 @@ import {
   MdPerson,
 } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
+import axiosInstance from "../../api/axiosInstance";
+
+
+export const fetchUsers = async () => {
+  const response = await axiosInstance.get("/user");
+  return response.data;
+};
 
 const UsersManagement = ({ darkMode }) => {
   const [users, setUsers] = useState([])
@@ -24,98 +31,28 @@ const UsersManagement = ({ darkMode }) => {
   const [filterRole, setFilterRole] = useState("all")
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
-  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
 
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get("/users"); // endpoint check kar lena `/users` hai ya `/user`
+      const fetchedUsers = response.data.data; // check structure in your API response
+      setUsers(fetchedUsers);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.data.count,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch users", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const allUsers = [
-        {
-          id: 1,
-          name: "John Doe",
-          email: "john.doe@ratepro.com",
-          role: "Super Admin",
-          status: "Active",
-          lastLogin: "2024-01-20 14:30",
-          created: "2024-01-01",
-          department: "Administration",
-        },
-        {
-          id: 2,
-          name: "Jane Smith",
-          email: "jane.smith@ratepro.com",
-          role: "Admin",
-          status: "Active",
-          lastLogin: "2024-01-19 09:15",
-          created: "2024-01-05",
-          department: "Marketing",
-        },
-        {
-          id: 3,
-          name: "Mike Johnson",
-          email: "mike.johnson@ratepro.com",
-          role: "Editor",
-          status: "Inactive",
-          lastLogin: "2024-01-15 16:45",
-          created: "2024-01-10",
-          department: "Content",
-        },
-        {
-          id: 4,
-          name: "Sarah Wilson",
-          email: "sarah.wilson@ratepro.com",
-          role: "Viewer",
-          status: "Active",
-          lastLogin: "2024-01-20 11:20",
-          created: "2024-01-12",
-          department: "Analytics",
-        },
-        {
-          id: 5,
-          name: "David Brown",
-          email: "david.brown@ratepro.com",
-          role: "Editor",
-          status: "Pending",
-          lastLogin: "Never",
-          created: "2024-01-18",
-          department: "Research",
-        },
-        {
-          id: 6,
-          name: "Lisa Garcia",
-          email: "lisa.garcia@ratepro.com",
-          role: "Admin",
-          status: "Active",
-          lastLogin: "2024-01-19 13:45",
-          created: "2024-01-08",
-          department: "Operations",
-        },
-        {
-          id: 7,
-          name: "Tom Anderson",
-          email: "tom.anderson@ratepro.com",
-          role: "Viewer",
-          status: "Active",
-          lastLogin: "2024-01-20 08:30",
-          created: "2024-01-15",
-          department: "Sales",
-        },
-        {
-          id: 8,
-          name: "Emily Chen",
-          email: "emily.chen@ratepro.com",
-          role: "Editor",
-          status: "Active",
-          lastLogin: "2024-01-19 17:20",
-          created: "2024-01-11",
-          department: "Design",
-        },
-      ]
-      setUsers(allUsers)
-      setPagination((prev) => ({ ...prev, total: allUsers.length }))
-      setLoading(false)
-    }, 1000)
-  }, [])
+  
+    loadUsers();
+  }, []);
 
   const getStatusBadge = (status) => {
     const variants = {
@@ -160,11 +97,16 @@ const UsersManagement = ({ darkMode }) => {
     setShowDeleteModal(true)
   }
 
-  const confirmDelete = () => {
-    setUsers(users.filter((u) => u.id !== selectedUser.id))
-    setShowDeleteModal(false)
-    setSelectedUser(null)
-  }
+  const confirmDelete = async () => {
+    try {
+      await axiosInstance.delete(`/users/${selectedUser._id}`); // id ya _id API ka response check kar lena
+      setUsers(users.filter((u) => u._id !== selectedUser._id));
+      setShowDeleteModal(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Failed to delete user", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -187,7 +129,7 @@ const UsersManagement = ({ darkMode }) => {
               <p className="text-muted mb-0">Manage user accounts and permissions</p>
             </div>
             <div className="d-flex gap-2 mt-2 mt-md-0">
-              <Button variant="outline-primary" size="sm" className="btn-enhanced">
+              <Button variant="outline-primary" size="sm" className="btn-enhanced" onClick={loadUsers}>
                 <MdRefresh className="me-1" />
                 Refresh
               </Button>
@@ -343,8 +285,8 @@ const UsersManagement = ({ darkMode }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentUsers.map((user) => (
-                      <tr key={user.id}>
+                    {currentUsers.map((user) => 
+                      <tr key={user._id}>
                         <td className="py-3 px-4 border-0">
                           <div className="d-flex align-items-center">
                             <div
@@ -406,7 +348,7 @@ const UsersManagement = ({ darkMode }) => {
                           </Dropdown>
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </Table>
               </div>

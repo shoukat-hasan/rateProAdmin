@@ -3,27 +3,30 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useLocation } from "react-router-dom"
 import { Container, Row, Col, Card, Form, Button, Badge, Tab, Nav } from "react-bootstrap"
 import { MdDownload, MdFilterAlt, MdInsertChart, MdTableChart, MdTrendingUp } from "react-icons/md"
 
 const SurveyAnalytics = () => {
   const { id } = useParams()
+  const location = useLocation()
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState("30days")
   const [analytics, setAnalytics] = useState(null)
 
+
+
   useEffect(() => {
-    // Simulate loading analytics data
+    setLoading(true)
     setTimeout(() => {
       setAnalytics({
-        surveyTitle: "Customer Satisfaction Survey",
-        totalResponses: 245,
-        completionRate: 87,
-        averageTime: "3m 45s",
-        responseRate: 65,
-        npsScore: 42,
-        satisfactionScore: 4.2,
+        surveyTitle: id ? `Survey #${id}` : "All Surveys Analytics",
+        totalResponses: id ? 245 : 3500,
+        completionRate: id ? 87 : 75,
+        averageTime: id ? "3m 45s" : "4m 10s",
+        responseRate: id ? 65 : 72,
+        npsScore: id ? 42 : 48,
+        satisfactionScore: id ? 4.2 : 4.4,
         responsesByDay: [
           { date: "2023-06-01", responses: 12 },
           { date: "2023-06-02", responses: 18 },
@@ -73,10 +76,12 @@ const SurveyAnalytics = () => {
             { device: "Tablet", responses: 25, percentage: 10 },
           ],
         },
-      })
+      },
+      )
       setLoading(false)
     }, 1000)
-  }, [id, timeRange])
+  }, [id, timeRange, location.pathname])
+
 
   const exportData = (format) => {
     console.log(`Exporting data in ${format} format...`)

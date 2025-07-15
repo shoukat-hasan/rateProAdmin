@@ -37,11 +37,9 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
   }, [])
 
   const handleLogout = () => {
-    // localStorage.removeItem("authUser")
     logout()
     navigate("/login")
-  }
-  
+  } 
 
   return (
     <Navbar
@@ -71,7 +69,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
         </Button>
 
         {/* Page title - hidden on mobile when search is active */}
-        <Navbar.Brand className="mb-0 h1 d-none d-sm-flex" style={{ flex: 1, color: darkMode ? "#fff" : "#000" }}>
+        <Navbar.Brand className="mb-0 h1 d-none d-sm-flex ps-2" style={{ flex: 1, color: darkMode ? "#fff" : "#000" }}>
           Rate Pro Dashboard
         </Navbar.Brand>
 
@@ -328,7 +326,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               >
                 <MdPerson className={darkMode ? "text-white" : "text-secondary"} />
               </div>
-              <span className="d-none d-lg-inline ms-2">{capitalize(user?.role)}</span>
+              <span className="d-none d-lg-inline ms-2">{capitalize(user?.name)}</span>
             </Dropdown.Toggle>
 
             <Dropdown.Menu
