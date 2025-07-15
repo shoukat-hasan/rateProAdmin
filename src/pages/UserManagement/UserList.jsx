@@ -17,7 +17,7 @@ const UserList = ({ darkMode }) => {
     role: "",
     status: "",
   })
-  const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -36,18 +36,14 @@ const UserList = ({ darkMode }) => {
           },
         });
 
-        const { data, count, pagination: serverPagination } = response.data;
+        const { data, pagination: serverPagination } = response.data;
 
         setUsers(data);
-        setPagination((prev) => ({
-          ...prev,
-          total: count,
-          page: serverPagination?.next?.page
-            ? pagination.page
-            : pagination.page > 1 && count === 0
-              ? pagination.page - 1
-              : pagination.page,
-        }));
+        setPagination({
+          page: serverPagination.page,
+          limit: serverPagination.limit,
+          total: serverPagination.total
+        });   
 
       } catch (error) {
         console.error("Failed to fetch users", error);
@@ -94,9 +90,7 @@ const UserList = ({ darkMode }) => {
     return <div className="text-center py-4">Loading users...</div>
   }
 
-  const startIndex = (pagination.page - 1) * pagination.limit
-  const endIndex = startIndex + pagination.limit
-  const currentUsers = users.slice(startIndex, endIndex)
+  // const currentUsers = users
 
   return (
     <Container fluid className="py-4">
@@ -165,7 +159,7 @@ const UserList = ({ darkMode }) => {
                 </tr>
               </thead>
               <tbody>
-                {currentUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user._id}>
                     <td>
                       <div className="d-flex align-items-center">
@@ -216,7 +210,7 @@ const UserList = ({ darkMode }) => {
             </small>
             <Pagination
               current={pagination.page}
-              total={users.length}
+              total={pagination.total}
               limit={pagination.limit}
               onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
               darkMode={darkMode}
