@@ -326,7 +326,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               >
                 <MdPerson className={darkMode ? "text-white" : "text-secondary"} />
               </div>
-              <span className="d-none d-lg-inline ms-2">{capitalize(user?.name)}</span>
+              <span className="d-none d-lg-inline ms-2">{capitalize(user?.name?.split(" ")[0])}</span>
             </Dropdown.Toggle>
 
             <Dropdown.Menu

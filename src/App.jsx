@@ -282,6 +282,7 @@ import Features from "./pages/ContentManagement/Features"
 import Pricing from "./pages/ContentManagement/Pricing"
 import ContactManagement from "./pages/Audiences/ContactManagement"
 import Support from "./pages/Support/CreateTicket"
+import VerifyEmail from "./pages/Auth/VerifyEmail"
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -317,6 +318,7 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/enter-email" element={<EnterEmail />} />
             <Route path="/enter-reset-code" element={<EnterResetCode />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
 
             {/* Default redirect */}
             <Route path="/" element={<Navigate to="/login" />} />
