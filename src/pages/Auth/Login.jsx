@@ -160,6 +160,7 @@ import { FaEye, FaEyeSlash, FaSignInAlt } from "react-icons/fa"
 import axiosInstance from "../../api/axiosInstance"
 import AuthLayout from "../../layouts/AuthLayout"
 import { useAuth } from "../../context/AuthContext"
+import Swal from "sweetalert2"
 
 const Login = () => {
   const [email, setEmail] = useState("")
@@ -173,14 +174,15 @@ const Login = () => {
   // const handleSubmit = async (e) => {
   //   e.preventDefault()
   //   setLoading(true)
-  //   setError("")
+  //   setError("")    
 
   //   try {
   //     const response = await axiosInstance.post("/auth/login", { email, password })
 
-  //     // Save token and user in localStorage
+  //     // Save token and user in localStorage if needed (although better to use cookies)
   //     localStorage.setItem("token", response.data.token)
   //     localStorage.setItem("authUser", JSON.stringify(response.data.user))
+  //     setUser(response.data.user) 
 
   //     // Role-based redirect
   //     if (response.data.user.role === "user") {
@@ -194,59 +196,51 @@ const Login = () => {
   //   } finally {
   //     setLoading(false)
   //   }
-  // }
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault()
-  //   setLoading(true)
-  //   setError("")
-
-  //   try {
-  //     await new Promise((resolve) => setTimeout(resolve, 500))
-
-  //     const success = login(email, password)
-  //     if (success) {
-  //       const loggedInUser = JSON.parse(localStorage.getItem("authUser"))
-  //       if (loggedInUser.role === "User") {
-  //         window.location.href = "https://ratepro-sa.com"
-  //       } else {
-  //         navigate("/app")
-  //       }
-  //     } else {
-  //       setError("Invalid email or password.")
-  //     }
-  //   } catch (err) {
-  //     setError("An error occurred. Please try again.")
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
+  // }  
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")    
-    
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
     try {
-      const response = await axiosInstance.post("/auth/login", { email, password })
-      
-      // Save token and user in localStorage if needed (although better to use cookies)
-      localStorage.setItem("token", response.data.token)
-      localStorage.setItem("authUser", JSON.stringify(response.data.user))
-      setUser(response.data.user) 
-  
-      // Role-based redirect
+      const response = await axiosInstance.post("/auth/login", {
+        email,
+        password,
+        source: "admin", // zaroori field
+      });
+
+      // ✅ Save user to localStorage
+      localStorage.setItem("authUser", JSON.stringify(response.data.user));
+      setUser(response.data.user); // context update
+
+      // ✅ Redirect based on role
       if (response.data.user.role === "user") {
-        window.location.href = "https://ratepro-sa.com"
+        window.location.href = "https://ratepro-sa.com";
       } else {
-        navigate("/app")
+        navigate("/app");
       }
-  
+
     } catch (err) {
-      setError(err.response?.data.message || "Invalid email or password.")
+      const message = err.response?.data?.message;
+
+      if (message?.includes("not verified")) {
+        // ❗ Email not verified case
+        Swal.fire({
+          icon: "warning",
+          title: "Email Not Verified",
+          text: message,
+          confirmButtonColor: "#0d6efd",
+        });
+      } else {
+        // ❌ Invalid credentials or other errors
+        setError(message || "Invalid email or password.");
+      }
+
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }  
+  };
 
   return (
     <AuthLayout
