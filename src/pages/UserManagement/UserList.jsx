@@ -17,43 +17,76 @@ const UserList = ({ darkMode }) => {
     role: "",
     status: "",
   })
-  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await axiosInstance.get("/user", {
+  //         params: {
+  //           page: pagination.page,
+  //           limit: pagination.limit,
+  //           search: searchTerm,
+  //           role: filters.role,
+  //           isActive: filters.status,
+  //         },
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,  // ya jahan se tu token store kar raha hai
+  //         },
+  //       });
+
+  //       const { data, pagination: serverPagination } = response.data;
+
+  //       setUsers(data);
+  //       setPagination({
+  //         page: serverPagination.page,
+  //         limit: serverPagination.limit,
+  //         total: serverPagination.total
+  //       });   
+
+  //     } catch (error) {
+  //       console.error("Failed to fetch users", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchUsers();
+  // }, [searchTerm, filters, pagination.page]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosInstance.get("/user", {
-          params: {
-            page: pagination.page,
-            limit: pagination.limit,
-            search: searchTerm,
-            role: filters.role,
-            isActive: filters.status,
-          },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,  // ya jahan se tu token store kar raha hai
-          },
-        });
-
-        const { data, pagination: serverPagination } = response.data;
-
-        setUsers(data);
-        setPagination({
-          page: serverPagination.page,
-          limit: serverPagination.limit,
-          total: serverPagination.total
-        });   
-
-      } catch (error) {
-        console.error("Failed to fetch users", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
-  }, [searchTerm, filters, pagination.page]);
+  }, [searchTerm, filters, pagination.page]);  
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get("/users", {
+        params: {
+          page: pagination.page,
+          limit: pagination.limit,
+          search: searchTerm,
+          role: filters.role,
+          active: filters.status === "Active" ? "true" : filters.status === "Inactive" ? "false" : undefined,
+        },
+      });
+
+      const { users, total, page: currentPage } = response.data;
+
+      setUsers(users);
+      setPagination((prev) => ({
+        ...prev,
+        page: currentPage,
+        total: total,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch users", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const getRoleVariant = (role) => {
     switch (role) {
@@ -182,6 +215,7 @@ const UserList = ({ darkMode }) => {
                       <Badge bg={getStatusVariant(user.status)}>{user.status}</Badge>
                     </td>
                     <td>{user.lastLogin}</td>
+                    {/* <td>{new Date(user.lastLogin).toLocaleString()}</td> */}
                     <td>
                       <div className="d-flex justify-content-center gap-1">
                         <Button as={Link} to={`/users/${user.id}/edit`} variant="outline-primary" size="sm">
