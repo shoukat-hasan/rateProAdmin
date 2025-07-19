@@ -283,6 +283,7 @@ import Pricing from "./pages/ContentManagement/Pricing"
 import ContactManagement from "./pages/Audiences/ContactManagement"
 import Support from "./pages/Support/CreateTicket"
 import VerifyEmail from "./pages/Auth/VerifyEmail"
+import TokenRedirector from "./components/TokenRedirector"
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
