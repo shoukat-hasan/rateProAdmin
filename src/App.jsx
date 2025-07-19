@@ -225,7 +225,7 @@ import Dashboard from "./pages/Dashboard/Dashboard"
 import Login from "./pages/Auth/Login"
 import Signup from "./pages/Auth/Signup"
 import CompanyRegistration from "./pages/Auth/CompanyRegistration"
-import ForgotPassword from "./pages/Auth/ForgotPassword"
+import ForgotPasswordFlow from "./pages/Auth/ForgotPasswordFlow"
 import ResetPassword from "./pages/Auth/ResetPassword"
 import EnterEmail from "./pages/Auth/EnterEmail"
 import EnterResetCode from "./pages/Auth/EnterResetCode"
@@ -304,17 +304,19 @@ function App() {
     document.documentElement.classList.toggle("dark", darkMode)
     localStorage.setItem("darkMode", JSON.stringify(darkMode))
   }, [darkMode])
+  
 
   return (
     <Router>
       <AuthProvider>
         <div className={`app-container ${darkMode ? "dark" : "light"}`}>
           <Routes>
+          <Route path="/auth-redirect" element={<TokenRedirector />} />
             {/* Auth Pages */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/company-registration" element={<CompanyRegistration />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/forgot-password" element={<ForgotPasswordFlow />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/enter-email" element={<EnterEmail />} />
             <Route path="/enter-reset-code" element={<EnterResetCode />} />

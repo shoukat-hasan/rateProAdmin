@@ -171,33 +171,6 @@ const Login = () => {
   const navigate = useNavigate()
   const { setUser } = useAuth()
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault()
-  //   setLoading(true)
-  //   setError("")    
-
-  //   try {
-  //     const response = await axiosInstance.post("/auth/login", { email, password })
-
-  //     // Save token and user in localStorage if needed (although better to use cookies)
-  //     localStorage.setItem("token", response.data.token)
-  //     localStorage.setItem("authUser", JSON.stringify(response.data.user))
-  //     setUser(response.data.user) 
-
-  //     // Role-based redirect
-  //     if (response.data.user.role === "user") {
-  //       window.location.href = "https://ratepro-sa.com"
-  //     } else {
-  //       navigate("/app")
-  //     }
-
-  //   } catch (err) {
-  //     setError(err.response?.data.message || "Invalid email or password.")
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -234,7 +207,12 @@ const Login = () => {
         });
       } else {
         // ❌ Invalid credentials or other errors
-        setError(message || "Invalid email or password.");
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: message || "Invalid email or password.",
+          confirmButtonColor: "#d33",
+        });
       }
 
     } finally {

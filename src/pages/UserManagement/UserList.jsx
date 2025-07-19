@@ -32,7 +32,7 @@ const UserList = ({ darkMode }) => {
             isActive: filters.status,
           },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,  // ya jahan se tu token store kar raha hai
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,  // ya jahan se tu token store kar raha hai
           },
         });
 

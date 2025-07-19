@@ -30,3 +30,21 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+
+export const forgotPassword = ({ email }) =>
+  axiosInstance.post("/auth/forgot-password", { email });
+
+export const verifyResetCode = ({ email, code }) => {
+  const payload = {
+    email: email.trim(),
+    code: code.trim(),
+  };
+  console.log("Sending to backend:", payload);
+  return axiosInstance.post("/auth/verify-reset-code", payload); // ✅ Return it!
+};
+
+export const resetPassword = ({ email, code, newPassword }) =>
+  axiosInstance.post("/auth/reset-password", { email, code, newPassword });
+
+export const verifyEmail = ({ email, code }) =>
+  axiosInstance.post("/auth/verify-email", { email, code });
