@@ -90,6 +90,8 @@ const UserList = ({ darkMode }) => {
   // };
   const fetchUsers = async () => {
     setLoading(true);
+    console.log("📱 [MOBILE DEBUG] token from localStorage:", localStorage.getItem("token"));
+
     try {
       const response = await axiosInstance.get("/users", {
         params: {
@@ -119,6 +121,7 @@ const UserList = ({ darkMode }) => {
       }));
     } catch (error) {
       console.error("Failed to fetch users", error);
+      console.log("❌ API error on mobile:", error?.response?.status, error?.response?.data);
     } finally {
       setLoading(false);
     }
@@ -172,7 +175,17 @@ const UserList = ({ darkMode }) => {
     }
   };
 
-  // const currentUsers = users
+  const log = (msg) => {
+    const logDiv = document.getElementById("mobile-log");
+    if (logDiv) {
+      logDiv.innerText += msg + "\n";
+    }
+  };
+  
+  log("Token: " + localStorage.getItem("accessToken"));
+  
+
+  const currentUsers = users
 
   return (
     // <Container fluid className="py-4">
@@ -303,6 +316,7 @@ const UserList = ({ darkMode }) => {
     //   </Card>
     // </Container>
     <Container fluid className="py-4">
+    <pre id="mobile-log" style={{ whiteSpace: "pre-wrap", fontSize: "12px", background: "#eee", padding: "10px", marginTop: "10px" }} />
       {/* Header */}
       <Row className="mb-4">
         <Col xs={12}>
@@ -337,8 +351,8 @@ const UserList = ({ darkMode }) => {
               <Form.Select name="role" value={filters.role} onChange={handleFilterChange}>
                 <option value="">All Roles</option>
                 <option value="Admin">Admin</option>
-                <option value="Editor">Editor</option>
-                <option value="Viewer">Viewer</option>
+                <option value="Company">Company</option>
+                <option value="User">User</option>
               </Form.Select>
             </Col>
             <Col xs={12} md={4}>
