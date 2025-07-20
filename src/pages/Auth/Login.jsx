@@ -175,30 +175,33 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
       const response = await axiosInstance.post("/auth/login", {
         email,
         password,
-        source: "admin", // zaroori field
+        source: "admin", // required to construct proper verification URL
       });
-
-      // ✅ Save user to localStorage
-      localStorage.setItem("authUser", JSON.stringify(response.data.user));
-      setUser(response.data.user); // context update
-
+  
+      const { accessToken, user } = response.data;
+  
+      // ✅ Save accessToken and user info (optional: depending on auth strategy)
+      localStorage.setItem("authUser", JSON.stringify(user));
+      localStorage.setItem("accessToken", accessToken); // optional if you're using token in headers
+      setUser(user); // update auth context / state
+  
       // ✅ Redirect based on role
-      if (response.data.user.role === "user") {
-        window.location.href = "https://ratepro-sa.com";
+      if (user.role === "user") {
+        window.location.href = "https://ratepro-sa.com"; // public dashboard
       } else {
-        navigate("/app");
+        navigate("/app"); // internal admin/company dashboard
       }
-
+  
     } catch (err) {
       const message = err.response?.data?.message;
-
-      if (message?.includes("not verified")) {
-        // ❗ Email not verified case
+  
+      if (message?.toLowerCase()?.includes("not verified")) {
+        // ❗ Handle email not verified
         Swal.fire({
           icon: "warning",
           title: "Email Not Verified",
@@ -206,7 +209,7 @@ const Login = () => {
           confirmButtonColor: "#0d6efd",
         });
       } else {
-        // ❌ Invalid credentials or other errors
+        // ❌ Handle general login error
         Swal.fire({
           icon: "error",
           title: "Login Failed",
@@ -214,11 +217,12 @@ const Login = () => {
           confirmButtonColor: "#d33",
         });
       }
-
+  
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <AuthLayout
