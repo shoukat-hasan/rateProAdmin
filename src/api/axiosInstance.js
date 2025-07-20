@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 
 // Optional: Request interceptor (if token based header lagana ho future me)
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
