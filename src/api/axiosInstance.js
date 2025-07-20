@@ -48,3 +48,10 @@ export const resetPassword = ({ email, code, newPassword }) =>
 
 export const verifyEmail = ({ email, code }) =>
   axiosInstance.post("/auth/verify-email", { email, code });
+
+export const toggleUserActiveStatus = (userId) =>
+  axiosInstance.put(`/users/toggle/${userId}`);
+
+export const deleteUserById = (id) => {
+  return axiosInstance.delete(`/users/${id}`);
+};

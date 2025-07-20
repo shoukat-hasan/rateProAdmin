@@ -284,6 +284,7 @@ import ContactManagement from "./pages/Audiences/ContactManagement"
 import Support from "./pages/Support/CreateTicket"
 import VerifyEmail from "./pages/Auth/VerifyEmail"
 import TokenRedirector from "./components/TokenRedirector"
+import { ToastContainer } from "react-toastify"
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -423,6 +424,7 @@ function App() {
           </Routes>
         </div>
       </AuthProvider>
+      <ToastContainer />
     </Router>
   )
 }
