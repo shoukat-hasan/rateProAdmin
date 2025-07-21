@@ -95,3 +95,12 @@ export const getCurrentUser = () => axiosInstance.get("/auth/me")
 
 export const updateProfile = (data) =>
 axiosInstance.put("/users/me", data, { withCredentials: true });
+
+export const updateUserProfile = (formData) =>
+axiosInstance.put("/auth/update-profile", formData, {
+  withCredentials: true,
+  headers: {
+    // "Content-Type": "multipart/form-data", // Required if avatar is included
+    "Content-Type": "application/json",
+  },
+});
