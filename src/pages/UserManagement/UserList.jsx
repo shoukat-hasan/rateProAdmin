@@ -289,9 +289,10 @@ import {
   MdPerson,
   MdToggleOn,
   MdToggleOff,
+  MdPictureAsPdf,
 } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
-import axiosInstance, { deleteUserById, toggleUserActiveStatus } from "../../api/axiosInstance.js"
+import axiosInstance, { deleteUserById, exportUserPDF, toggleUserActiveStatus } from "../../api/axiosInstance.js"
 import { capitalize } from "../../utilities/capitalize.jsx"
 import { toast } from "react-toastify";
 import Swal from "sweetalert2"
@@ -367,15 +368,15 @@ const UserList = ({ darkMode }) => {
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
     });
-  
+
     if (result.isConfirmed) {
       try {
         const res = await deleteUserById(userId);
-  
+
         setUsers((prev) => prev.filter((user) => user._id !== userId));
-  
+
         toast.success(res.data.message || "User deleted successfully");
-  
+
         // Optional: show sweetalert success
         Swal.fire("Deleted!", "User has been deleted.", "success");
       } catch (error) {
@@ -427,6 +428,28 @@ const UserList = ({ darkMode }) => {
     }
     return map[status] || "secondary"
   }
+
+  // ...
+
+  const handleExport = async (userId) => {
+    try {
+      const response = await exportUserPDF(userId);
+  
+      const blob = new Blob([response.data], { type: response.headers["content-type"] });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `user-${userId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Export error", err);
+    }
+  };
+
+
+
 
   return (
     <Container fluid className="py-4">
@@ -538,6 +561,9 @@ const UserList = ({ darkMode }) => {
                             onClick={() => handleToggleActive(user._id, user.isActive)}
                           >
                             {user.isActive ? <MdToggleOn size={20} /> : <MdToggleOff size={20} />}
+                          </Button>
+                          <Button variant="outline-secondary" onClick={() => handleExport(user._id)}>
+                            <MdPictureAsPdf className="" />
                           </Button>
                         </div>
                       </td>

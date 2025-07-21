@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  // baseURL: 'https://rateprobackend-production.up.railway.app/api',
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
   headers: {
@@ -83,3 +82,16 @@ export const updateUser = (id, data) => axiosInstance.put(`/users/${id}`, data);
 //     },
 //   });
 // };
+
+export const exportUserPDF = async (userId) => {
+  if (!userId) throw new Error("User ID is required for export");
+  const response = await axiosInstance.get(`/users/export/${userId}`, {
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const getCurrentUser = () => axiosInstance.get("/auth/me")
+
+export const updateProfile = (data) =>
+axiosInstance.put("/users/me", data, { withCredentials: true });

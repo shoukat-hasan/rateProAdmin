@@ -62,7 +62,7 @@ const Profile = ({ darkMode }) => {
               <p className="text-muted mb-0">Manage your account settings and preferences</p>
             </div>
             <div className="d-flex gap-2">
-              {isEditing ? (
+              {/* {isEditing ? (
                 <>
                   <Button variant="outline-secondary" size="sm" onClick={handleCancel}>
                     <MdCancel className="me-1" />
@@ -78,6 +78,23 @@ const Profile = ({ darkMode }) => {
                   <MdEdit className="me-1" />
                   Edit Profile
                 </Button>
+              )} */}
+
+              {activeTab === "profile" && (
+                isEditing ? (
+                  <>
+                    <button onClick={handleCancel} className="btn btn-outline-secondary btn-sm">
+                      <MdCancel className="me-1" /> Cancel
+                    </button>
+                    <button onClick={handleSave} className="btn btn-primary btn-sm">
+                      <MdSave className="me-1" /> Save
+                    </button>
+                  </>
+                ) : (
+                  <button onClick={() => setIsEditing(true)} className="btn btn-primary btn-sm">
+                    <MdEdit className="me-1" /> Edit Profile
+                  </button>
+                )
               )}
             </div>
           </div>
