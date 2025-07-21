@@ -302,6 +302,7 @@ const UserList = ({ darkMode }) => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [filters, setFilters] = useState({
     role: "",
     status: "",
@@ -318,6 +319,11 @@ const UserList = ({ darkMode }) => {
   useEffect(() => {
     fetchUsers()
   }, [debouncedSearch, filters, pagination.page])
+
+  useEffect(() => {
+    const loggedInUser = JSON.parse(localStorage.getItem("authUser"));
+    setCurrentUserId(loggedInUser?._id || null);
+  }, []);
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -358,7 +364,49 @@ const UserList = ({ darkMode }) => {
     setFilters((prev) => ({ ...prev, [name]: value }))
   }
 
+  // const handleDeleteUser = async (userId) => {
+  //   const result = await Swal.fire({
+  //     title: "Are you sure?",
+  //     text: "This user will be marked as deleted!",
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#d33",
+  //     cancelButtonColor: "#3085d6",
+  //     confirmButtonText: "Yes, delete it!",
+  //   });
+
+  //   if (result.isConfirmed) {
+  //     try {
+  //       const res = await deleteUserById(userId);
+
+  //       setUsers((prev) => prev.filter((user) => user._id !== userId));
+
+  //       toast.success(res.data.message || "User deleted successfully");
+
+  //       // Optional: show sweetalert success
+  //       Swal.fire("Deleted!", "User has been deleted.", "success");
+  //     } catch (error) {
+  //       toast.error(
+  //         error.response?.data?.message || "Failed to delete user"
+  //       );
+  //     }
+  //   }
+  // };
+
   const handleDeleteUser = async (userId) => {
+    const currentUserId = JSON.parse(localStorage.getItem("authUser"))?._id;
+
+    console.log(currentUserId)
+
+    if (userId === currentUserId) {
+      Swal.fire({
+        icon: "error",
+        title: "Action Forbidden",
+        text: "You cannot delete your own account!",
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "This user will be marked as deleted!",
@@ -377,7 +425,6 @@ const UserList = ({ darkMode }) => {
 
         toast.success(res.data.message || "User deleted successfully");
 
-        // Optional: show sweetalert success
         Swal.fire("Deleted!", "User has been deleted.", "success");
       } catch (error) {
         toast.error(
@@ -434,7 +481,7 @@ const UserList = ({ darkMode }) => {
   const handleExport = async (userId) => {
     try {
       const response = await exportUserPDF(userId);
-  
+
       const blob = new Blob([response.data], { type: response.headers["content-type"] });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -551,7 +598,8 @@ const UserList = ({ darkMode }) => {
                           <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary">
                             <MdEdit />
                           </Button>
-                          <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(user._id)}>
+                          <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(user._id)} disabled={user._id === currentUserId}
+                            title={user._id === currentUserId ? "You can't delete your own account" : "Delete user"}>
                             <MdDelete />
                           </Button>
                           <Button

@@ -910,3 +910,12 @@ body {
 .dark .modal-enhanced .modal-footer {
   border-top-color: var(--dark-border);
 }
+
+button.btn-outline-danger:disabled {
+  background-color: #e9ecef !important;
+  border-color: #ced4da !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+  opacity: 0.75;
+}
+
