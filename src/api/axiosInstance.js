@@ -104,3 +104,10 @@ axiosInstance.put("/auth/update-profile", formData, {
     "Content-Type": "application/json",
   },
 });
+
+export const sendUserNotification = async (userId, subject, message) => {
+  return await axiosInstance.post(`/users/notify/${userId}`, {
+    subject,
+    message,
+  });
+};

@@ -268,7 +268,7 @@ const Profile = ({ darkMode }) => {
           >
             <Card.Body className="text-center">
               <div
-                className="profile-avatar mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center"
+                className="profile-avatar mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center relative"
                 style={{
                   width: "120px",
                   height: "120px",

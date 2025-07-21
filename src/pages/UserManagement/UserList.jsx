@@ -290,10 +290,12 @@ import {
   MdToggleOn,
   MdToggleOff,
   MdPictureAsPdf,
+  MdEmail,
 } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
-import axiosInstance, { deleteUserById, exportUserPDF, toggleUserActiveStatus } from "../../api/axiosInstance.js"
+import axiosInstance, { deleteUserById, exportUserPDF, sendUserNotification, toggleUserActiveStatus } from "../../api/axiosInstance.js"
 import { capitalize } from "../../utilities/capitalize.jsx"
+import EmailModal from "../../components/Modal/EmailModal.jsx";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2"
 
@@ -308,6 +310,12 @@ const UserList = ({ darkMode }) => {
     status: "",
   })
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
+  const [selectedEmail, setSelectedEmail] = useState("");
+  const [sending, setSending] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState("");
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -476,7 +484,35 @@ const UserList = ({ darkMode }) => {
     return map[status] || "secondary"
   }
 
-  // ...
+  const handleOpenEmailModal = (id, email) => {
+    setSelectedEmail(email);
+    setSelectedUserId(id);
+    setShowEmailModal(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailSubject.trim() || !emailMessage.trim()) {
+      Swal.fire("Error", "Please fill out both subject and message.", "error");
+      return;
+    }
+
+    setSending(true);
+
+    try {
+      await sendUserNotification(selectedUserId, emailSubject, emailMessage); // You should have `selectedUserId` in state
+
+      Swal.fire("Success", "Email sent successfully!", "success");
+
+      setShowEmailModal(false);
+      setEmailSubject("");
+      setEmailMessage("");
+    } catch (error) {
+      Swal.fire("Error", error.response?.data?.message || "Failed to send email", "error");
+    } finally {
+      setSending(false);
+    }
+  };
+
 
   const handleExport = async (userId) => {
     try {
@@ -613,6 +649,13 @@ const UserList = ({ darkMode }) => {
                           <Button variant="outline-secondary" onClick={() => handleExport(user._id)}>
                             <MdPictureAsPdf className="" />
                           </Button>
+                          <Button
+                            variant="outline-info"
+                            size="sm"
+                            onClick={() => handleOpenEmailModal(user._id, user.email)}
+                            title={`Send email to ${user.email}`}>
+                            <MdEmail />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -636,6 +679,17 @@ const UserList = ({ darkMode }) => {
           />
         </Card.Footer>
       </Card>
+      <EmailModal
+        show={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSend={handleSendEmail}
+        subject={emailSubject}
+        setSubject={setEmailSubject}
+        message={emailMessage}
+        setMessage={setEmailMessage}
+        recipientEmail={selectedEmail}
+        sending={sending}
+      />
     </Container>
   )
 }
