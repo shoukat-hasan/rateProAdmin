@@ -303,12 +303,13 @@
 
 "use client"
 
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import { Container, Row, Col, Card, Form, Button, Spinner } from "react-bootstrap"
 import Swal from "sweetalert2"
 import { MdSave, MdArrowBack, MdVisibility, MdVisibilityOff } from "react-icons/md"
 import { createUser } from "../../api/createUser"
+import { getUserById, updateUser } from "../../api/axiosInstance"
 
 const UserForm = () => {
   const navigate = useNavigate()
@@ -324,6 +325,8 @@ const UserForm = () => {
   const [errors, setErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -332,17 +335,42 @@ const UserForm = () => {
   }
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
-    if (!user.name.trim()) newErrors.name = "Name is required"
-    if (!user.email.trim()) newErrors.email = "Email is required"
-    if (!user.password.trim()) newErrors.password = "Password is required"
-    if (!user.role) newErrors.role = "Role is required"
-    if (!user.status) newErrors.status = "Status is required"
+    if (!user.name.trim()) newErrors.name = "Name is required";
+    if (!user.email.trim()) newErrors.email = "Email is required";
+    if (!isEditMode && !user.password.trim()) newErrors.password = "Password is required";
+    if (!user.role) newErrors.role = "Role is required";
+    if (!user.status) newErrors.status = "Status is required";
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  useEffect(() => {
+    if (id) {
+      getUserById(id)
+        .then((res) => {
+          // console.log("Full res.data:", res.data);
+          const { name, email, role, isActive } = res.data.user;
+
+          setUser({
+            name,
+            email,
+            password: "", // Leave blank on edit
+            role,
+            status: isActive ? "Active" : "Inactive", // Map isActive to status
+          });
+        })
+        .catch((err) => {
+          console.error("Error loading user:", err);
+          Swal.fire("Error", "Failed to load user data", "error");
+          navigate("/app/users");
+        });
+    }
+  }, [id]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -359,19 +387,21 @@ const UserForm = () => {
     setIsSubmitting(true)
 
     try {
-      await createUser(user)
+      if (isEditMode) {
+        const { password, ...userWithoutPassword } = user
+        await updateUser(id, userWithoutPassword)
+        Swal.fire({ icon: "success", title: "User Updated" })
+      } else {
+        await createUser(user)
+        Swal.fire({ icon: "success", title: "User Created" })
+      }
 
-      Swal.fire({
-        icon: "success",
-        title: "User Created",
-        text: "User has been created successfully!",
-      }).then(() => navigate("/app/users"))
+      navigate("/app/users")
     } catch (error) {
-      console.error("Error creating user:", error)
       Swal.fire({
         icon: "error",
         title: "Failed",
-        text: error.response?.data?.message || "Failed to create user",
+        text: error.response?.data?.message || "Failed to submit user data",
       })
     } finally {
       setIsSubmitting(false)
@@ -390,7 +420,7 @@ const UserForm = () => {
             >
               <MdArrowBack className="me-1" /> Back
             </Button>
-            <h1 className="h3 mb-0">Create User</h1>
+            <h1 className="h3 mb-0">{isEditMode ? "Edit User" : "Create User"}</h1>
           </div>
         </Col>
       </Row>
@@ -434,30 +464,33 @@ const UserForm = () => {
 
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3" style={{ position: "relative" }}>
+                    <Form.Group className="mb-3">
                       <Form.Label>Password</Form.Label>
-                      <Form.Control
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        autoComplete="new-password"
-                        value={user.password}
-                        onChange={handleChange}
-                        placeholder="Minimum 8 characters"
-                      />
-                      <span
-                        onClick={() => setShowPassword(!showPassword)}
-                        style={{
-                          position: "absolute",
-                          top: "70%",
-                          right: "10px",
-                          transform: "translateY(-50%)",
-                          cursor: "pointer",
-                          color: "#888",
-                          fontSize: "1.1rem"
-                        }}
-                      >
-                        {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
-                      </span>
+                      <div style={{ position: "relative" }}>
+                        <Form.Control
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          autoComplete="new-password"
+                          value={user.password}
+                          onChange={handleChange}
+                          placeholder={isEditMode ? "Password unchanged" : "Minimum 8 characters"}
+                          disabled={isEditMode}
+                        />
+                        <span
+                          onClick={() => setShowPassword(!showPassword)}
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            right: "10px",
+                            transform: "translateY(-50%)",
+                            cursor: isEditMode ? "not-allowed" : "pointer",
+                            color: "#888",
+                            fontSize: "1.1rem"
+                          }}
+                        >
+                          {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
+                        </span>
+                      </div>
                       {errors.password && <div className="text-danger">{errors.password}</div>}
                     </Form.Group>
                   </Col>
@@ -514,12 +547,12 @@ const UserForm = () => {
                     {isSubmitting ? (
                       <>
                         <Spinner size="sm" className="me-2" animation="border" />
-                        Creating...
+                        Submitting...
                       </>
                     ) : (
                       <>
                         <MdSave className="me-2" />
-                        Create User
+                        {isEditMode ? "Update User" : "Create User"}
                       </>
                     )}
                   </Button>

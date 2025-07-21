@@ -55,3 +55,31 @@ export const toggleUserActiveStatus = (userId) =>
 export const deleteUserById = (id) => {
   return axiosInstance.delete(`/users/${id}`);
 };
+
+export const getUserById = (id) => axiosInstance.get(`/users/${id}`)
+
+export const updateUser = (id, data) => axiosInstance.put(`/users/${id}`, data);
+// export const updateUser = (id, data) => {
+//   const formData = new FormData();
+
+//   formData.append("name", data.name);
+//   formData.append("email", data.email);
+//   formData.append("role", data.role);
+//   formData.append("isActive", data.status === "Active");
+
+//   // Only include password if it's being updated
+//   if (data.password) {
+//     formData.append("password", data.password);
+//   }
+
+//   // Only include avatar if it was changed
+//   if (data.avatar instanceof File) {
+//     formData.append("avatar", data.avatar);
+//   }
+
+//   return axiosInstance.put(`/users/${id}`, formData, {
+//     headers: {
+//       "Content-Type": "multipart/form-data",
+//     },
+//   });
+// };

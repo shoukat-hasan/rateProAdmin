@@ -468,7 +468,7 @@ const UserList = ({ darkMode }) => {
             </Col>
             <Col md>
               <Form.Select name="status" value={filters.status} onChange={handleFilterChange}>
-                <option value="">All Statuses</option>
+                <option value="">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
                 <option value="pending">Pending</option>
@@ -525,7 +525,7 @@ const UserList = ({ darkMode }) => {
                       </td>
                       <td className="text-center">
                         <div className="d-flex justify-content-center gap-2">
-                          <Button as={Link} to={`/users/${user._id}/edit`} size="sm" variant="outline-primary">
+                          <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary">
                             <MdEdit />
                           </Button>
                           <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(user._id)}>
