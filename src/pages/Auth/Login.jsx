@@ -184,6 +184,17 @@ const Login = () => {
       });
   
       const { accessToken, user } = response.data;
+      console.log("User:", user); 
+
+      if (!user.isActive) {
+        Swal.fire({
+          icon: "error",
+          title: "Account Inactive",
+          text: "Your account is currently inactive. Please contact the administrator.",
+          confirmButtonColor: "#d33",
+        });
+        return; // stop login process
+      }
   
       // ✅ Save accessToken and user info (optional: depending on auth strategy)
       localStorage.setItem("authUser", JSON.stringify(user));

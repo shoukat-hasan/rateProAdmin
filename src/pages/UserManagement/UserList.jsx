@@ -343,9 +343,9 @@ const UserList = ({ darkMode }) => {
           search: debouncedSearch,
           role: filters.role,
           active:
-            filters.status === "Active"
+            filters.status === "active"
               ? "true"
-              : filters.status === "Inactive"
+              : filters.status === "inactive"
                 ? "false"
                 : undefined,
         },
@@ -577,7 +577,7 @@ const UserList = ({ darkMode }) => {
                 <option value="">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
-                <option value="pending">Pending</option>
+                {/* <option value="pending">Pending</option> */}
               </Form.Select>
             </Col>
           </Row>

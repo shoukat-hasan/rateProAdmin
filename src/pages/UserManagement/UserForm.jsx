@@ -319,7 +319,7 @@ const UserForm = () => {
     email: "",
     password: "",
     role: "",
-    status: "",
+    isActive: "",
   })
 
   const [errors, setErrors] = useState({})
@@ -341,7 +341,9 @@ const UserForm = () => {
     if (!user.email.trim()) newErrors.email = "Email is required";
     if (!isEditMode && !user.password.trim()) newErrors.password = "Password is required";
     if (!user.role) newErrors.role = "Role is required";
-    if (!user.status) newErrors.status = "Status is required";
+    if (user.isActive === undefined || user.isActive === null)
+      newErrors.isActive = "Status is required";
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -360,7 +362,7 @@ const UserForm = () => {
             email,
             password: "", // Leave blank on edit
             role,
-            status: isActive ? "Active" : "Inactive", // Map isActive to status
+            isActive: isActive.toString(), // Map isActive to status
           });
         })
         .catch((err) => {
@@ -372,41 +374,88 @@ const UserForm = () => {
   }, [id]);
 
 
+  //   const handleSubmit = async (e) => {
+  //     e.preventDefault()
+
+  //     if (!validateForm()) {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Validation Error",
+  //         text: "Please fill all required fields.",
+  //       })
+  //       return
+  //     }
+
+  //     setIsSubmitting(true)
+
+  //     try {
+  //       if (isEditMode) {
+  //         const { password, ...userWithoutPassword } = user
+  //         await updateUser(id, userWithoutPassword)
+  //         Swal.fire({ icon: "success", title: "User Updated" })
+  //       } else {
+  //         const preparedUser = {
+  //           ...user,
+  //           isActive: user.isActive === "true",
+  //         };
+  //         console.log("🔍 Creating user with data:", preparedUser);
+  //         await createUser(preparedUser);
+  //         Swal.fire({ icon: "success", title: "User Created" });
+  //       }
+  //     }
+
+  //       navigate("/app/users")
+  //   } catch (error) {
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Failed",
+  //       text: error.response?.data?.message || "Failed to submit user data",
+  //     })
+  //   } finally {
+  //     setIsSubmitting(false)
+  //   }
+  // }
+
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
       Swal.fire({
         icon: "error",
         title: "Validation Error",
         text: "Please fill all required fields.",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       if (isEditMode) {
-        const { password, ...userWithoutPassword } = user
-        await updateUser(id, userWithoutPassword)
-        Swal.fire({ icon: "success", title: "User Updated" })
+        const { password, ...userWithoutPassword } = user;
+        await updateUser(id, userWithoutPassword);
+        Swal.fire({ icon: "success", title: "User Updated" });
       } else {
-        await createUser(user)
-        Swal.fire({ icon: "success", title: "User Created" })
+        const preparedUser = {
+          ...user,
+          isActive: user.isActive === "true",
+        };
+        console.log("🔍 Creating user with data:", preparedUser);
+        await createUser(preparedUser);
+        Swal.fire({ icon: "success", title: "User Created" });
       }
 
-      navigate("/app/users")
+      navigate("/app/users");
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Failed",
         text: error.response?.data?.message || "Failed to submit user data",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Container fluid className="py-4">
@@ -455,7 +504,8 @@ const UserForm = () => {
                         autoComplete="email"
                         value={user.email}
                         onChange={handleChange}
-                        placeholder="user@example.com"
+                        placeholder={isEditMode ? user.email : "user@example.com"}
+                        disabled={isEditMode}
                       />
                       {errors.email && <div className="text-danger">{errors.email}</div>}
                     </Form.Group>
@@ -518,17 +568,19 @@ const UserForm = () => {
                     <Form.Group className="mb-3">
                       <Form.Label>Status</Form.Label>
                       <Form.Select
-                        name="status"
-                        value={user.status}
-                        onChange={handleChange}
+                        name="isActive"
+                        value={user.isActive?.toString() || ""}
+                        onChange={(e) =>
+                          setUser({ ...user, isActive: e.target.value === "true" })
+                        }
                         autoComplete="off"
                       >
                         <option value="">Select Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                        <option value="Pending">Pending</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
                       </Form.Select>
                       {errors.status && <div className="text-danger">{errors.status}</div>}
+
                     </Form.Group>
                   </Col>
                 </Row>
