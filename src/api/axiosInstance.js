@@ -57,7 +57,39 @@ export const deleteUserById = (id) => {
 
 export const getUserById = (id) => axiosInstance.get(`/users/${id}`)
 
-export const updateUser = (id, data) => axiosInstance.put(`/users/${id}`, data);
+// export const updateUser = (id, data) => {
+//   const formData = new FormData();
+
+//   if (data.name) formData.append("name", data.name);
+//   if (data.role) formData.append("role", data.role);
+
+//   // 👇 This ensures only boolean is sent
+//   if (typeof data.isActive === "boolean") {
+//     formData.append("isActive", data.isActive);
+//   }
+
+//   // 👇 Only send avatar if it's a File instance
+//   if (data.avatar instanceof File) {
+//     formData.append("avatar", data.avatar);
+//   }
+
+//   return axiosInstance.put(`/users/${id}`, formData, {
+//     headers: {
+//       "Content-Type": "multipart/form-data",
+//     },
+//   });
+// };.
+
+export const updateUser = (id, data) => {
+  return axios.put(`/users/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+
+// export const updateUser = (id, data) => axiosInstance.put(`/users/${id}`, data);
 // export const updateUser = (id, data) => {
 //   const formData = new FormData();
 
@@ -94,20 +126,33 @@ export const exportUserPDF = async (userId) => {
 export const getCurrentUser = () => axiosInstance.get("/auth/me")
 
 export const updateProfile = (data) =>
-axiosInstance.put("/users/me", data, { withCredentials: true });
+  axiosInstance.put("/users/me", data, { withCredentials: true });
 
 export const updateUserProfile = (formData) =>
-axiosInstance.put("/auth/update-profile", formData, {
-  withCredentials: true,
-  headers: {
-    // "Content-Type": "multipart/form-data", // Required if avatar is included
-    "Content-Type": "application/json",
-  },
-});
+  axiosInstance.put("/auth/update-profile", formData, {
+    withCredentials: true,
+    headers: {
+      // "Content-Type": "multipart/form-data", // Required if avatar is included
+      "Content-Type": "application/json",
+    },
+  });
 
 export const sendUserNotification = async (userId, subject, message) => {
   return await axiosInstance.post(`/users/notify/${userId}`, {
     subject,
     message,
   });
+};
+
+export const uploadAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const response = await axiosInstance.put("/auth/upload-avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
 };

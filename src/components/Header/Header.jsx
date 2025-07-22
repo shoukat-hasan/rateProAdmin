@@ -27,6 +27,8 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
   const navigate = useNavigate()
   const { logout, user } = useAuth()
 
+  console.log(user);
+
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -39,7 +41,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
   const handleLogout = () => {
     logout()
     navigate("/login")
-  } 
+  }
 
   return (
     <Navbar
@@ -324,7 +326,21 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
                 className="rounded-circle bg-light d-flex align-items-center justify-content-center"
                 style={{ width: "36px", height: "36px" }}
               >
-                <MdPerson className={darkMode ? "text-white" : "text-secondary"} />
+                {user?.avatar?.url ? (
+                  <img
+                    src={user.avatar.url}
+                    alt="avatar"
+                    className="rounded-circle"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <span
+                    className={`fw-bold ${darkMode ? "text-white" : "text-secondary"}`}
+                    style={{ fontSize: "1rem" }}
+                  >
+                    {user?.name?.charAt(0)?.toUpperCase()}
+                  </span>
+                )}
               </div>
               <span className="d-none d-lg-inline ms-2">{capitalize(user?.name?.split(" ")[0])}</span>
             </Dropdown.Toggle>
@@ -339,7 +355,7 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
             >
               <Dropdown.Header style={{ color: darkMode ? "#fff" : "#000" }}>
                 <h6 className="mb-0">{capitalize(user?.role)}</h6>
-                <small className="text-muted">{ user.email }</small>
+                <small className="text-muted">{user.email}</small>
               </Dropdown.Header>
               <Dropdown.Item
                 as={Link}

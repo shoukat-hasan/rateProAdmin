@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react"
 import { Container, Row, Col, Card, Form, Button, Tab, Tabs, Alert, Badge } from "react-bootstrap"
 import { MdPerson, MdSecurity, MdNotifications, MdEdit, MdSave, MdCancel } from "react-icons/md"
-import { getCurrentUser, updateProfile, updateUserProfile } from "../../api/axiosInstance"
+import axiosInstance, { getCurrentUser, updateProfile, updateUser, updateUserProfile } from "../../api/axiosInstance"
 import Swal from "sweetalert2"
 import { capitalize } from "../../utilities/capitalize";
 
@@ -13,6 +13,8 @@ const Profile = ({ darkMode }) => {
   const [activeTab, setActiveTab] = useState("profile")
   const [isEditing, setIsEditing] = useState(false)
   const [showAlert, setShowAlert] = useState(false)
+  const [userData, setUserData] = useState("");
+  const [userId, setUserId] = useState("");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -69,6 +71,8 @@ const Profile = ({ darkMode }) => {
           timezone: user.timezone || "",
           language: user.language || "",
         })
+        setUserId(user._id);
+        setUserData(user);
       } catch (err) {
         console.error("Failed to fetch profile:", err)
       }
@@ -210,6 +214,27 @@ const Profile = ({ darkMode }) => {
     setIsEditing(false)
   }
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const res = await axiosInstance.put(`/users/${userId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      Swal.fire("Success", "Avatar updated!", "success");
+      // Optionally update avatar preview:
+      setUserData(res.data.user);
+    } catch (err) {
+      Swal.fire("Error", err.response?.data?.message || "Upload failed", "error");
+    }
+  };
+
+
   const tabClass = (tab) => `nav-link ${activeTab === tab ? "active" : ""}`
   const inputClass = "form-control"
 
@@ -268,17 +293,59 @@ const Profile = ({ darkMode }) => {
           >
             <Card.Body className="text-center">
               <div
-                className="profile-avatar mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center relative"
+                className="profile-avatar mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center position-relative"
                 style={{
                   width: "120px",
                   height: "120px",
                   backgroundColor: "var(--primary-color)",
                   color: "#fff",
                   fontSize: "3rem",
+                  cursor: "pointer",
                 }}
               >
-                <MdPerson />
+                {/* Avatar image or fallback initial */}
+                {userData?.avatar?.url ? (
+                  <img
+                    src={userData.avatar.url}
+                    alt="Avatar"
+                    className="rounded-circle w-100 h-100 object-fit-cover"
+                  />
+                ) : (
+                  <span>{userData?.name?.charAt(0)?.toUpperCase() || <MdPerson />}</span>
+                )}
+
+                {/* Hidden file input */}
+                <Form.Control
+                  id="avatarUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  style={{ display: "none" }}
+                />
+
+                {/* Edit icon trigger */}
+                <label
+                  htmlFor="avatarUpload"
+                  style={{
+                    position: "absolute",
+                    bottom: "5px",
+                    left: "5px",
+                    backgroundColor: "#fff",
+                    borderRadius: "50%",
+                    padding: "5px",
+                    cursor: "pointer",
+                    height: "26px",
+                    width: "26px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                  }}
+                >
+                  <MdEdit size={16} color="var(--primary-color)" />
+                </label>
               </div>
+
               <h4 className={`mb-1 ${darkMode ? "text-white" : "text-dark"}`}>
                 {formData.firstName} {formData.lastName}
               </h4>

@@ -9,17 +9,36 @@ export const AuthProvider = ({ children }) => {
   });
   
 
-  const login = (email, password) => {
-    const foundUser = demoUsers.find(
-      (u) => u.email === email && u.password === password
-    )
-    if (foundUser) {
-      setUser(foundUser)
-      localStorage.setItem("authUser", JSON.stringify(foundUser))
-      return true
+  // const login = (email, password) => {
+  //   const foundUser = demoUsers.find(
+  //     (u) => u.email === email && u.password === password
+  //   )
+  //   if (foundUser) {
+  //     setUser(foundUser)
+  //     localStorage.setItem("authUser", JSON.stringify(foundUser))
+  //     return true
+  //   }
+  //   return false
+  // }
+
+  const login = async (email, password) => {
+    try {
+      const res = await axiosInstance.post("/auth/login", {
+        email,
+        password,
+        source: "admin", // ya "public"
+      });
+  
+      const user = res.data.user; // full user with avatar
+  
+      setUser(user);
+      localStorage.setItem("authUser", JSON.stringify(user));
+      return true;
+    } catch (err) {
+      console.error("Login error", err);
+      return false;
     }
-    return false
-  }
+  };
 
   const logout = () => {
     setUser(null)

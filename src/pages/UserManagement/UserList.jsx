@@ -611,7 +611,17 @@ const UserList = ({ darkMode }) => {
                             className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
                             style={{ width: 42, height: 42 }}
                           >
-                            <MdPerson size={22} className="text-muted" />
+                            {user.avatar?.url ? (
+                              <img
+                                src={user.avatar.url}
+                                alt={user.name}
+                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "100%" }}
+                              />
+                            ) : (
+                              <span className="text-uppercase fw-bold text-muted">
+                                {user.name?.charAt(0)}
+                              </span>
+                            )}
                           </div>
                           <div>
                             <div className="fw-semibold text-truncate" style={{ maxWidth: 150 }}>{user.name}</div>
