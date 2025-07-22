@@ -634,7 +634,7 @@ const UserList = ({ darkMode }) => {
                           <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary">
                             <MdEdit />
                           </Button>
-                          <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(user._id)} disabled={user._id === currentUserId}
+                          <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(user._id)} disabled={user._id === currentUserId || user.role === "admin"}
                             title={user._id === currentUserId ? "You can't delete your own account" : "Delete user"}>
                             <MdDelete />
                           </Button>
@@ -642,6 +642,7 @@ const UserList = ({ darkMode }) => {
                             variant={user.isActive ? "outline-success" : "outline-secondary"}
                             size="sm"
                             className="me-2"
+                            disabled={user._id === currentUserId || user.role === "admin"}
                             onClick={() => handleToggleActive(user._id, user.isActive)}
                           >
                             {user.isActive ? <MdToggleOn size={20} /> : <MdToggleOff size={20} />}

@@ -430,16 +430,19 @@ const UserForm = () => {
 
     setIsSubmitting(true);
 
+    const preparedUser = {
+      ...user,
+      // isActive: user.isActive === "true",
+    };
+
     try {
       if (isEditMode) {
-        const { password, ...userWithoutPassword } = user;
+        const { password, ...userWithoutPassword } = preparedUser;
         await updateUser(id, userWithoutPassword);
+        console.log("📝 Updating user with data:", preparedUser);
         Swal.fire({ icon: "success", title: "User Updated" });
       } else {
-        const preparedUser = {
-          ...user,
-          isActive: user.isActive === "true",
-        };
+        
         console.log("🔍 Creating user with data:", preparedUser);
         await createUser(preparedUser);
         Swal.fire({ icon: "success", title: "User Created" });
