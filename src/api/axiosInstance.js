@@ -80,16 +80,16 @@ export const getUserById = (id) => axiosInstance.get(`/users/${id}`)
 //   });
 // };.
 
-export const updateUser = (id, data) => {
-  return axios.put(`/users/${id}`, data, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
+// export const updateUser = (id, data) => {
+//   return axios.put(`/users/${id}`, data, {
+//     headers: {
+//       "Content-Type": "multipart/form-data",
+//     },
+//   });
+// };
 
 
-// export const updateUser = (id, data) => axiosInstance.put(`/users/${id}`, data);
+export const updateUser = (id, data) => axiosInstance.put(`/users/${id}`, data);
 // export const updateUser = (id, data) => {
 //   const formData = new FormData();
 
