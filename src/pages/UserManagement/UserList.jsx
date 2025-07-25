@@ -357,7 +357,6 @@ const UserList = ({ darkMode }) => {
         ...user,
         status: user.isActive ? "Active" : "Inactive",
       }))
-
       setUsers(processedUsers)
       setPagination((prev) => ({ ...prev, page: currentPage, total }))
     } catch (error) {
@@ -403,8 +402,6 @@ const UserList = ({ darkMode }) => {
 
   const handleDeleteUser = async (userId) => {
     const currentUserId = JSON.parse(localStorage.getItem("authUser"))?._id;
-
-    console.log(currentUserId)
 
     if (userId === currentUserId) {
       Swal.fire({
@@ -513,7 +510,6 @@ const UserList = ({ darkMode }) => {
     }
   };
 
-
   const handleExport = async (userId) => {
     try {
       const response = await exportUserPDF(userId);
@@ -530,9 +526,6 @@ const UserList = ({ darkMode }) => {
       console.error("Export error", err);
     }
   };
-
-
-
 
   return (
     <Container fluid className="py-4">
@@ -599,6 +592,7 @@ const UserList = ({ darkMode }) => {
                     <th>User</th>
                     <th>Role</th>
                     <th>Status</th>
+                    <th>Email Verified</th>
                     <th className="text-center">Actions</th>
                   </tr>
                 </thead>
@@ -637,6 +631,11 @@ const UserList = ({ darkMode }) => {
                       <td>
                         <Badge bg={user.status === "Active" ? "success" : "secondary"} className="px-3 py-2">
                           {user.status}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Badge bg={user.isVerified ? "success" : "secondary"} className="px-3 py-2">
+                          {user.isVerified ? "Verified" : "Not Verified"}
                         </Badge>
                       </td>
                       <td className="text-center">

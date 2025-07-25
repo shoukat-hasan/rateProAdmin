@@ -327,6 +327,8 @@ const UserForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { id } = useParams();
   const isEditMode = Boolean(id);
+  const currentUser = JSON.parse(localStorage.getItem("authUser"));
+  const currentUserRole = currentUser?.role || "";
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -554,7 +556,7 @@ const UserForm = () => {
                         autoComplete="off"
                       >
                         <option value="">Select Role</option>
-                        <option value="company">Company</option>
+                        {currentUserRole !== "company" && <option value="company">Company</option>}
                         <option value="user">User</option>
                       </Form.Select>
                       {errors.role && <div className="text-danger">{errors.role}</div>}

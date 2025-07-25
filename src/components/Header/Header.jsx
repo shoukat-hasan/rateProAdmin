@@ -20,14 +20,13 @@ import {
 import LanguageSelector from "../LanguageSelector/LanguageSelector.jsx"
 import { capitalize } from "../../utilities/capitalize"
 
+
 const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, sidebarOpen, sidebarCollapsed }) => {
   const [searchFocused, setSearchFocused] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const navigate = useNavigate()
   const { logout, user } = useAuth()
-
-  console.log(user);
 
   // Handle scroll effect
   useEffect(() => {

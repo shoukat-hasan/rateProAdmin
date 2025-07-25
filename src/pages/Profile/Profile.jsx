@@ -8,6 +8,7 @@ import { MdPerson, MdSecurity, MdNotifications, MdEdit, MdSave, MdCancel } from 
 import axiosInstance, { getCurrentUser, updateProfile, updateUser, updateUserProfile } from "../../api/axiosInstance"
 import Swal from "sweetalert2"
 import { capitalize } from "../../utilities/capitalize";
+import { useAuth } from "../../context/AuthContext"
 
 const Profile = ({ darkMode }) => {
   const [activeTab, setActiveTab] = useState("profile")
@@ -15,6 +16,8 @@ const Profile = ({ darkMode }) => {
   const [showAlert, setShowAlert] = useState(false)
   const [userData, setUserData] = useState("");
   const [userId, setUserId] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const { setUser } = useAuth()
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -218,6 +221,8 @@ const Profile = ({ darkMode }) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setIsUploading(true);
+
     try {
       const formData = new FormData();
       formData.append("avatar", file);
@@ -228,9 +233,12 @@ const Profile = ({ darkMode }) => {
 
       Swal.fire("Success", "Avatar updated!", "success");
       // Optionally update avatar preview:
+      setUser(res.data.user);
       setUserData(res.data.user);
     } catch (err) {
       Swal.fire("Error", err.response?.data?.message || "Upload failed", "error");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -240,6 +248,25 @@ const Profile = ({ darkMode }) => {
 
   return (
     <Container fluid className="profile-container py-4">
+      {isUploading && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div className="spinner-border text-light" role="status"></div>
+        </div>
+      )}
+
       {/* Header */}
       <Row className="mb-4">
         <Col>

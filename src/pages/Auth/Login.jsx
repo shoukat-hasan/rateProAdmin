@@ -175,16 +175,15 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-  
+
     try {
       const response = await axiosInstance.post("/auth/login", {
         email,
         password,
         source: "admin", // required to construct proper verification URL
       });
-  
+
       const { accessToken, user } = response.data;
-      console.log("User:", user); 
 
       if (!user.isActive) {
         Swal.fire({
@@ -193,24 +192,27 @@ const Login = () => {
           text: "Your account is currently inactive. Please contact the administrator.",
           confirmButtonColor: "#d33",
         });
+        setLoading(false);
         return; // stop login process
       }
-  
+
       // ✅ Save accessToken and user info (optional: depending on auth strategy)
       localStorage.setItem("authUser", JSON.stringify(user));
       localStorage.setItem("accessToken", accessToken); // optional if you're using token in headers
       setUser(user); // update auth context / state
-  
+
       // ✅ Redirect based on role
       if (user.role === "user") {
-        window.location.href = "https://ratepro-sa.com"; // public dashboard
+        window.location.href = "https://ratepro-public.vercel.app/"; // public dashboard
       } else {
         navigate("/app"); // internal admin/company dashboard
       }
-  
+
     } catch (err) {
-      const message = err.response?.data?.message;
-  
+      // const message = err.response?.data?.message;
+      const message = err.response?.data?.message || err.message || "Network error. Please try again.";
+
+
       if (message?.toLowerCase()?.includes("not verified")) {
         // ❗ Handle email not verified
         Swal.fire({
@@ -228,12 +230,11 @@ const Login = () => {
           confirmButtonColor: "#d33",
         });
       }
-  
     } finally {
       setLoading(false);
     }
   };
-  
+
 
   return (
     <AuthLayout
