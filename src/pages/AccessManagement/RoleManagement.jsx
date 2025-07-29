@@ -18,7 +18,11 @@ const RoleManagement = () => {
     description: "",
     permissions: [],
   })
-  const [pagination, setPagination] = useState({ page: 1, limit: 1, total: 0 })
+  const [users, setUsers] = useState([])
+  const [assigningRole, setAssigningRole] = useState(null)
+  const [selectedUserId, setSelectedUserId] = useState(null)
+  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
 
   useEffect(() => {
     // Simulate loading data
@@ -57,10 +61,10 @@ const RoleManagement = () => {
           isSystem: false,
         },
       ]
-  
+
       setRoles(loadedRoles)
       setPagination((prev) => ({ ...prev, total: loadedRoles.length }))
-  
+
       setPermissions([
         { id: "read", name: "Read", description: "View content and data" },
         { id: "write", name: "Write", description: "Create and edit content" },
@@ -71,11 +75,18 @@ const RoleManagement = () => {
         { id: "view_analytics", name: "View Analytics", description: "Access analytics and reports" },
         { id: "export_data", name: "Export Data", description: "Export system data" },
       ])
-  
+
       setLoading(false)
     }, 1000)
   }, [])
-  
+
+  useEffect(() => {
+    setUsers([
+      { id: 101, name: "Ali Khan" },
+      { id: 102, name: "Fatima Noor" },
+      { id: 103, name: "Usman Raza" },
+    ])
+  }, [])
 
   const handleCreateRole = () => {
     setEditingRole(null)
@@ -185,6 +196,7 @@ const RoleManagement = () => {
                   <th>Description</th>
                   <th>Permissions</th>
                   <th>Users</th>
+                  <th>Assign To</th>
                   <th className="text-center">Actions</th>
                 </tr>
               </thead>
@@ -224,6 +236,20 @@ const RoleManagement = () => {
                     <td>
                       <div className="d-flex justify-content-center gap-1">
                         <Button
+                          variant="outline-success"
+                          size="sm"
+                          onClick={() => {
+                            setAssigningRole(role)
+                            setShowAssignModal(true)
+                          }}
+                        >
+                          Assign To
+                        </Button>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex justify-content-center gap-1">
+                        <Button
                           variant="outline-primary"
                           size="sm"
                           onClick={() => handleEditRole(role)}
@@ -241,6 +267,7 @@ const RoleManagement = () => {
                         </Button>
                       </div>
                     </td>
+
                   </tr>
                 ))}
               </tbody>
@@ -257,6 +284,48 @@ const RoleManagement = () => {
           />
         </div>
       </Card>
+
+      <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Assign Role: {assigningRole?.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Select User</Form.Label>
+            <Form.Select
+              value={selectedUserId || ""}
+              onChange={(e) => setSelectedUserId(Number(e.target.value))}
+            >
+              <option value="">-- Select User --</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAssignModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (selectedUserId) {
+                alert(
+                  `Role "${assigningRole.name}" assigned to user ID ${selectedUserId}`
+                )
+                setShowAssignModal(false)
+                setSelectedUserId(null)
+              }
+            }}
+            disabled={!selectedUserId}
+          >
+            Assign
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Create/Edit Role Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">

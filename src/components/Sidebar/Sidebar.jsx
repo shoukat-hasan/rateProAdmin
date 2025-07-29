@@ -394,19 +394,21 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
 
       ],
     },
-    {
-      name: "Access Management",
-      icon: <MdSecurity />,
-      submenu: true,
-      isOpen: accessSubmenuOpen,
-      roles: ["admin"],
-      toggle: () => toggleSubmenu("access"),
-      submenuItems: [
-        { path: "/app/access", name: "Overview", icon: <MdSecurity /> },
-        { path: "/app/access/roles", name: "Role Management", icon: <MdGroup /> },
-        { path: "/app/access/permissions", name: "Permission Management", icon: <MdVpnKey /> },
-      ],
-    },
+    // {
+    //   name: "Access Management",
+    //   icon: <MdSecurity />,
+    //   submenu: true,
+    //   isOpen: accessSubmenuOpen,
+    //   roles: ["admin"],
+    //   toggle: () => toggleSubmenu("access"),
+    //   submenuItems: [
+    //     { path: "/app/access", name: "Overview", icon: <MdSecurity /> },
+    //     { path: "/app/access/roles", name: "Role Management", icon: <MdGroup /> },
+    //     // { path: "/app/access/permissions", name: "Permission Management", icon: <MdVpnKey /> },
+    //   ],
+    // },
+    { path: "/app/access", name: "Access Management", icon: <MdSecurity /> },
+    { path: "/app/roles", name: "Role Management", icon: <MdGroup /> },
     {
       name: "Analytics & Reports",
       icon: <MdInsertChart />,

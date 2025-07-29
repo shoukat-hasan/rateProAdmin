@@ -380,12 +380,12 @@ function App() {
               <Route path="users" element={<UserList />} />
               <Route path="users/:id/edit" element={<UserForm />} />
               <Route path="users/form" element={<UserForm />} />
-              <Route path="users/role-permissions" element={<PermissionManagement />} />
+              {/* <Route path="users/role-permissions" element={<PermissionManagement />} /> */}
 
               {/* Access */}
               <Route path="access" element={<AccessManagement />} />
-              <Route path="access/roles" element={<RoleManagement />} />
-              <Route path="access/permissions" element={<PermissionManagement />} />
+              <Route path="roles" element={<RoleManagement />} />
+              {/* <Route path="access/permissions" element={<PermissionManagement />} /> */}
 
               {/* Audiences */}
               <Route path="audiences" element={<Audiences />} />
