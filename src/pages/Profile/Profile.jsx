@@ -17,7 +17,7 @@ const Profile = ({ darkMode }) => {
   const [userData, setUserData] = useState("");
   const [userId, setUserId] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const { setUser } = useAuth()
+  const { setUser, user } = useAuth()
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -56,6 +56,16 @@ const Profile = ({ darkMode }) => {
     weeklyReports: true,
     systemUpdates: false,
   })
+
+  const [companyData, setCompanyData] = useState({
+    name: "",
+    address: "",
+    contactEmail: "",
+    contactPhone: "",
+    website: "",
+    employees: "",
+    departments: [{ name: "", head: "" }],
+  });
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -242,6 +252,24 @@ const Profile = ({ darkMode }) => {
     }
   };
 
+  const handleCompanyChange = (e, index = null) => {
+    const { name, value } = e.target;
+    if (name.startsWith("department")) {
+      const updatedDepartments = [...companyData.departments];
+      const field = name.includes("name") ? "name" : "head";
+      updatedDepartments[index][field] = value;
+      setCompanyData({ ...companyData, departments: updatedDepartments });
+    } else {
+      setCompanyData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const addDepartment = () => {
+    setCompanyData((prev) => ({
+      ...prev,
+      departments: [...prev.departments, { name: "", head: "" }],
+    }));
+  };
 
   const tabClass = (tab) => `nav-link ${activeTab === tab ? "active" : ""}`
   const inputClass = "form-control"
@@ -422,6 +450,13 @@ const Profile = ({ darkMode }) => {
                     <MdSecurity className="me-1" /> Security
                   </button>
                 </li>
+                {(user?.role === "company" || user?.role === "companyAdmin") && (
+                  <li className="nav-item">
+                    <button className={tabClass("company")} onClick={() => setActiveTab("company")}>
+                      🏢 Company Details
+                    </button>
+                  </li>
+                )}
                 <li className="nav-item">
                   <button className={tabClass("notifications")} onClick={() => setActiveTab("notifications")}>
                     <MdNotifications className="me-1" /> Notifications
@@ -544,6 +579,113 @@ const Profile = ({ darkMode }) => {
                     >
                       Update Password
                     </button>
+                  </div>
+                </form>
+              )}
+
+              {activeTab === "company" && (
+                <form className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label">Company Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={companyData.name}
+                      onChange={handleCompanyChange}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label">Contact Email</label>
+                    <input
+                      type="email"
+                      name="contactEmail"
+                      value={companyData.contactEmail}
+                      onChange={handleCompanyChange}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label">Contact Phone</label>
+                    <input
+                      type="text"
+                      name="contactPhone"
+                      value={companyData.contactPhone}
+                      onChange={handleCompanyChange}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label">Website (optional)</label>
+                    <input
+                      type="text"
+                      name="website"
+                      value={companyData.website}
+                      onChange={handleCompanyChange}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="col-md-12">
+                    <label className="form-label">Company Address</label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={companyData.address}
+                      onChange={handleCompanyChange}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label className="form-label">Total Employees</label>
+                    <input
+                      type="number"
+                      name="employees"
+                      value={companyData.employees}
+                      onChange={handleCompanyChange}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="col-md-12">
+                    <label className="form-label">Departments</label>
+                    {companyData.departments.map((dept, idx) => (
+                      <div key={idx} className="row mb-2">
+                        <div className="col-md-5">
+                          <input
+                            type="text"
+                            name="departmentName"
+                            placeholder="Department Name"
+                            value={dept.name}
+                            onChange={(e) => handleCompanyChange(e, idx)}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div className="col-md-5">
+                          <input
+                            type="text"
+                            name="departmentHead"
+                            placeholder="Department Head"
+                            value={dept.head}
+                            onChange={(e) => handleCompanyChange(e, idx)}
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <Button variant="outline-secondary" size="sm" onClick={addDepartment}>
+                      + Add Department
+                    </Button>
+                  </div>
+
+                  <div className="col-12">
+                    <Button type="button" className="btn btn-primary">
+                      Save Company Info
+                    </Button>
                   </div>
                 </form>
               )}

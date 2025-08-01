@@ -309,7 +309,7 @@ import { Container, Row, Col, Card, Form, Button, Spinner } from "react-bootstra
 import Swal from "sweetalert2"
 import { MdSave, MdArrowBack, MdVisibility, MdVisibilityOff } from "react-icons/md"
 import { createUser } from "../../api/createUser"
-import { getUserById, updateUser } from "../../api/axiosInstance"
+import { getCompanyById, getUserById, updateUser } from "../../api/axiosInstance"
 
 const UserForm = () => {
   const navigate = useNavigate()
@@ -320,6 +320,8 @@ const UserForm = () => {
     password: "",
     role: "",
     isActive: "",
+    companyName: "",
+    departmentName: "",
   })
 
   const [errors, setErrors] = useState({})
@@ -351,20 +353,34 @@ const UserForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-
   useEffect(() => {
     if (id) {
       getUserById(id)
-        .then((res) => {
-          // console.log("Full res.data:", res.data);
-          const { name, email, role, isActive } = res.data.user;
+        .then(async (res) => {
+          const userData = res.data.user;
+          console.log("User Loaded:", userData);
+
+          let companyName = "";
+
+          // 🔁 Fetch company name if company ID is present
+          if (userData.company) {
+            try {
+              const companyRes = await getCompanyById(userData.company);
+              companyName = companyRes.data.name;
+              console.log(companyName)
+            } catch (err) {
+              console.error("Failed to load company:", err);
+            }
+          }
 
           setUser({
-            name,
-            email,
-            password: "", // Leave blank on edit
-            role,
-            isActive: isActive.toString(), // Map isActive to status
+            name: userData.name,
+            email: userData.email,
+            password: "",
+            role: userData.role,
+            isActive: userData.isActive.toString(),
+            companyName: userData.company?.name || "",
+            departments: userData.company?.companyProfile?.departments || [],
           });
         })
         .catch((err) => {
@@ -374,6 +390,7 @@ const UserForm = () => {
         });
     }
   }, [id]);
+
 
 
   //   const handleSubmit = async (e) => {
@@ -434,8 +451,10 @@ const UserForm = () => {
 
     const preparedUser = {
       ...user,
+      companyName: "ABC Company",
+      department: "Management",
     };
-
+    console.log("Submitted user:", preparedUser);
     try {
       if (isEditMode) {
         const { password, ...userWithoutPassword } = preparedUser;
@@ -556,8 +575,18 @@ const UserForm = () => {
                         autoComplete="off"
                       >
                         <option value="">Select Role</option>
-                        {currentUserRole !== "company" && <option value="company">Company</option>}
-                        <option value="user">User</option>
+
+                        {currentUserRole === "admin" && (
+                          <>
+                            <option value="companyAdmin">Company Admin</option>
+                            <option value="member">Member</option>
+                            <option value="user">User</option>
+                          </>
+                        )}
+
+                        {currentUserRole === "companyAdmin" && <option value="member">Member</option>}
+
+                        {currentUserRole === "member" && memberCanCreate && <option value="member">Member</option>}
                       </Form.Select>
                       {errors.role && <div className="text-danger">{errors.role}</div>}
                     </Form.Group>
@@ -585,6 +614,39 @@ const UserForm = () => {
                     </Form.Group>
                   </Col>
                 </Row>
+
+                {currentUserRole === "companyAdmin" && (
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Company Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="companyName"
+                          value={user.companyName}
+                          onChange={handleChange}
+                          placeholder="e.g. Acme Corp"
+                          disabled
+                        />
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Department Name</Form.Label>
+                        <Form.Select>
+                          {Array.isArray(user.departments) && user.departments.length > 0 ? (
+                            user.departments.map((dept, index) => (
+                              <option key={index} value={dept}>{dept}</option>
+                            ))
+                          ) : (
+                            <option disabled>No departments found</option>
+                          )}
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                )}
 
                 <div className="d-flex justify-content-end gap-2 mt-3">
                   <Button

@@ -156,3 +156,6 @@ export const uploadAvatar = async (file) => {
 
   return response.data;
 };
+
+export const getCompanyById = (companyId) =>
+  axios.get(`/api/company/${companyId}`);
