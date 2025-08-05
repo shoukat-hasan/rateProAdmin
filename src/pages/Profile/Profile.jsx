@@ -67,12 +67,54 @@ const Profile = ({ darkMode }) => {
     departments: [{ name: "", head: "" }],
   });
 
+  const availableDepartments = [
+    { name: "Administration" },
+    { name: "Management" },
+    { name: "Human Resources" },
+    { name: "Finance" },
+    { name: "IT" },
+    { name: "Marketing" },
+    { name: "Sales" },
+    { name: "Customer Support" },
+  ];
+
+
+  // useEffect(() => {
+  //   const fetchUserProfile = async () => {
+  //     try {
+  //       const res = await getCurrentUser()
+  //       const user = res.data.user
+  //       const [firstName, lastName] = user.name?.split(" ") || ["", ""]
+  //       setFormData({
+  //         firstName,
+  //         lastName,
+  //         email: user.email || "",
+  //         phone: user.phone || "",
+  //         department: user.department || "",
+  //         role: user.role || "",
+  //         bio: user.bio || "",
+  //         timezone: user.timezone || "",
+  //         language: user.language || "",
+  //       })
+  //       setUserId(user._id);
+  //       setUserData(user);
+  //     } catch (err) {
+  //       console.error("Failed to fetch profile:", err)
+  //     }
+  //   }
+
+  //   fetchUserProfile()
+  // }, [])
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const res = await getCurrentUser()
-        const user = res.data.user
-        const [firstName, lastName] = user.name?.split(" ") || ["", ""]
+        const res = await getCurrentUser();
+        const user = res.data.user;
+        const nameParts = user.name?.trim().split(" ") || [];
+        const firstName = nameParts.slice(0, -1).join(" ");
+        const lastName = nameParts.slice(-1).join(" ");
+
         setFormData({
           firstName,
           lastName,
@@ -83,16 +125,32 @@ const Profile = ({ darkMode }) => {
           bio: user.bio || "",
           timezone: user.timezone || "",
           language: user.language || "",
-        })
+        });
+
         setUserId(user._id);
         setUserData(user);
-      } catch (err) {
-        console.error("Failed to fetch profile:", err)
-      }
-    }
 
-    fetchUserProfile()
-  }, [])
+        // ✅ Load company profile if available
+        if (user.role === "companyAdmin" && user.companyProfile) {
+          const company = user.companyProfile;
+          setCompanyData({
+            name: company.name || "",
+            address: company.address || "",
+            contactEmail: company.contactEmail || "",
+            contactPhone: company.contactPhone || "",
+            website: company.website || "",
+            employees: company.totalEmployees || "",
+            departments: company.departments || [],
+          });
+        }
+
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -140,7 +198,11 @@ const Profile = ({ darkMode }) => {
       });
 
       // 💾 Update profile
-      await updateProfile({ name: updatedName });
+      await updateProfile({
+        name: updatedName,
+        phone: formData.phone,
+        bio: formData.bio,
+      });
 
       // ✅ Success Swal
       Swal.fire({
@@ -252,23 +314,83 @@ const Profile = ({ darkMode }) => {
     }
   };
 
-  const handleCompanyChange = (e, index = null) => {
+  const handleCompanyChange = (e, index) => {
     const { name, value } = e.target;
-    if (name.startsWith("department")) {
-      const updatedDepartments = [...companyData.departments];
-      const field = name.includes("name") ? "name" : "head";
-      updatedDepartments[index][field] = value;
-      setCompanyData({ ...companyData, departments: updatedDepartments });
-    } else {
-      setCompanyData((prev) => ({ ...prev, [name]: value }));
-    }
+
+    setCompanyData((prev) => {
+      if (typeof index === "number") {
+        const updatedDepartments = [...prev.departments];
+        updatedDepartments[index] = {
+          ...updatedDepartments[index],
+          [name === "departmentName" ? "name" : "head"]: value,
+        };
+
+        return {
+          ...prev,
+          departments: updatedDepartments,
+        };
+      } else {
+        return {
+          ...prev,
+          [name]: value,
+        };
+      }
+    });
   };
+
 
   const addDepartment = () => {
     setCompanyData((prev) => ({
       ...prev,
       departments: [...prev.departments, { name: "", head: "" }],
     }));
+  };
+
+  const handleSaveInfo = async () => {
+    try {
+      const departmentPayload = companyData.departments?.map((dept) => ({
+        name: dept.name,
+        head: dept.head,
+      })) || [];
+
+      const payload = {
+        ...formData,
+        companyProfile: {
+          name: companyData.name,
+          address: companyData.address,
+          contactEmail: companyData.contactEmail,
+          contactPhone: companyData.contactPhone,
+          website: companyData.website,
+          totalEmployees: companyData.employees,
+          departments: departmentPayload,
+        },
+      };
+
+      const response = await updateProfile(payload);
+
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Updated",
+          text: "Company info updated successfully!",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Update failed. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text: error.response?.data?.message || "Server error. Try again later.",
+      });
+    }
   };
 
   const tabClass = (tab) => `nav-link ${activeTab === tab ? "active" : ""}`
@@ -470,7 +592,6 @@ const Profile = ({ darkMode }) => {
                     ["First Name", "firstName"],
                     ["Last Name", "lastName"],
                     ["Phone", "phone"],
-                    ["Department", "department"],
                   ].map(([label, name]) => (
                     <div className="col-md-6" key={name}>
                       <label className="form-label">{label}</label>
@@ -597,7 +718,7 @@ const Profile = ({ darkMode }) => {
                   </div>
 
                   <div className="col-md-6">
-                    <label className="form-label">Contact Email</label>
+                    <label className="form-label">Company Email</label>
                     <input
                       type="email"
                       name="contactEmail"
@@ -608,7 +729,7 @@ const Profile = ({ darkMode }) => {
                   </div>
 
                   <div className="col-md-6">
-                    <label className="form-label">Contact Phone</label>
+                    <label className="form-label">Company Phone</label>
                     <input
                       type="text"
                       name="contactPhone"
@@ -656,14 +777,19 @@ const Profile = ({ darkMode }) => {
                     {companyData.departments.map((dept, idx) => (
                       <div key={idx} className="row mb-2">
                         <div className="col-md-5">
-                          <input
-                            type="text"
+                          <select
                             name="departmentName"
-                            placeholder="Department Name"
                             value={dept.name}
                             onChange={(e) => handleCompanyChange(e, idx)}
                             className={inputClass}
-                          />
+                          >
+                            <option value="">Select Department</option>
+                            {availableDepartments.map((d) => (
+                              <option key={d.name} value={d.name}>
+                                {d.name}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <div className="col-md-5">
                           <input
@@ -677,13 +803,14 @@ const Profile = ({ darkMode }) => {
                         </div>
                       </div>
                     ))}
+
                     <Button variant="outline-secondary" size="sm" onClick={addDepartment}>
                       + Add Department
                     </Button>
                   </div>
 
                   <div className="col-12">
-                    <Button type="button" className="btn btn-primary">
+                    <Button type="button" onClick={handleSaveInfo} className="btn btn-primary">
                       Save Company Info
                     </Button>
                   </div>

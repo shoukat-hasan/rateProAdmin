@@ -212,9 +212,9 @@
 
 "use client"
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route, Navigate, useSearchParams, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { AuthProvider } from "./context/AuthContext"
+import { useAuth } from "./context/AuthContext"
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"
 
 // Layout & Pages
@@ -287,6 +287,8 @@ import TokenRedirector from "./components/TokenRedirector"
 import { ToastContainer } from "react-toastify"
 
 function App() {
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem("darkMode")
@@ -307,32 +309,46 @@ function App() {
     localStorage.setItem("darkMode", JSON.stringify(darkMode))
   }, [darkMode])
 
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
+  //   const token = params.get("token");
+  //   const user = params.get("user");
+
+  //   if (token && user) {
+  //     // localStorage me save karo
+  //     localStorage.setItem("accessToken", token);
+  //     localStorage.setItem("authUser", user);
+
+  //     // Auth context ya login function call karo
+  //     login(JSON.parse(user)); // agar tumhare paas login() function hai
+
+  //     // URL clean kar do aur dashboard pe redirect kar do
+  //     window.location.replace("/app/dashboard");
+  //   }
+  // }, []);
+
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-    const user = params.get("user");
-  
-    if (token && user) {
-      // localStorage me save karo
-      localStorage.setItem("accessToken", token);
-      localStorage.setItem("authUser", user);
-  
-      // Auth context ya login function call karo
-      login(JSON.parse(user)); // agar tumhare paas login() function hai
-  
-      // URL clean kar do aur dashboard pe redirect kar do
-      window.location.replace("/app/dashboard");
+
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        localStorage.setItem("accessToken", token);
+        localStorage.setItem("authUser", JSON.stringify(decoded));
+
+        navigate("/app/dashboard", { replace: true });
+      } catch (err) {
+        console.error("Invalid token");
+      }
     }
   }, []);
   
-  
-
   return (
-    <Router>
-      <AuthProvider>
+    <div>
+      <>
         <div className={`app-container ${darkMode ? "dark" : "light"}`}>
           <Routes>
-          <Route path="/auth-redirect" element={<TokenRedirector />} />
+            <Route path="/auth-redirect" element={<TokenRedirector />} />
             {/* Auth Pages */}
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPasswordFlow />} />
@@ -440,9 +456,9 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-      </AuthProvider>
+      </>
       <ToastContainer />
-    </Router>
+    </div>
   )
 }
 

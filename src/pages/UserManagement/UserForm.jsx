@@ -353,43 +353,43 @@ const UserForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  useEffect(() => {
-    if (id) {
-      getUserById(id)
-        .then(async (res) => {
-          const userData = res.data.user;
-          console.log("User Loaded:", userData);
+  // useEffect(() => {
+  //   if (id) {
+  //     getUserById(id)
+  //       .then(async (res) => {
+  //         const userData = res.data.user;
+  //         console.log("User Loaded:", userData);
 
-          let companyName = "";
+  //         let companyName = "";
 
-          // 🔁 Fetch company name if company ID is present
-          if (userData.company) {
-            try {
-              const companyRes = await getCompanyById(userData.company);
-              companyName = companyRes.data.name;
-              console.log(companyName)
-            } catch (err) {
-              console.error("Failed to load company:", err);
-            }
-          }
+  //         // 🔁 Fetch company name if company ID is present
+  //         if (userData.company) {
+  //           try {
+  //             const companyRes = await getCompanyById(userData.company);
+  //             companyName = companyRes.data.name;
+  //             console.log(companyName)
+  //           } catch (err) {
+  //             console.error("Failed to load company:", err);
+  //           }
+  //         }
 
-          setUser({
-            name: userData.name,
-            email: userData.email,
-            password: "",
-            role: userData.role,
-            isActive: userData.isActive.toString(),
-            companyName: userData.company?.name || "",
-            departments: userData.company?.companyProfile?.departments || [],
-          });
-        })
-        .catch((err) => {
-          console.error("Error loading user:", err);
-          Swal.fire("Error", "Failed to load user data", "error");
-          navigate("/app/users");
-        });
-    }
-  }, [id]);
+  //         setUser({
+  //           name: userData.name,
+  //           email: userData.email,
+  //           password: "",
+  //           role: userData.role,
+  //           isActive: userData.isActive.toString(),
+  //           companyName: userData.company?.name || "",
+  //           departments: userData.company?.companyProfile?.departments || [],
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         console.error("Error loading user:", err);
+  //         Swal.fire("Error", "Failed to load user data", "error");
+  //         navigate("/app/users");
+  //       });
+  //   }
+  // }, [id]);
 
 
 
@@ -434,6 +434,72 @@ const UserForm = () => {
   //     setIsSubmitting(false)
   //   }
   // }
+
+  useEffect(() => {
+    const fetchUserAndCompany = async () => {
+      try {
+        const res = await getUserById(id);
+        const userData = res.data.user;
+        console.log("User Loaded:", userData);
+  
+        let companyName = "";
+        let departments = [];
+  
+        // ✅ If user has company and companyProfile populated
+        if (userData.company && userData.company.companyProfile) {
+          companyName = userData.company.name || "";
+          departments = userData.company.companyProfile.departments || [];
+        }
+  
+        // 🔁 Fallback: If only company ID is stored and no full object
+        else if (userData.company && typeof userData.company === "string") {
+          try {
+            const companyRes = await getCompanyById(userData.company);
+            companyName = companyRes.data.name || "";
+            departments = companyRes.data?.companyProfile?.departments || [];
+          } catch (err) {
+            console.error("Failed to fetch company by ID", err);
+          }
+        }
+  
+        setUser({
+          name: userData.name,
+          email: userData.email,
+          password: "",
+          role: userData.role,
+          isActive: userData.isActive.toString(),
+          companyName,
+          departments,
+        });
+  
+        // 🔄 Set selected department if available
+        setSelectedDepartment(userData.department || "");
+      } catch (err) {
+        console.error("Error loading user:", err);
+        Swal.fire("Error", "Failed to load user data", "error");
+        navigate("/app/users");
+      }
+    };
+  
+    if (id) {
+      fetchUserAndCompany();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    // Sirf create mode me chale
+    if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
+      const companyName = currentUser?.companyProfile?.name || "";
+      const departments = currentUser?.companyProfile?.departments || [];
+  
+      setUser((prev) => ({
+        ...prev,
+        companyName,
+        departments,
+      }));
+    }
+  }, [id]);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -579,7 +645,6 @@ const UserForm = () => {
                         {currentUserRole === "admin" && (
                           <>
                             <option value="companyAdmin">Company Admin</option>
-                            <option value="member">Member</option>
                             <option value="user">User</option>
                           </>
                         )}

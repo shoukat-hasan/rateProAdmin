@@ -13,17 +13,21 @@
 
 // export default ProtectedRoute
 
-import { Navigate } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext"
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth()
+  const { user, loading } = useAuth();
 
-  if (!user) {
-    return <Navigate to="/login" replace />
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  return children
-}
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
-export default ProtectedRoute
+  return children;
+};
+
+export default ProtectedRoute;

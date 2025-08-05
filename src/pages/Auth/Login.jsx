@@ -171,6 +171,70 @@ const Login = () => {
   const navigate = useNavigate()
   const { setUser } = useAuth()
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError("");
+
+  //   try {
+  //     const response = await axiosInstance.post("/auth/login", {
+  //       email,
+  //       password,
+  //       source: "admin", // required to construct proper verification URL
+  //     });
+
+  //     const { accessToken, user } = response.data;
+
+  //     if (!user.isActive) {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Account Inactive",
+  //         text: "Your account is currently inactive. Please contact the administrator.",
+  //         confirmButtonColor: "#d33",
+  //       });
+  //       setLoading(false);
+  //       return; // stop login process
+  //     }
+
+  //     // ✅ Save accessToken and user info (optional: depending on auth strategy)
+  //     localStorage.setItem("authUser", JSON.stringify(user));
+  //     localStorage.setItem("accessToken", accessToken); // optional if you're using token in headers
+  //     setUser(user); // update auth context / state
+
+  //     // ✅ Redirect based on role
+  //     if (user.role === "user") {
+  //       window.location.href = "https://ratepro-public.vercel.app/"; // public dashboard
+  //     } else {
+  //       navigate("/app"); // internal admin/company dashboard
+  //     }
+
+  //   } catch (err) {
+  //     // const message = err.response?.data?.message;
+  //     const message = err.response?.data?.message || err.message || "Network error. Please try again.";
+
+
+  //     if (message?.toLowerCase()?.includes("not verified")) {
+  //       // ❗ Handle email not verified
+  //       Swal.fire({
+  //         icon: "warning",
+  //         title: "Email Not Verified",
+  //         text: message,
+  //         confirmButtonColor: "#0d6efd",
+  //       });
+  //     } else {
+  //       // ❌ Handle general login error
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Login Failed",
+  //         text: message || "Invalid email or password.",
+  //         confirmButtonColor: "#d33",
+  //       });
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -180,7 +244,7 @@ const Login = () => {
       const response = await axiosInstance.post("/auth/login", {
         email,
         password,
-        source: "admin", // required to construct proper verification URL
+        source: "admin", // to help backend determine correct baseURL for verification link
       });
 
       const { accessToken, user } = response.data;
@@ -193,48 +257,48 @@ const Login = () => {
           confirmButtonColor: "#d33",
         });
         setLoading(false);
-        return; // stop login process
+        return;
       }
 
-      // ✅ Save accessToken and user info (optional: depending on auth strategy)
       localStorage.setItem("authUser", JSON.stringify(user));
-      localStorage.setItem("accessToken", accessToken); // optional if you're using token in headers
-      setUser(user); // update auth context / state
+      // localStorage.setItem("accessToken", accessToken);
+      setUser(user);
 
-      // ✅ Redirect based on role
       if (user.role === "user") {
-        window.location.href = "https://ratepro-public.vercel.app/"; // public dashboard
+        window.location.href = "https://ratepro-public.vercel.app/";
       } else {
-        navigate("/app"); // internal admin/company dashboard
+        navigate("/app");
       }
 
     } catch (err) {
-      // const message = err.response?.data?.message;
       const message = err.response?.data?.message || err.message || "Network error. Please try again.";
 
-
-      if (message?.toLowerCase()?.includes("not verified")) {
-        // ❗ Handle email not verified
+      // 🟡 Check for Login Verification Required case
+      if (message.toLowerCase().includes("login verification required")) {
         Swal.fire({
-          icon: "warning",
-          title: "Email Not Verified",
-          text: message,
+          icon: "info",
+          title: "Login Verification",
+          text: "A verification link has been sent to your email. Please verify to continue.",
           confirmButtonColor: "#0d6efd",
         });
-      } else {
-        // ❌ Handle general login error
-        Swal.fire({
-          icon: "error",
-          title: "Login Failed",
-          text: message || "Invalid email or password.",
-          confirmButtonColor: "#d33",
-        });
+
+        // optionally: redirect user to verification page
+        // OR wait for OTP and open a modal to enter it
+        // navigate(`/verify-email?email=${email}&login=true`);
+        return;
       }
+
+      // 🛑 General error fallback
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: message || "Invalid email or password.",
+        confirmButtonColor: "#d33",
+      });
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <AuthLayout
