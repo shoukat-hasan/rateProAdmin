@@ -285,16 +285,25 @@ const Login = () => {
       }
 
       // 🔴 User not found or invalid credentials
-      if (
-        message.toLowerCase().includes("invalid email or password") ||
-        message.toLowerCase().includes("user not found")
-      ) {
+      if (message.toLowerCase().includes("user not found")) {
         Swal.fire({
           icon: "error",
           title: "User Not Found",
           text: "No account found with this email. Please double-check or contact support.",
           confirmButtonColor: "#d33",
         });
+        setLoading(false);
+        return;
+      }
+      
+      if (message.toLowerCase().includes("invalid email or password")) {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid Password",
+          text: "The password you entered is incorrect. Please try again.",
+          confirmButtonColor: "#d33",
+        });
+        setLoading(false);
         return;
       }
 
@@ -305,6 +314,7 @@ const Login = () => {
         text: message || "Something went wrong. Please try again.",
         confirmButtonColor: "#d33",
       });
+      setLoading(false);
     }
   };
 
