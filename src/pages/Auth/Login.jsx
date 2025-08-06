@@ -247,7 +247,7 @@ const Login = () => {
         source: "admin", // to help backend determine correct baseURL for verification link
       });
 
-      const { accessToken, user } = response.data;
+      const { user } = response.data;
 
       if (!user.isActive) {
         Swal.fire({
@@ -261,8 +261,10 @@ const Login = () => {
       }
 
       localStorage.setItem("authUser", JSON.stringify(user));
-      // localStorage.setItem("accessToken", accessToken);
       setUser(user);
+
+      console.log("🔥 User from backend:", user);
+
 
       if (user.role === "user") {
         window.location.href = "https://ratepro-public.vercel.app/";
