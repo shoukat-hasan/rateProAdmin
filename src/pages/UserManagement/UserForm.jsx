@@ -502,65 +502,81 @@ const UserForm = () => {
   //   }
   // }, [id]);
 
-  useEffect(() => {
-    const fetchUserAndCompany = async () => {
-      try {
-        const res = await getUserById(id);
-        const userData = res.data.user;
+  // 🔍 LOAD USER BY ID (Edit Mode)
+useEffect(() => {
+  const fetchUserAndCompany = async () => {
+    try {
+      const res = await getUserById(id);
+      const userData = res.data.user;
+      console.log("✅ Loaded userData:", userData);
 
-        let companyName = "";
-        let departments = [];
+      let companyName = "";
+      let departments = [];
 
-        // ✅ If company is populated with full object
-        if (userData.company && userData.company.companyProfile) {
-          companyName = userData.company.companyProfile.name || "";
-          departments = userData.company.companyProfile.departments?.map(dep => dep.name) || [];
-        }
+      // 👉 Check if company is populated with full object
+      if (userData.company && userData.company.companyProfile) {
+        console.log("📦 Company is populated object:", userData.company);
 
-        // 🔁 Else if only company ID present
-        else if (userData.company && typeof userData.company === "string") {
-          try {
-            const companyRes = await getCompanyById(userData.company);
-            companyName = companyRes.data?.companyProfile?.name || "";
-            departments = companyRes.data?.companyProfile?.departments?.map(dep => dep.name) || [];
-          } catch (err) {
-            console.error("Company fetch failed", err);
-          }
-        }
-
-        setUser({
-          name: userData.name,
-          email: userData.email,
-          password: "",
-          role: userData.role,
-          isActive: userData.isActive.toString(),
-          companyName,
-          departments,
-          departmentName: userData.department || "",
-        });
-
-      } catch (err) {
-        console.error("Error loading user:", err);
-        Swal.fire("Error", "Failed to load user data", "error");
-        navigate("/app/users");
+        companyName = userData.company.companyProfile.name || "";
+        departments = userData.company.companyProfile.departments?.map(dep => dep.name) || [];
       }
-    };
 
-    if (id) fetchUserAndCompany();
-  }, [id]);
+      // 🔁 Else if only company ID present
+      else if (userData.company && typeof userData.company === "string") {
+        console.log("🔗 Only company ID:", userData.company);
 
-  useEffect(() => {
-    if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
-      const companyName = currentUser?.companyProfile?.name || "";
-      const departments = currentUser?.companyProfile?.departments?.map(dep => dep.name) || [];
+        try {
+          const companyRes = await getCompanyById(userData.company);
+          console.log("🏢 Fetched company data:", companyRes.data);
 
-      setUser(prev => ({
-        ...prev,
+          companyName = companyRes.data?.companyProfile?.name || "";
+          departments = companyRes.data?.companyProfile?.departments?.map(dep => dep.name) || [];
+        } catch (err) {
+          console.error("❌ Company fetch failed:", err);
+        }
+      }
+
+      // Set user state for form
+      setUser({
+        name: userData.name,
+        email: userData.email,
+        password: "",
+        role: userData.role,
+        isActive: userData.isActive?.toString() || "true",
         companyName,
         departments,
-      }));
+        departmentName: userData.department || "",
+      });
+
+    } catch (err) {
+      console.error("❌ Error loading user:", err);
+      Swal.fire("Error", "Failed to load user data", "error");
+      navigate("/app/users");
     }
-  }, [id]);
+  };
+
+  if (id) fetchUserAndCompany();
+}, [id]);
+
+// 🆕 NEW USER (Create Mode) → Preload company info from currentUser
+useEffect(() => {
+  if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
+    console.log("🔍 Creating new user as:", currentUserRole);
+    console.log("👤 currentUser:", currentUser);
+
+    const companyName = currentUser?.companyProfile?.name || "";
+    const departments = currentUser?.companyProfile?.departments?.map(dep => dep.name) || [];
+
+    console.log("🏢 companyName:", companyName);
+    console.log("📂 departments:", departments);
+
+    setUser(prev => ({
+      ...prev,
+      companyName,
+      departments,
+    }));
+  }
+}, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
