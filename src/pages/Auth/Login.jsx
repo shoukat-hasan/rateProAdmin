@@ -273,7 +273,7 @@ const Login = () => {
     } catch (err) {
       const message = err.response?.data?.message || err.message || "Network error. Please try again.";
 
-      // 🟡 Check for Login Verification Required case
+      // 🔵 Login verification required
       if (message.toLowerCase().includes("login verification required")) {
         Swal.fire({
           icon: "info",
@@ -281,10 +281,20 @@ const Login = () => {
           text: "A verification link has been sent to your email. Please verify to continue.",
           confirmButtonColor: "#0d6efd",
         });
+        return;
+      }
 
-        // optionally: redirect user to verification page
-        // OR wait for OTP and open a modal to enter it
-        // navigate(`/verify-email?email=${email}&login=true`);
+      // 🔴 User not found or invalid credentials
+      if (
+        message.toLowerCase().includes("invalid email or password") ||
+        message.toLowerCase().includes("user not found")
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "User Not Found",
+          text: "No account found with this email. Please double-check or contact support.",
+          confirmButtonColor: "#d33",
+        });
         return;
       }
 
@@ -292,11 +302,9 @@ const Login = () => {
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: message || "Invalid email or password.",
+        text: message || "Something went wrong. Please try again.",
         confirmButtonColor: "#d33",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
