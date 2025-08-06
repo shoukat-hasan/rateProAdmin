@@ -508,14 +508,12 @@ useEffect(() => {
     try {
       const res = await getUserById(id);
       const userData = res.data.user;
-      console.log("✅ Loaded userData:", userData);
 
       let companyName = "";
       let departments = [];
 
       // 👉 Check if company is populated with full object
       if (userData.company && userData.company.companyProfile) {
-        console.log("📦 Company is populated object:", userData.company);
 
         companyName = userData.company.companyProfile.name || "";
         departments = userData.company.companyProfile.departments?.map(dep => dep.name) || [];
@@ -523,11 +521,9 @@ useEffect(() => {
 
       // 🔁 Else if only company ID present
       else if (userData.company && typeof userData.company === "string") {
-        console.log("🔗 Only company ID:", userData.company);
 
         try {
           const companyRes = await getCompanyById(userData.company);
-          console.log("🏢 Fetched company data:", companyRes.data);
 
           companyName = companyRes.data?.companyProfile?.name || "";
           departments = companyRes.data?.companyProfile?.departments?.map(dep => dep.name) || [];

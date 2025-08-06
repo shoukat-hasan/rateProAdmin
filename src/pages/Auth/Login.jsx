@@ -263,9 +263,6 @@ const Login = () => {
       localStorage.setItem("authUser", JSON.stringify(user));
       setUser(user);
 
-      console.log("🔥 User from backend:", user);
-
-
       if (user.role === "user") {
         window.location.href = "https://ratepro-public.vercel.app/";
       } else {

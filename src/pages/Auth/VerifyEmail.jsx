@@ -63,7 +63,6 @@ const VerifyEmail = () => {
           const { user } = res.data;
           localStorage.setItem("authUser", JSON.stringify(user));
           setUser(user);
-          console.log("🔥 User from backend:", user);
           // Redirect to app or wherever
           navigate("/app");
 
