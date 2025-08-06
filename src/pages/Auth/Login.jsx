@@ -296,7 +296,7 @@ const Login = () => {
         return;
       }
       
-      if (message.toLowerCase().includes("invalid email or password")) {
+      if (message.toLowerCase().includes("invalid password")) {
         Swal.fire({
           icon: "error",
           title: "Invalid Password",

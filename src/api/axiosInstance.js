@@ -186,121 +186,168 @@
 // export const getCompanyById = (companyId) =>
 //   axios.get(`/api/company/${companyId}`);
 
-import axios from 'axios';
+// import axios from 'axios';
+
+// const axiosInstance = axios.create({
+//   baseURL: import.meta.env.VITE_API_BASE_URL,
+//   withCredentials: true, // send cookies
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+// });
+
+// // Optional: Add token manually in future if needed
+// axiosInstance.interceptors.request.use(
+//   (config) => {
+//     // const token = localStorage.getItem('accessToken');
+//     // if (token) {
+//     //   config.headers.Authorization = `Bearer ${token}`;
+//     // }
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
+// // 🔄 Refresh token logic
+// let isRefreshing = false;
+// let failedQueue = [];
+
+// const processQueue = (error, token = null) => {
+//   failedQueue.forEach((prom) => {
+//     if (error) prom.reject(error);
+//     else prom.resolve(token);
+//   });
+//   failedQueue = [];
+// };
+
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     const originalRequest = error.config;
+//     const message = error.response?.data?.message || error.message;
+
+//     // Silent fail for specific OTP login message
+//     if (
+//       error.response?.status === 401 &&
+//       message?.includes("Login verification required")
+//     ) {
+//       return Promise.reject(error);
+//     }
+
+//     // 👉 If 401 AND not already retried — refresh logic temporarily disabled
+//     if (
+//       error.response?.status === 401 &&
+//       !originalRequest._retry
+//     ) {
+//       console.warn("Access token expired or unauthorized. Refresh logic disabled for now.");
+//       // You could optionally redirect to login here if needed
+//       // window.location.href = "/login";
+//       return Promise.reject(error);
+//     }
+
+//     // Other errors
+//     console.error("API Error:", message);
+//     return Promise.reject(error);
+//   }
+// );
+
+
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
+//     const message = error.response?.data?.message || error.message;
+
+//     // Silent fail for specific OTP login message
+//     if (
+//       error.response?.status === 401 &&
+//       message?.includes("Login verification required")
+//     ) {
+//       return Promise.reject(error);
+//     }
+
+//     // 👉 If 401 AND not already retried
+//     if (
+//       error.response?.status === 401 &&
+//       !originalRequest._retry
+//     ) {
+//       originalRequest._retry = true;
+
+//       if (isRefreshing) {
+//         return new Promise((resolve, reject) => {
+//           failedQueue.push({ resolve, reject });
+//         })
+//           .then(() => axiosInstance(originalRequest))
+//           .catch((err) => Promise.reject(err));
+//       }
+
+//       isRefreshing = true;
+
+//       try {
+//         await axiosInstance.get("/auth/refresh-token"); // 🔁 get new accessToken via cookie
+//         processQueue(null);
+//         return axiosInstance(originalRequest); // ✅ Retry original request
+//       } catch (refreshErr) {
+//         processQueue(refreshErr, null);
+//         // ❌ Refresh failed → logout
+//         console.error("Refresh token expired or invalid.");
+//         // Optional: redirect to login
+//         // window.location.href = "/login";
+//         return Promise.reject(refreshErr);
+//       } finally {
+//         isRefreshing = false;
+//       }
+//     }
+
+//     // Other errors
+//     console.error("API Error:", message);
+//     return Promise.reject(error);
+//   }
+// );
+
+// export default axiosInstance;
+
+import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true, // send cookies
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Optional: Add token manually in future if needed
+// ===== Optional: Authorization Header if needed later =====
 axiosInstance.interceptors.request.use(
   (config) => {
     // const token = localStorage.getItem('accessToken');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// 🔄 Refresh token logic
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) prom.reject(error);
-    else prom.resolve(token);
-  });
-  failedQueue = [];
-};
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const originalRequest = error.config;
-    const message = error.response?.data?.message || error.message;
-
-    // Silent fail for specific OTP login message
-    if (
-      error.response?.status === 401 &&
-      message?.includes("Login verification required")
-    ) {
-      return Promise.reject(error);
-    }
-
-    // 👉 If 401 AND not already retried — refresh logic temporarily disabled
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry
-    ) {
-      console.warn("Access token expired or unauthorized. Refresh logic disabled for now.");
-      // You could optionally redirect to login here if needed
-      // window.location.href = "/login";
-      return Promise.reject(error);
-    }
-
-    // Other errors
-    console.error("API Error:", message);
-    return Promise.reject(error);
-  }
-);
-
-
+// ===== Clean Response Interceptor (No Refresh Token) =====
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
     const message = error.response?.data?.message || error.message;
 
-    // Silent fail for specific OTP login message
-    if (
-      error.response?.status === 401 &&
-      message?.includes("Login verification required")
-    ) {
+    // 🎯 Specific silent fail (e.g. login OTP verification)
+    if (status === 401 && message?.includes("Login verification required")) {
       return Promise.reject(error);
     }
 
-    // 👉 If 401 AND not already retried
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry
-    ) {
-      originalRequest._retry = true;
+    // 🧨 Other errors
+    console.error("📦 API Error:", {
+      status,
+      message,
+      url: originalRequest?.url,
+      method: originalRequest?.method,
+    });
 
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => axiosInstance(originalRequest))
-          .catch((err) => Promise.reject(err));
-      }
-
-      isRefreshing = true;
-
-      try {
-        await axiosInstance.get("/auth/refresh-token"); // 🔁 get new accessToken via cookie
-        processQueue(null);
-        return axiosInstance(originalRequest); // ✅ Retry original request
-      } catch (refreshErr) {
-        processQueue(refreshErr, null);
-        // ❌ Refresh failed → logout
-        console.error("Refresh token expired or invalid.");
-        // Optional: redirect to login
-        // window.location.href = "/login";
-        return Promise.reject(refreshErr);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-
-    // Other errors
-    console.error("API Error:", message);
     return Promise.reject(error);
   }
 );

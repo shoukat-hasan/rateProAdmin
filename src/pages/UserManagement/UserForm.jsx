@@ -301,6 +301,88 @@
 
 // export default UserForm
 
+// useEffect(() => {
+//   if (id) {
+//     getUserById(id)
+//       .then(async (res) => {
+//         const userData = res.data.user;
+//         console.log("User Loaded:", userData);
+
+//         let companyName = "";
+
+//         // 🔁 Fetch company name if company ID is present
+//         if (userData.company) {
+//           try {
+//             const companyRes = await getCompanyById(userData.company);
+//             companyName = companyRes.data.name;
+//             console.log(companyName)
+//           } catch (err) {
+//             console.error("Failed to load company:", err);
+//           }
+//         }
+
+//         setUser({
+//           name: userData.name,
+//           email: userData.email,
+//           password: "",
+//           role: userData.role,
+//           isActive: userData.isActive.toString(),
+//           companyName: userData.company?.name || "",
+//           departments: userData.company?.companyProfile?.departments || [],
+//         });
+//       })
+//       .catch((err) => {
+//         console.error("Error loading user:", err);
+//         Swal.fire("Error", "Failed to load user data", "error");
+//         navigate("/app/users");
+//       });
+//   }
+// }, [id]);
+
+
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault()
+
+//     if (!validateForm()) {
+//       Swal.fire({
+//         icon: "error",
+//         title: "Validation Error",
+//         text: "Please fill all required fields.",
+//       })
+//       return
+//     }
+
+//     setIsSubmitting(true)
+
+//     try {
+//       if (isEditMode) {
+//         const { password, ...userWithoutPassword } = user
+//         await updateUser(id, userWithoutPassword)
+//         Swal.fire({ icon: "success", title: "User Updated" })
+//       } else {
+//         const preparedUser = {
+//           ...user,
+//           isActive: user.isActive === "true",
+//         };
+//         console.log("🔍 Creating user with data:", preparedUser);
+//         await createUser(preparedUser);
+//         Swal.fire({ icon: "success", title: "User Created" });
+//       }
+//     }
+
+//       navigate("/app/users")
+//   } catch (error) {
+//     Swal.fire({
+//       icon: "error",
+//       title: "Failed",
+//       text: error.response?.data?.message || "Failed to submit user data",
+//     })
+//   } finally {
+//     setIsSubmitting(false)
+//   }
+// }
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -321,8 +403,10 @@ const UserForm = () => {
     role: "",
     isActive: "",
     companyName: "",
-    departmentName: "",
-  })
+    departments: [], // ✅ add this
+    departmentName: "", // optional: for form value binding
+  });
+
 
   const [errors, setErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
@@ -354,114 +438,96 @@ const UserForm = () => {
   };
 
   // useEffect(() => {
-  //   if (id) {
-  //     getUserById(id)
-  //       .then(async (res) => {
-  //         const userData = res.data.user;
-  //         console.log("User Loaded:", userData);
+  //   const fetchUserAndCompany = async () => {
+  //     try {
+  //       const res = await getUserById(id);
+  //       const userData = res.data.user;
+  //       console.log("User Loaded:", userData);
 
-  //         let companyName = "";
+  //       let companyName = "";
+  //       let departments = [];
 
-  //         // 🔁 Fetch company name if company ID is present
-  //         if (userData.company) {
-  //           try {
-  //             const companyRes = await getCompanyById(userData.company);
-  //             companyName = companyRes.data.name;
-  //             console.log(companyName)
-  //           } catch (err) {
-  //             console.error("Failed to load company:", err);
-  //           }
+  //       // ✅ If user has company and companyProfile populated
+  //       if (userData.company && userData.company.companyProfile) {
+  //         companyName = userData.company.name || "";
+  //         departments = userData.company.companyProfile.departments || [];
+  //       }
+
+  //       // 🔁 Fallback: If only company ID is stored and no full object
+  //       else if (userData.company && typeof userData.company === "string") {
+  //         try {
+  //           const companyRes = await getCompanyById(userData.company);
+  //           companyName = companyRes.data.name || "";
+  //           departments = companyRes.data?.companyProfile?.departments || [];
+  //         } catch (err) {
+  //           console.error("Failed to fetch company by ID", err);
   //         }
+  //       }
 
-  //         setUser({
-  //           name: userData.name,
-  //           email: userData.email,
-  //           password: "",
-  //           role: userData.role,
-  //           isActive: userData.isActive.toString(),
-  //           companyName: userData.company?.name || "",
-  //           departments: userData.company?.companyProfile?.departments || [],
-  //         });
-  //       })
-  //       .catch((err) => {
-  //         console.error("Error loading user:", err);
-  //         Swal.fire("Error", "Failed to load user data", "error");
-  //         navigate("/app/users");
+  //       setUser({
+  //         name: userData.name,
+  //         email: userData.email,
+  //         password: "",
+  //         role: userData.role,
+  //         isActive: userData.isActive.toString(),
+  //         companyName,
+  //         departments,
   //       });
+
+  //       // 🔄 Set selected department if available
+  //       setSelectedDepartment(userData.department || "");
+  //     } catch (err) {
+  //       console.error("Error loading user:", err);
+  //       Swal.fire("Error", "Failed to load user data", "error");
+  //       navigate("/app/users");
+  //     }
+  //   };
+
+  //   if (id) {
+  //     fetchUserAndCompany();
   //   }
   // }, [id]);
 
+  // useEffect(() => {
+  //   // Sirf create mode me chale
+  //   if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
+  //     const companyName = currentUser?.companyProfile?.name || "";
+  //     const departments = currentUser?.companyProfile?.departments || [];
 
-
-  //   const handleSubmit = async (e) => {
-  //     e.preventDefault()
-
-  //     if (!validateForm()) {
-  //       Swal.fire({
-  //         icon: "error",
-  //         title: "Validation Error",
-  //         text: "Please fill all required fields.",
-  //       })
-  //       return
-  //     }
-
-  //     setIsSubmitting(true)
-
-  //     try {
-  //       if (isEditMode) {
-  //         const { password, ...userWithoutPassword } = user
-  //         await updateUser(id, userWithoutPassword)
-  //         Swal.fire({ icon: "success", title: "User Updated" })
-  //       } else {
-  //         const preparedUser = {
-  //           ...user,
-  //           isActive: user.isActive === "true",
-  //         };
-  //         console.log("🔍 Creating user with data:", preparedUser);
-  //         await createUser(preparedUser);
-  //         Swal.fire({ icon: "success", title: "User Created" });
-  //       }
-  //     }
-
-  //       navigate("/app/users")
-  //   } catch (error) {
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Failed",
-  //       text: error.response?.data?.message || "Failed to submit user data",
-  //     })
-  //   } finally {
-  //     setIsSubmitting(false)
+  //     setUser((prev) => ({
+  //       ...prev,
+  //       companyName,
+  //       departments,
+  //     }));
   //   }
-  // }
+  // }, [id]);
 
   useEffect(() => {
     const fetchUserAndCompany = async () => {
       try {
         const res = await getUserById(id);
         const userData = res.data.user;
-        console.log("User Loaded:", userData);
-  
+
         let companyName = "";
         let departments = [];
-  
-        // ✅ If user has company and companyProfile populated
+
+        // ✅ If company is populated with full object
         if (userData.company && userData.company.companyProfile) {
-          companyName = userData.company.name || "";
-          departments = userData.company.companyProfile.departments || [];
+          companyName = userData.company.companyProfile.name || "";
+          departments = userData.company.companyProfile.departments?.map(dep => dep.name) || [];
         }
-  
-        // 🔁 Fallback: If only company ID is stored and no full object
+
+        // 🔁 Else if only company ID present
         else if (userData.company && typeof userData.company === "string") {
           try {
             const companyRes = await getCompanyById(userData.company);
-            companyName = companyRes.data.name || "";
-            departments = companyRes.data?.companyProfile?.departments || [];
+            companyName = companyRes.data?.companyProfile?.name || "";
+            departments = companyRes.data?.companyProfile?.departments?.map(dep => dep.name) || [];
           } catch (err) {
-            console.error("Failed to fetch company by ID", err);
+            console.error("Company fetch failed", err);
           }
         }
-  
+
         setUser({
           name: userData.name,
           email: userData.email,
@@ -470,36 +536,31 @@ const UserForm = () => {
           isActive: userData.isActive.toString(),
           companyName,
           departments,
+          departmentName: userData.department || "",
         });
-  
-        // 🔄 Set selected department if available
-        setSelectedDepartment(userData.department || "");
+
       } catch (err) {
         console.error("Error loading user:", err);
         Swal.fire("Error", "Failed to load user data", "error");
         navigate("/app/users");
       }
     };
-  
-    if (id) {
-      fetchUserAndCompany();
-    }
+
+    if (id) fetchUserAndCompany();
   }, [id]);
 
   useEffect(() => {
-    // Sirf create mode me chale
     if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
       const companyName = currentUser?.companyProfile?.name || "";
-      const departments = currentUser?.companyProfile?.departments || [];
-  
-      setUser((prev) => ({
+      const departments = currentUser?.companyProfile?.departments?.map(dep => dep.name) || [];
+
+      setUser(prev => ({
         ...prev,
         companyName,
         departments,
       }));
     }
   }, [id]);
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -517,8 +578,8 @@ const UserForm = () => {
 
     const preparedUser = {
       ...user,
-      companyName: "ABC Company",
-      department: "Management",
+      companyName: user.companyName,
+      department: user.departmentName,
     };
     console.log("Submitted user:", preparedUser);
     try {
@@ -699,7 +760,12 @@ const UserForm = () => {
                     <Col md={6}>
                       <Form.Group className="mb-3">
                         <Form.Label>Department Name</Form.Label>
-                        <Form.Select>
+                        <Form.Select
+                          name="departmentName"
+                          value={user.departmentName}
+                          onChange={handleChange}
+                        >
+                          <option value="">Select Department</option>
                           {Array.isArray(user.departments) && user.departments.length > 0 ? (
                             user.departments.map((dept, index) => (
                               <option key={index} value={dept}>{dept}</option>
