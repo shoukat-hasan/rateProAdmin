@@ -298,8 +298,10 @@ import { capitalize } from "../../utilities/capitalize.jsx"
 import EmailModal from "../../components/Modal/EmailModal.jsx";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2"
+import { useAuth } from "../../context/AuthContext.jsx"
 
 const UserList = ({ darkMode }) => {
+  const [ authUser] = useAuth();
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
