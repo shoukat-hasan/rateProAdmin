@@ -360,7 +360,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   }
 
   const navItems = [
-    { path: "/app", name: "Dashboard", icon: <MdDashboard />, roles: ["admin", "companyAdmin"], },
+    { path: "/app", name: "Dashboard", icon: <MdDashboard /> },
     {
       name: "Survey Management",
       icon: <MdAssignment />,
