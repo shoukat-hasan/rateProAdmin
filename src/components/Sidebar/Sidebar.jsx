@@ -360,25 +360,25 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   }
 
   const navItems = [
-    { path: "/app", name: "Dashboard", icon: <MdDashboard />, roles: ["admin", "company"], },
+    { path: "/app", name: "Dashboard", icon: <MdDashboard />, roles: ["admin", "companyAdmin"], },
     {
       name: "Survey Management",
       icon: <MdAssignment />,
       submenu: true,
       isOpen: surveySubmenuOpen,
-      roles: ["admin", "company"],
+      roles: ["admin", "companyAdmin"],
       toggle: () => toggleSubmenu("survey"),
       submenuItems: [
         { path: "/app/surveys", name: "All Surveys", icon: <MdViewList /> },
-        { path: "/app/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline />, roles: ["company"] },
+        { path: "/app/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline />, roles: ["companyAdmin"] },
         { path: "/app/surveys/templates", name: "Survey Templates", icon: <MdTemplate />, roles: ["admin"] },
         { path: "/app/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule /> },
-        { path: "/app/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer />, roles: ["company"] },
-        { path: "/app/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics />, roles: ["company"] },
+        { path: "/app/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer />, roles: ["companyAdmin"] },
+        { path: "/app/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics />, roles: ["companyAdmin"] },
         { path: "/app/surveys/:id/customize", name: "Customization", icon: <MdCustomize /> },
-        { path: "/app/surveys/:id/share", name: "Survey Sharing", icon: <MdShare />, roles: ["company"] },
-        { path: "/app/surveys/settings", name: "Survey Settings", icon: <MdSettings />, roles: ["company"] },
-        { path: "/app/surveys/detail", name: "Survey Detail", icon: <MdVisibility />, roles: ["company"] },
+        { path: "/app/surveys/:id/share", name: "Survey Sharing", icon: <MdShare />, roles: ["companyAdmin"] },
+        { path: "/app/surveys/settings", name: "Survey Settings", icon: <MdSettings />, roles: ["companyAdmin"] },
+        { path: "/app/surveys/detail", name: "Survey Detail", icon: <MdVisibility />, roles: ["companyAdmin"] },
       ],
     },
     {
@@ -458,7 +458,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       isOpen: settingsSubmenuOpen,
       toggle: () => toggleSubmenu("settings"),
       submenuItems: [
-        { path: "/app/settings", name: "General Settings", icon: <MdSettings />, roles: ["admin", "company"] },
+        { path: "/app/settings", name: "General Settings", icon: <MdSettings />, roles: ["admin", "companyAdmin"] },
         { path: "/app/settings/email-templates", name: "Email Templates", icon: <MdMailOutline />, roles: ["admin"] },
         { path: "/app/settings/notification-settings", name: "Notification Settings", icon: <MdNotifications />, roles: ["admin"] },
         { path: "/app/settings/smtp-config", name: "SMTP Configuration", icon: <MdEmail />, roles: ["admin"] },
