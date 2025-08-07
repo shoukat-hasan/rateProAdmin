@@ -366,7 +366,6 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdAssignment />,
       submenu: true,
       isOpen: surveySubmenuOpen,
-      roles: ["admin", "companyAdmin"],
       toggle: () => toggleSubmenu("survey"),
       submenuItems: [
         { path: "/app/surveys", name: "All Surveys", icon: <MdViewList /> },
