@@ -591,6 +591,7 @@ const UserList = ({ darkMode }) => {
                   <tr>
                     <th>User</th>
                     <th>Role</th>
+                    {authUser.role === "admin" && <th>Company Name</th>}
                     <th>Status</th>
                     <th>Email Verified</th>
                     <th className="text-center">Actions</th>
@@ -627,6 +628,11 @@ const UserList = ({ darkMode }) => {
                         <Badge bg={getRoleVariant(user.role)} className="px-3 py-2">
                           {capitalize(user.role)}
                         </Badge>
+                      </td>
+                      <td>
+                        {authUser.role === "admin" && (
+                          <td>{user.companyProfile?.name || "—"}</td>
+                        )}
                       </td>
                       <td>
                         <Badge bg={user.status === "Active" ? "success" : "secondary"} className="px-3 py-2">
