@@ -301,7 +301,7 @@ import Swal from "sweetalert2"
 import { useAuth } from "../../context/AuthContext.jsx"
 
 const UserList = ({ darkMode }) => {
-  const [authUser] = useAuth();
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -318,6 +318,8 @@ const UserList = ({ darkMode }) => {
   const [selectedEmail, setSelectedEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
+
+  // console.log(currentUser?.role)
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -593,7 +595,7 @@ const UserList = ({ darkMode }) => {
                   <tr>
                     <th>User</th>
                     <th>Role</th>
-                    {authUser.role === "admin" && <th>Company Name</th>}
+                    {currentUser.role === "admin" && <th>Company Name</th>}
                     <th>Status</th>
                     <th>Email Verified</th>
                     <th className="text-center">Actions</th>
@@ -631,8 +633,8 @@ const UserList = ({ darkMode }) => {
                           {capitalize(user.role)}
                         </Badge>
                       </td>
-                      {authUser.role === "admin" && (
-                        <td>{user.companyProfile?.name || "—"}</td>
+                      {currentUser.role === "admin" && (
+                        <td>{user.companyProfile?.name || "-"}</td>
                       )}
                       <td>
                         <Badge bg={user.status === "Active" ? "success" : "secondary"} className="px-3 py-2">
