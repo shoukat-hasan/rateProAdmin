@@ -435,7 +435,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
 
       ],
     },
-    { path: "/app/support", name: "Support Tickets", icon: <MdSupport />, role: ["admin"] },
+    { path: "/app/support", name: "Support Tickets", icon: <MdSupport />, roles: ["admin"] },
     {
       name: "Settings",
       icon: <MdSettings />,
@@ -443,12 +443,12 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       isOpen: settingsSubmenuOpen,
       toggle: () => toggleSubmenu("settings"),
       submenuItems: [
-        { path: "/app/settings", name: "General Settings", icon: <MdSettings />, role: ["admin", "companyAdmin"] },
-        { path: "/app/settings/email-templates", name: "Email Templates", icon: <MdMailOutline />, role: ["admin"] },
-        { path: "/app/settings/notification-settings", name: "Notification Settings", icon: <MdNotifications />, role: ["admin"] },
-        { path: "/app/settings/smtp-config", name: "SMTP Configuration", icon: <MdEmail />, role: ["admin"] },
-        { path: "/app/settings/custom-thank-you", name: "Thank You Page", icon: <MdThumbUp />, role: ["admin"] },
-        { path: "/app/settings/theme-settings", name: "Theme Settings", icon: <MdColorLens />, role: ["admin"] },
+        { path: "/app/settings", name: "General Settings", icon: <MdSettings />, roles: ["admin", "companyAdmin"] },
+        { path: "/app/settings/email-templates", name: "Email Templates", icon: <MdMailOutline />, roles: ["admin"] },
+        { path: "/app/settings/notification-settings", name: "Notification Settings", icon: <MdNotifications />, roles: ["admin"] },
+        { path: "/app/settings/smtp-config", name: "SMTP Configuration", icon: <MdEmail />, roles: ["admin"] },
+        { path: "/app/settings/custom-thank-you", name: "Thank You Page", icon: <MdThumbUp />, roles: ["admin"] },
+        { path: "/app/settings/theme-settings", name: "Theme Settings", icon: <MdColorLens />, roles: ["admin"] },
       ],
     },
   ]
