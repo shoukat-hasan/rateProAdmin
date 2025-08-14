@@ -171,69 +171,6 @@ const Login = () => {
   const navigate = useNavigate()
   const { setUser } = useAuth()
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   setError("");
-
-  //   try {
-  //     const response = await axiosInstance.post("/auth/login", {
-  //       email,
-  //       password,
-  //       source: "admin", // required to construct proper verification URL
-  //     });
-
-  //     const { accessToken, user } = response.data;
-
-  //     if (!user.isActive) {
-  //       Swal.fire({
-  //         icon: "error",
-  //         title: "Account Inactive",
-  //         text: "Your account is currently inactive. Please contact the administrator.",
-  //         confirmButtonColor: "#d33",
-  //       });
-  //       setLoading(false);
-  //       return; // stop login process
-  //     }
-
-  //     // ✅ Save accessToken and user info (optional: depending on auth strategy)
-  //     localStorage.setItem("authUser", JSON.stringify(user));
-  //     localStorage.setItem("accessToken", accessToken); // optional if you're using token in headers
-  //     setUser(user); // update auth context / state
-
-  //     // ✅ Redirect based on role
-  //     if (user.role === "user") {
-  //       window.location.href = "https://ratepro-public.vercel.app/"; // public dashboard
-  //     } else {
-  //       navigate("/app"); // internal admin/company dashboard
-  //     }
-
-  //   } catch (err) {
-  //     // const message = err.response?.data?.message;
-  //     const message = err.response?.data?.message || err.message || "Network error. Please try again.";
-
-
-  //     if (message?.toLowerCase()?.includes("not verified")) {
-  //       // ❗ Handle email not verified
-  //       Swal.fire({
-  //         icon: "warning",
-  //         title: "Email Not Verified",
-  //         text: message,
-  //         confirmButtonColor: "#0d6efd",
-  //       });
-  //     } else {
-  //       // ❌ Handle general login error
-  //       Swal.fire({
-  //         icon: "error",
-  //         title: "Login Failed",
-  //         text: message || "Invalid email or password.",
-  //         confirmButtonColor: "#d33",
-  //       });
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -241,14 +178,19 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axiosInstance.post("/auth/login", {
+      const { data } = await axiosInstance.post("/auth/login", {
         email,
         password,
-        source: "admin", // to help backend determine correct baseURL for verification link
+        source: "admin",
       });
 
-      const { user } = response.data;
+      const user = data?.user;
+      if (!user) {
+        // Server ne 2xx diya lekin expected shape nahi mila
+        throw new Error(data?.message || "Malformed server response");
+      }
 
+      // ✅ Active check
       if (!user.isActive) {
         Swal.fire({
           icon: "error",
@@ -256,10 +198,22 @@ const Login = () => {
           text: "Your account is currently inactive. Please contact the administrator.",
           confirmButtonColor: "#d33",
         });
-        setLoading(false);
         return;
       }
 
+      // ✅ Email verification check (DB flag)
+      if (!user.isVerified) {
+        Swal.fire({
+          icon: "info",
+          title: "Email Not Verified",
+          text:
+            "Your email is not verified. A verification link has been sent to your email. Kindly click the link to verify your account.",
+          confirmButtonColor: "#0d6efd",
+        });
+        return;
+      }
+
+      // ✅ Save & redirect
       localStorage.setItem("authUser", JSON.stringify(user));
       setUser(user);
 
@@ -268,51 +222,81 @@ const Login = () => {
       } else {
         navigate("/app");
       }
-
     } catch (err) {
-      const message = err.response?.data?.message || err.message || "Network error. Please try again.";
+      const status = err.response?.status;
+      const rawMsg = err.response?.data?.message || err.message || "";
+      const msg = rawMsg.toLowerCase();
 
-      // 🔵 Login verification required
-      if (message.toLowerCase().includes("login verification required")) {
+      // 🟦 Email not verified (server ne error status bheja ho)
+      if (
+        msg.includes("login verification required") ||
+        msg.includes("email not verified") ||
+        msg.includes("verify your email") ||
+        msg.includes("unverified")
+      ) {
         Swal.fire({
           icon: "info",
-          title: "Login Verification",
-          text: "A verification link has been sent to your email. Please verify to continue.",
+          title: "Email Not Verified",
+          text:
+            "Your email is not verified. A verification link has been sent to your email. Kindly click the link to verify your account.",
           confirmButtonColor: "#0d6efd",
         });
         return;
       }
 
-      // 🔴 User not found or invalid credentials
-      if (message.toLowerCase().includes("user not found")) {
+      // 🔴 User not found
+      if (msg.includes("user not found")) {
         Swal.fire({
           icon: "error",
           title: "User Not Found",
-          text: "No account found with this email. Please double-check or contact support.",
+          text:
+            "No account found with this email. Please double-check or contact support.",
           confirmButtonColor: "#d33",
         });
-        setLoading(false);
         return;
       }
-      
-      if (message.toLowerCase().includes("invalid password")) {
+
+      // 🔴 Invalid password
+      if (msg.includes("invalid password")) {
         Swal.fire({
           icon: "error",
           title: "Invalid Password",
           text: "The password you entered is incorrect. Please try again.",
           confirmButtonColor: "#d33",
         });
-        setLoading(false);
         return;
       }
 
-      // 🛑 General error fallback
+      // 🟠 Rate limit / too many attempts
+      if (status === 429) {
+        Swal.fire({
+          icon: "warning",
+          title: "Too Many Attempts",
+          text: "Please wait a moment before trying again.",
+          confirmButtonColor: "#f0ad4e",
+        });
+        return;
+      }
+
+      // 🔧 Server-side issue
+      if (status >= 500) {
+        Swal.fire({
+          icon: "error",
+          title: "Server Error",
+          text: "We're having trouble on our end. Please try again later.",
+          confirmButtonColor: "#d33",
+        });
+        return;
+      }
+
+      // 🛑 General fallback
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: message || "Something went wrong. Please try again.",
+        text: rawMsg || "Something went wrong. Please try again.",
         confirmButtonColor: "#d33",
       });
+    } finally {
       setLoading(false);
     }
   };

@@ -14,7 +14,7 @@
 //       try {
 //         const res = await axios.post("http://localhost:5000/api/auth/verify-email", { code, email }) // <- send correct keys
 //         Swal.fire("✅ Verified!", res.data.message, "success")
-//         navigate("/login")
+//         navigate("/app")
 //       } catch (error) {
 //         Swal.fire("❌ Verification Failed", error.response?.data?.message || "Something went wrong", "error")
 //       }
@@ -51,73 +51,38 @@ const VerifyEmail = () => {
   useEffect(() => {
     const verify = async () => {
       try {
-        if (isLogin === "true") {
-          // 🔐 Verify Login OTP
-          const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/verify-login-otp`, {
-            code,
-            email,
-          }, { withCredentials: true });
-
-          Swal.fire("✅ Login Verified!", "Welcome back!", "success");
-
-          const { user } = res.data;
-          localStorage.setItem("authUser", JSON.stringify(user));
-          setUser(user);
-          // Redirect to app or wherever
-          navigate("/app");
-
-        }
-
+        // ✅ Email verification API call
+        const res = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/auth/verify-email`,
+          { code, email },
+          { withCredentials: true }
+        );
+  
+        Swal.fire("✅ Email Verified!", "Your email has been successfully verified.", "success");
+  
+        const { user } = res.data;
+        console.log(user)
+        localStorage.setItem("authUser", JSON.stringify(user));
+        setUser(user);
+  
+        // ✅ Redirect to app
+        navigate("/app");
+  
       } catch (error) {
         Swal.fire(
           "❌ Verification Failed",
-          error.response?.data?.message || "Something went wrong",
+          error.response?.data?.message || "Verification link is invalid or expired.",
           "error"
         );
       }
     };
-
+  
+    // Run verification only if we have code and email in URL
     if (code && email) {
       verify();
     }
-  }, [code, email, isLogin, navigate, setUser]);
-
-  // useEffect(() => {
-  //   const verify = async () => {
-  //     try {
-  //       if (isLogin === "true") {
-  //         // 🔐 Verify Login OTP
-  //         await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/verify-login-otp`, {
-  //           code,
-  //           email,
-  //         }, { withCredentials: true });
-
-  //         Swal.fire("✅ Login Verified!", "Welcome back!", "success");
-  //         navigate("/app");
-  //       } else {
-  //         // 📧 Regular Email Verification
-  //         const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/verify-email`, {
-  //           code,
-  //           email,
-  //         });
-
-  //         Swal.fire("✅ Verified!", res.data.message, "success");
-  //         navigate("/login");
-  //       }
-  //     } catch (error) {
-  //       Swal.fire(
-  //         "❌ Verification Failed",
-  //         error.response?.data?.message || "Something went wrong",
-  //         "error"
-  //       );
-  //     }
-  //   };
-
-  //   if (code && email) {
-  //     verify();
-  //   }
-  // }, [code, email, isLogin, navigate]);
-
+  }, [code, email, navigate, setUser]);
+ 
   return (
     <div className="text-center mt-5">
       <h2>Verifying your email...</h2>

@@ -557,15 +557,10 @@ useEffect(() => {
 // 🆕 NEW USER (Create Mode) → Preload company info from currentUser
 useEffect(() => {
   if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
-    console.log("🔍 Creating new user as:", currentUserRole);
-    console.log("👤 currentUser:", currentUser);
 
     const companyName = currentUser?.companyProfile?.name || "";
     const departments = currentUser?.companyProfile?.departments?.map(dep => dep.name) || [];
-
-    console.log("🏢 companyName:", companyName);
-    console.log("📂 departments:", departments);
-
+    
     setUser(prev => ({
       ...prev,
       companyName,
