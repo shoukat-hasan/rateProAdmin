@@ -607,7 +607,6 @@ const UserForm = () => {
       companyName: user.companyName,
       department: user.departmentName,
     };
-    console.log("Submitted user:", preparedUser);
     try {
       if (isEditMode) {
         const { password, ...userWithoutPassword } = preparedUser;
@@ -618,7 +617,7 @@ const UserForm = () => {
         Swal.fire({ icon: "success", title: "User Created" });
       }
 
-      navigate("/app/users");
+      navigate("/app/users", { replace: true });
     } catch (error) {
       Swal.fire({
         icon: "error",

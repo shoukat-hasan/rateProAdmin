@@ -337,6 +337,23 @@ const UserList = ({ darkMode }) => {
     setCurrentUserId(loggedInUser?._id || null);
   }, []);
 
+  const resolveCompanyName = async (rowUser) => {
+    if (rowUser.role === "companyAdmin") {
+      // Ye row me jo user companyAdmin hai, uski companyProfile se naam lo
+      return rowUser.companyProfile?.name || "-"
+    } else if (rowUser.role === "member") {
+      try {
+        // Member ke liye, createdBy se companyAdmin ka user fetch karo
+        const res = await axiosInstance.get(`/users/${rowUser.createdBy}`)
+        return res.data.user.companyProfile?.name || "-"
+      } catch (err) {
+        console.error("Failed to fetch company for member:", err)
+        return "-"
+      }
+    }
+    return "-"
+  }
+
   const fetchUsers = async () => {
     setLoading(true)
     try {
@@ -354,21 +371,30 @@ const UserList = ({ darkMode }) => {
                 : undefined,
         },
       })
-
+  
       const { users, total, page: currentPage } = response.data
-
-      const processedUsers = users.map((user) => ({
-        ...user,
-        status: user.isActive ? "Active" : "Inactive",
-      }))
+  
+      // ✅ Async mapping with Promise.all
+      const processedUsers = await Promise.all(
+        users.map(async (user) => {
+          const companyName = await resolveCompanyName(user);
+          return {
+            ...user,
+            status: user.isActive ? "Active" : "Inactive",
+            companyName,
+          };
+        })
+      );      
+  
       setUsers(processedUsers)
+      // console.log(processedUsers)
       setPagination((prev) => ({ ...prev, page: currentPage, total }))
     } catch (error) {
       console.error("Failed to fetch users", error)
     } finally {
       setLoading(false)
     }
-  }
+  }  
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target
@@ -604,7 +630,7 @@ const UserList = ({ darkMode }) => {
                         </Badge>
                       </td>
                       {currentUser.role === "admin" && (
-                        <td>{user.companyProfile?.name || "-"}</td>
+                        <td>{user.companyName || "-"}</td>
                       )}
                       <td>
                         <Badge bg={user.status === "Active" ? "success" : "secondary"} className="px-3 py-2">

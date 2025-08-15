@@ -212,9 +212,8 @@
 
 "use client"
 
-import { Routes, Route, Navigate, useSearchParams, useNavigate } from "react-router-dom"
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { useAuth } from "./context/AuthContext"
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"
 
 // Layout & Pages
@@ -223,8 +222,6 @@ import Dashboard from "./pages/Dashboard/Dashboard"
 
 // Auth Pages
 import Login from "./pages/Auth/Login"
-import Signup from "./pages/Auth/Signup"
-import CompanyRegistration from "./pages/Auth/CompanyRegistration"
 import ForgotPasswordFlow from "./pages/Auth/ForgotPasswordFlow"
 import ResetPassword from "./pages/Auth/ResetPassword"
 import EnterEmail from "./pages/Auth/EnterEmail"
@@ -257,7 +254,6 @@ import TrendAnalysis from "./pages/Analytics/TrendAnalysis"
 import CustomReports from "./pages/Analytics/CustomReports"
 import ResponseOverview from "./pages/Analytics/ResponseOverview"
 import Settings from "./pages/Settings/Settings"
-// import BillingPlans from "./pages/Settings/BillingPlans"
 import ThankYouPage from "./pages/Settings/ThankYouPage"
 import NotificationSettings from "./pages/Settings/NotificationSettings"
 import ThemeSettings from "./pages/Settings/ThemeSettings"
@@ -267,17 +263,12 @@ import UserList from "./pages/UserManagement/UserList"
 import UserForm from "./pages/UserManagement/UserForm"
 import AccessManagement from "./pages/AccessManagement/AccessManagement"
 import RoleManagement from "./pages/AccessManagement/RoleManagement"
-import PermissionManagement from "./pages/AccessManagement/PermissionManagement"
-// import EmailManagement from "./pages/Communication/EmailManagement"
 import EmailTemplates from "./pages/Communication/EmailTemplates"
-import NotificationCenter from "./pages/Communication/NotificationCenter"
 import SupportTickets from "./pages/Support/SupportTickets"
 import TicketDetail from "./pages/Support/TicketDetail"
 import CreateTicket from "./pages/Support/CreateTicket"
 import Testimonials from "./pages/ContentManagement/Testimonials"
 import Widgets from "./pages/ContentManagement/Widgets"
-// import IncentiveManagement from "./pages/Incentives/IncentiveManagement"
-// import RewardSystem from "./pages/Incentives/RewardSystem"
 import Features from "./pages/ContentManagement/Features"
 import Pricing from "./pages/ContentManagement/Pricing"
 import ContactManagement from "./pages/Audiences/ContactManagement"
@@ -287,7 +278,6 @@ import TokenRedirector from "./components/TokenRedirector"
 import { ToastContainer } from "react-toastify"
 
 function App() {
-  const [params] = useSearchParams();
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() => {
     try {
@@ -310,38 +300,15 @@ function App() {
   }, [darkMode])
 
   // useEffect(() => {
-  //   const params = new URLSearchParams(window.location.search);
-  //   const token = params.get("token");
-  //   const user = params.get("user");
 
-  //   if (token && user) {
-  //     // localStorage me save karo
-  //     localStorage.setItem("accessToken", token);
-  //     localStorage.setItem("authUser", user);
+  //   if () {
+  //     try {
+  //       localStorage.setItem("authUser", JSON.stringify(decoded));
 
-  //     // Auth context ya login function call karo
-  //     login(JSON.parse(user)); // agar tumhare paas login() function hai
-
-  //     // URL clean kar do aur dashboard pe redirect kar do
-  //     window.location.replace("/app/dashboard");
+  //       navigate("/app/dashboard", { replace: true });
+  //     } 
   //   }
   // }, []);
-
-  useEffect(() => {
-    const token = params.get("token");
-
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        localStorage.setItem("accessToken", token);
-        localStorage.setItem("authUser", JSON.stringify(decoded));
-
-        navigate("/app/dashboard", { replace: true });
-      } catch (err) {
-        console.error("Invalid token");
-      }
-    }
-  }, []);
   
   return (
     <div>
@@ -396,12 +363,10 @@ function App() {
               <Route path="users" element={<UserList />} />
               <Route path="users/:id/edit" element={<UserForm />} />
               <Route path="users/form" element={<UserForm />} />
-              {/* <Route path="users/role-permissions" element={<PermissionManagement />} /> */}
 
               {/* Access */}
               <Route path="access" element={<AccessManagement />} />
               <Route path="roles" element={<RoleManagement />} />
-              {/* <Route path="access/permissions" element={<PermissionManagement />} /> */}
 
               {/* Audiences */}
               <Route path="audiences" element={<Audiences />} />
@@ -415,19 +380,10 @@ function App() {
               <Route path="analytics/trends" element={<TrendAnalysis />} />
               <Route path="analytics/response-overview" element={<ResponseOverview />} />
 
-              {/* Communication */}
-              {/* <Route path="communication/emails" element={<EmailManagement />} />
-              <Route path="communication/templates" element={<EmailTemplates />} />
-              <Route path="communication/notifications" element={<NotificationCenter />} /> */}
-
               {/* Support */}
               <Route path="support" element={<SupportTickets />} />
               <Route path="support/create" element={<CreateTicket />} />
               <Route path="support/:id" element={<TicketDetail />} />
-
-              {/* Incentives */}
-              {/* <Route path="incentives" element={<IncentiveManagement />} />
-              <Route path="incentives/rewards" element={<RewardSystem />} /> */}
 
               {/* Templates */}
               <Route path="templates" element={<Templates />} />
