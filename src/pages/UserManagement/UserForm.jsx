@@ -585,7 +585,7 @@ const UserForm = () => {
         departments,
       }));
     }
-  }, [id, currentUserRole, currentUser]);
+  }, [id, currentUserRole]);
 
 
   const handleSubmit = async (e) => {
@@ -838,7 +838,7 @@ const UserForm = () => {
                   <Button
                     type="button"
                     variant="secondary"
-                    onClick={() => navigate("/app/users")}
+                    onClick={() => navigate("/app/users", { replace: true })}
                     disabled={isSubmitting}
                   >
                     Cancel

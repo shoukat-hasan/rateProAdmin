@@ -374,36 +374,6 @@ const UserList = ({ darkMode }) => {
     const { name, value } = e.target
     setFilters((prev) => ({ ...prev, [name]: value }))
   }
-
-  // const handleDeleteUser = async (userId) => {
-  //   const result = await Swal.fire({
-  //     title: "Are you sure?",
-  //     text: "This user will be marked as deleted!",
-  //     icon: "warning",
-  //     showCancelButton: true,
-  //     confirmButtonColor: "#d33",
-  //     cancelButtonColor: "#3085d6",
-  //     confirmButtonText: "Yes, delete it!",
-  //   });
-
-  //   if (result.isConfirmed) {
-  //     try {
-  //       const res = await deleteUserById(userId);
-
-  //       setUsers((prev) => prev.filter((user) => user._id !== userId));
-
-  //       toast.success(res.data.message || "User deleted successfully");
-
-  //       // Optional: show sweetalert success
-  //       Swal.fire("Deleted!", "User has been deleted.", "success");
-  //     } catch (error) {
-  //       toast.error(
-  //         error.response?.data?.message || "Failed to delete user"
-  //       );
-  //     }
-  //   }
-  // };
-
   const handleDeleteUser = async (userId) => {
     const currentUserId = JSON.parse(localStorage.getItem("authUser"))?._id;
 
