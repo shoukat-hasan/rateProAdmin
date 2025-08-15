@@ -18,6 +18,7 @@ const Profile = ({ darkMode }) => {
   const [userId, setUserId] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const { setUser, user } = useAuth()
+  const { updateCompanyInfo } = useAuth();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -369,6 +370,8 @@ const Profile = ({ darkMode }) => {
       const response = await updateProfile(payload);
 
       if (response.status === 200) {
+
+        updateCompanyInfo(payload.companyProfile);
         Swal.fire({
           icon: "success",
           title: "Updated",

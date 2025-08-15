@@ -457,11 +457,12 @@ import { Container, Row, Col, Card, Form, Button, Spinner } from "react-bootstra
 import Swal from "sweetalert2"
 import { MdSave, MdArrowBack, MdVisibility, MdVisibilityOff } from "react-icons/md"
 import { createUser } from "../../api/createUser"
+import { useAuth } from "../../context/AuthContext";
 import { getCompanyById, getUserById, updateUser } from "../../api/axiosInstance"
 
 const UserForm = () => {
   const navigate = useNavigate()
-
+  const { user: currentUser } = useAuth();
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -479,7 +480,7 @@ const UserForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { id } = useParams();
   const isEditMode = Boolean(id);
-  const currentUser = JSON.parse(localStorage.getItem("authUser"));
+  // const currentUser = JSON.parse(localStorage.getItem("authUser"));
   const currentUserRole = currentUser?.role || "";
 
   const handleChange = (e) => {
@@ -558,34 +559,26 @@ const UserForm = () => {
       } catch (err) {
         console.error("❌ Error loading user:", err);
         Swal.fire("Error", "Failed to load user data", "error");
-        navigate("/app/users");
+        navigate("/app/users", { state: { refresh: true }, replace: true });
       }
     };
 
     if (id) fetchUserAndCompany();
   }, [id]);
 
-  // 🆕 NEW USER (Create Mode)
   useEffect(() => {
     if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
-      const companyName = currentUser?.companyProfile?.name || "";
-      const departments = currentUser?.companyProfile?.departments?.map(dep => dep.name) || [];
-
-      // ✅ companyId logic for create mode
-      const companyId =
-        currentUserRole === "companyAdmin"
-          ? currentUser._id
-          : currentUser.createdBy; // jisne create kiya wo companyAdmin
-
       setUser(prev => ({
         ...prev,
-        companyId,
-        companyName,
-        departments,
+        companyId:
+          currentUserRole === "companyAdmin"
+            ? currentUser._id
+            : currentUser.createdBy,
+        companyName: currentUser?.companyProfile?.name || "",
+        departments: currentUser?.companyProfile?.departments?.map(dep => dep.name) || []
       }));
     }
-  }, [id, currentUserRole]);
-
+  }, [id, currentUserRole, currentUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -616,7 +609,7 @@ const UserForm = () => {
         Swal.fire({ icon: "success", title: "User Created" });
       }
 
-      navigate("/app/users", { replace: true });
+      navigate("/app/users", { state: { refresh: true }, replace: true });
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -795,12 +788,17 @@ const UserForm = () => {
                     <Col md={6}>
                       <Form.Group className="mb-3">
                         <Form.Label>Company Name</Form.Label>
-                        <Form.Control
+                        {/* <Form.Control
                           type="text"
                           name="companyName"
                           value={user.companyName}
                           onChange={handleChange}
                           placeholder="e.g. Acme Corp"
+                          disabled
+                        /> */}
+                        <Form.Control
+                          type="text"
+                          value={user.companyName}
                           disabled
                         />
                       </Form.Group>
@@ -813,10 +811,14 @@ const UserForm = () => {
                     <Col md={6}>
                       <Form.Group className="mb-3">
                         <Form.Label>Department Name</Form.Label>
-                        <Form.Select
+                        {/* <Form.Select
                           name="departmentName"
                           value={user.departmentName}
                           onChange={handleChange}
+                        > */}
+                        <Form.Select
+                          value={user.departmentName}
+                          onChange={(e) => setUser(prev => ({ ...prev, departmentName: e.target.value }))}
                         >
                           <option value="">Select Department</option>
                           {Array.isArray(user.departments) && user.departments.length > 0 ? (

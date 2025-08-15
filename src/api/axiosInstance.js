@@ -372,7 +372,7 @@ export const resetPassword = ({ email, code, newPassword }) =>
 export const verifyEmail = ({ email, code }) =>
   axiosInstance.post("/auth/verify-email", { email, code });
 
-export const getCurrentUser = () => axiosInstance.get("/auth/me");
+export const getCurrentUser = () => axiosInstance.get("/auth/me", { withCredentials: true });
 
 export const updateProfile = (data) =>
   axiosInstance.put("/users/me", data);
