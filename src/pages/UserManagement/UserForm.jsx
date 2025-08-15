@@ -383,6 +383,72 @@
 //   }
 // }
 
+
+// useEffect(() => {
+//   const fetchUserAndCompany = async () => {
+//     try {
+//       const res = await getUserById(id);
+//       const userData = res.data.user;
+//       console.log("User Loaded:", userData);
+
+//       let companyName = "";
+//       let departments = [];
+
+//       // ✅ If user has company and companyProfile populated
+//       if (userData.company && userData.company.companyProfile) {
+//         companyName = userData.company.name || "";
+//         departments = userData.company.companyProfile.departments || [];
+//       }
+
+//       // 🔁 Fallback: If only company ID is stored and no full object
+//       else if (userData.company && typeof userData.company === "string") {
+//         try {
+//           const companyRes = await getCompanyById(userData.company);
+//           companyName = companyRes.data.name || "";
+//           departments = companyRes.data?.companyProfile?.departments || [];
+//         } catch (err) {
+//           console.error("Failed to fetch company by ID", err);
+//         }
+//       }
+
+//       setUser({
+//         name: userData.name,
+//         email: userData.email,
+//         password: "",
+//         role: userData.role,
+//         isActive: userData.isActive.toString(),
+//         companyName,
+//         departments,
+//       });
+
+//       // 🔄 Set selected department if available
+//       setSelectedDepartment(userData.department || "");
+//     } catch (err) {
+//       console.error("Error loading user:", err);
+//       Swal.fire("Error", "Failed to load user data", "error");
+//       navigate("/app/users");
+//     }
+//   };
+
+//   if (id) {
+//     fetchUserAndCompany();
+//   }
+// }, [id]);
+
+// useEffect(() => {
+//   // Sirf create mode me chale
+//   if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
+//     const companyName = currentUser?.companyProfile?.name || "";
+//     const departments = currentUser?.companyProfile?.departments || [];
+
+//     setUser((prev) => ({
+//       ...prev,
+//       companyName,
+//       departments,
+//     }));
+//   }
+// }, [id]);
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -437,137 +503,90 @@ const UserForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // useEffect(() => {
-  //   const fetchUserAndCompany = async () => {
-  //     try {
-  //       const res = await getUserById(id);
-  //       const userData = res.data.user;
-  //       console.log("User Loaded:", userData);
-
-  //       let companyName = "";
-  //       let departments = [];
-
-  //       // ✅ If user has company and companyProfile populated
-  //       if (userData.company && userData.company.companyProfile) {
-  //         companyName = userData.company.name || "";
-  //         departments = userData.company.companyProfile.departments || [];
-  //       }
-
-  //       // 🔁 Fallback: If only company ID is stored and no full object
-  //       else if (userData.company && typeof userData.company === "string") {
-  //         try {
-  //           const companyRes = await getCompanyById(userData.company);
-  //           companyName = companyRes.data.name || "";
-  //           departments = companyRes.data?.companyProfile?.departments || [];
-  //         } catch (err) {
-  //           console.error("Failed to fetch company by ID", err);
-  //         }
-  //       }
-
-  //       setUser({
-  //         name: userData.name,
-  //         email: userData.email,
-  //         password: "",
-  //         role: userData.role,
-  //         isActive: userData.isActive.toString(),
-  //         companyName,
-  //         departments,
-  //       });
-
-  //       // 🔄 Set selected department if available
-  //       setSelectedDepartment(userData.department || "");
-  //     } catch (err) {
-  //       console.error("Error loading user:", err);
-  //       Swal.fire("Error", "Failed to load user data", "error");
-  //       navigate("/app/users");
-  //     }
-  //   };
-
-  //   if (id) {
-  //     fetchUserAndCompany();
-  //   }
-  // }, [id]);
-
-  // useEffect(() => {
-  //   // Sirf create mode me chale
-  //   if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
-  //     const companyName = currentUser?.companyProfile?.name || "";
-  //     const departments = currentUser?.companyProfile?.departments || [];
-
-  //     setUser((prev) => ({
-  //       ...prev,
-  //       companyName,
-  //       departments,
-  //     }));
-  //   }
-  // }, [id]);
-
   // 🔍 LOAD USER BY ID (Edit Mode)
-useEffect(() => {
-  const fetchUserAndCompany = async () => {
-    try {
-      const res = await getUserById(id);
-      const userData = res.data.user;
+  useEffect(() => {
+    const fetchUserAndCompany = async () => {
+      try {
+        const res = await getUserById(id);
+        const userData = res.data.user;
 
-      let companyName = "";
-      let departments = [];
+        let companyName = "";
+        let departments = [];
+        let companyId = "";
 
-      // 👉 Check if company is populated with full object
-      if (userData.company && userData.company.companyProfile) {
+        // 👉 Check if company is populated object
+        if (userData.company && userData.company.companyProfile) {
+          companyName = userData.company.companyProfile.name || "";
+          departments = userData.company.companyProfile.departments?.map(dep => dep.name) || [];
 
-        companyName = userData.company.companyProfile.name || "";
-        departments = userData.company.companyProfile.departments?.map(dep => dep.name) || [];
-      }
-
-      // 🔁 Else if only company ID present
-      else if (userData.company && typeof userData.company === "string") {
-
-        try {
-          const companyRes = await getCompanyById(userData.company);
-
-          companyName = companyRes.data?.companyProfile?.name || "";
-          departments = companyRes.data?.companyProfile?.departments?.map(dep => dep.name) || [];
-        } catch (err) {
-          console.error("❌ Company fetch failed:", err);
+          // ✅ companyId logic for populated object
+          companyId =
+            userData.role === "companyAdmin"
+              ? userData._id
+              : userData.company._id; // companyAdmin ka ID
         }
-      }
+        // 👉 If only company ID present
+        else if (userData.company && typeof userData.company === "string") {
+          try {
+            const companyRes = await getCompanyById(userData.company);
+            companyName = companyRes.data?.companyProfile?.name || "";
+            departments = companyRes.data?.companyProfile?.departments?.map(dep => dep.name) || [];
 
-      // Set user state for form
-      setUser({
-        name: userData.name,
-        email: userData.email,
-        password: "",
-        role: userData.role,
-        isActive: userData.isActive?.toString() || "true",
+            // ✅ companyId logic for string type
+            companyId =
+              userData.role === "companyAdmin"
+                ? userData._id
+                : userData.company; // already companyAdmin ka ID
+          } catch (err) {
+            console.error("❌ Company fetch failed:", err);
+          }
+        }
+
+        // Set user state for form
+        setUser({
+          _id: userData._id,
+          name: userData.name,
+          email: userData.email,
+          password: "",
+          role: userData.role,
+          isActive: userData.isActive?.toString() || "true",
+          companyId,
+          companyName,
+          departments,
+          departmentName: userData.department || "",
+        });
+
+      } catch (err) {
+        console.error("❌ Error loading user:", err);
+        Swal.fire("Error", "Failed to load user data", "error");
+        navigate("/app/users");
+      }
+    };
+
+    if (id) fetchUserAndCompany();
+  }, [id]);
+
+  // 🆕 NEW USER (Create Mode)
+  useEffect(() => {
+    if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
+      const companyName = currentUser?.companyProfile?.name || "";
+      const departments = currentUser?.companyProfile?.departments?.map(dep => dep.name) || [];
+
+      // ✅ companyId logic for create mode
+      const companyId =
+        currentUserRole === "companyAdmin"
+          ? currentUser._id
+          : currentUser.createdBy; // jisne create kiya wo companyAdmin
+
+      setUser(prev => ({
+        ...prev,
+        companyId,
         companyName,
         departments,
-        departmentName: userData.department || "",
-      });
-
-    } catch (err) {
-      console.error("❌ Error loading user:", err);
-      Swal.fire("Error", "Failed to load user data", "error");
-      navigate("/app/users");
+      }));
     }
-  };
+  }, [id, currentUserRole, currentUser]);
 
-  if (id) fetchUserAndCompany();
-}, [id]);
-
-// 🆕 NEW USER (Create Mode) → Preload company info from currentUser
-useEffect(() => {
-  if (!id && (currentUserRole === "companyAdmin" || currentUserRole === "member")) {
-
-    const companyName = currentUser?.companyProfile?.name || "";
-    const departments = currentUser?.companyProfile?.departments?.map(dep => dep.name) || [];
-    
-    setUser(prev => ({
-      ...prev,
-      companyName,
-      departments,
-    }));
-  }
-}, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -634,6 +653,18 @@ useEffect(() => {
             <Card.Body className="p-4">
               <Form onSubmit={handleSubmit}>
                 <Row>
+                  {isEditMode && (
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>User ID</Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={user._id || ""}
+                          disabled
+                        />
+                      </Form.Group>
+                    </Col>
+                  )}
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Name</Form.Label>
@@ -648,7 +679,9 @@ useEffect(() => {
                       {errors.name && <div className="text-danger">{errors.name}</div>}
                     </Form.Group>
                   </Col>
+                </Row>
 
+                <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Email</Form.Label>
@@ -664,9 +697,6 @@ useEffect(() => {
                       {errors.email && <div className="text-danger">{errors.email}</div>}
                     </Form.Group>
                   </Col>
-                </Row>
-
-                <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Password</Form.Label>
@@ -698,7 +728,9 @@ useEffect(() => {
                       {errors.password && <div className="text-danger">{errors.password}</div>}
                     </Form.Group>
                   </Col>
+                </Row>
 
+                <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Role</Form.Label>
@@ -724,9 +756,6 @@ useEffect(() => {
                       {errors.role && <div className="text-danger">{errors.role}</div>}
                     </Form.Group>
                   </Col>
-                </Row>
-
-                <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Status</Form.Label>
@@ -752,6 +781,21 @@ useEffect(() => {
                   <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3">
+                        <Form.Label>Company ID</Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={
+                            user.company?._id ||
+                            (typeof user.company === "string" ? user.company : "") ||
+                            user.companyId || ""
+                          }
+                          disabled
+                        />
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
                         <Form.Label>Company Name</Form.Label>
                         <Form.Control
                           type="text"
@@ -763,7 +807,11 @@ useEffect(() => {
                         />
                       </Form.Group>
                     </Col>
+                  </Row>
+                )}
 
+                {currentUserRole === "companyAdmin" && (
+                  <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3">
                         <Form.Label>Department Name</Form.Label>
