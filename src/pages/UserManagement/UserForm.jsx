@@ -498,7 +498,6 @@ const UserForm = () => {
     if (user.isActive === undefined || user.isActive === null)
       newErrors.isActive = "Status is required";
 
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
