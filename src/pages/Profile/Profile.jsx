@@ -1,5 +1,4 @@
 // src\pages\Profile\Profile.jsx
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -11,32 +10,31 @@ import { capitalize } from "../../utilities/capitalize";
 import { useAuth } from "../../context/AuthContext"
 
 const Profile = ({ darkMode }) => {
-  const [activeTab, setActiveTab] = useState("profile")
-  const [isEditing, setIsEditing] = useState(false)
-  const [showAlert, setShowAlert] = useState(false)
+   const [activeTab, setActiveTab] = useState("profile");
+  const [isEditing, setIsEditing] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const [userData, setUserData] = useState("");
   const [userId, setUserId] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const { setUser, user } = useAuth()
-  const { updateCompanyInfo } = useAuth();
+  const { setUser, user, updateCompanyInfo } = useAuth();
 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
-    department: "",
+    department: "", // Department._id from Tenant.departments
     role: "",
     bio: "",
     timezone: "",
     language: "",
-  })
+  });
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  })
+  });
 
   const [passwordErrors, setPasswordErrors] = useState({
     currentPassword: "",
@@ -56,7 +54,7 @@ const Profile = ({ darkMode }) => {
     surveyAlerts: true,
     weeklyReports: true,
     systemUpdates: false,
-  })
+  });
 
   const [companyData, setCompanyData] = useState({
     name: "",
@@ -65,7 +63,7 @@ const Profile = ({ darkMode }) => {
     contactPhone: "",
     website: "",
     employees: "",
-    departments: [{ name: "", head: "" }],
+    departments: [], // Array of { _id, name, head }
   });
 
   const availableDepartments = [
@@ -79,37 +77,10 @@ const Profile = ({ darkMode }) => {
     { name: "Customer Support" },
   ];
 
-
-  // useEffect(() => {
-  //   const fetchUserProfile = async () => {
-  //     try {
-  //       const res = await getCurrentUser()
-  //       const user = res.data.user
-  //       const [firstName, lastName] = user.name?.split(" ") || ["", ""]
-  //       setFormData({
-  //         firstName,
-  //         lastName,
-  //         email: user.email || "",
-  //         phone: user.phone || "",
-  //         department: user.department || "",
-  //         role: user.role || "",
-  //         bio: user.bio || "",
-  //         timezone: user.timezone || "",
-  //         language: user.language || "",
-  //       })
-  //       setUserId(user._id);
-  //       setUserData(user);
-  //     } catch (err) {
-  //       console.error("Failed to fetch profile:", err)
-  //     }
-  //   }
-
-  //   fetchUserProfile()
-  // }, [])
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
+        console.log('fetchUserProfile: API call shuru');
         const res = await getCurrentUser();
         const user = res.data.user;
         const nameParts = user.name?.trim().split(" ") || [];
@@ -121,7 +92,7 @@ const Profile = ({ darkMode }) => {
           lastName,
           email: user.email || "",
           phone: user.phone || "",
-          department: user.department || "",
+          department: user.department?._id || "", // Department ID
           role: user.role || "",
           bio: user.bio || "",
           timezone: user.timezone || "",
@@ -130,65 +101,79 @@ const Profile = ({ darkMode }) => {
 
         setUserId(user._id);
         setUserData(user);
+        setUser(user);
 
-        // ✅ Load company profile if available
-        if (user.role === "companyAdmin" && user.companyProfile) {
-          const company = user.companyProfile;
+        // Load Tenant data for companyAdmin or member roles
+        if (user.tenant && (user.role === "companyAdmin" || user.role === "member")) {
+          const tenant = user.tenant;
           setCompanyData({
-            name: company.name || "",
-            address: company.address || "",
-            contactEmail: company.contactEmail || "",
-            contactPhone: company.contactPhone || "",
-            website: company.website || "",
-            employees: company.totalEmployees || "",
-            departments: company.departments || [],
+            name: tenant.name || "",
+            address: tenant.address || "",
+            contactEmail: tenant.contactEmail || "",
+            contactPhone: tenant.contactPhone || "",
+            website: tenant.website || "",
+            employees: tenant.totalEmployees || "",
+            departments: tenant.departments.map(dept => ({
+              _id: dept._id,
+              name: dept.name,
+              head: dept.head?._id || "", // Head is a User ID
+            })) || [],
           });
         }
 
+        console.log('fetchUserProfile: Data set kiya', { user, tenant: user.tenant });
       } catch (err) {
-        console.error("Failed to fetch profile:", err);
+        console.error('fetchUserProfile: Error aaya', err.response?.data || err.message);
+        if (err.response?.status === 401 || err.response?.status === 404) {
+          console.log('fetchUserProfile: Redirecting to login');
+          window.location.href = '/login';
+        }
       }
     };
 
     fetchUserProfile();
-  }, []);
+  }, [setUser]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleNotificationChange = (e) => {
-    const { name, checked } = e.target
-    setNotifications((prev) => ({ ...prev, [name]: checked }))
-  }
+    const { name, checked } = e.target;
+    setNotifications((prev) => ({ ...prev, [name]: checked }));
+  };
 
   const handleSave = async () => {
     const updatedName = `${formData.firstName} ${formData.lastName}`.trim();
     const errors = { firstName: "", lastName: "", phone: "" };
 
-    // 🔍 Validate First Name
+    // Validate First Name
     if (!formData.firstName.trim()) {
       errors.firstName = "First name is required";
     } else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(formData.firstName)) {
       errors.firstName = "Only alphabets allowed";
     }
 
-    // 🔍 Validate Last Name (optional)
+    // Validate Last Name (optional)
     if (formData.lastName && !/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(formData.lastName)) {
       errors.lastName = "Only alphabets allowed";
     }
 
-    // 🔍 Validate Phone
+    // Validate Phone
     if (formData.phone && !/^\+?\d+$/.test(formData.phone)) {
       errors.phone = "Only digits or + allowed";
+    }
+
+    // Validate Department for member role
+    if (user.role === "member" && !formData.department) {
+      errors.department = "Department is required for members";
     }
 
     setFormErrors(errors);
     if (Object.values(errors).some((e) => e)) return;
 
     try {
-      // 🔄 Show loading Swal
       Swal.fire({
         title: "Saving...",
         text: "Please wait while we update your profile.",
@@ -198,14 +183,14 @@ const Profile = ({ darkMode }) => {
         },
       });
 
-      // 💾 Update profile
+      // Update user profile
       await updateProfile({
         name: updatedName,
         phone: formData.phone,
         bio: formData.bio,
+        department: formData.department || null, // Send Department._id or null
       });
 
-      // ✅ Success Swal
       Swal.fire({
         icon: "success",
         title: "Profile Updated",
@@ -218,9 +203,7 @@ const Profile = ({ darkMode }) => {
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
     } catch (err) {
-      Swal.close(); // Close loader before showing error
-
-      // ❌ Error Swal
+      Swal.close();
       Swal.fire({
         icon: "error",
         title: "Failed to Save",
@@ -233,18 +216,16 @@ const Profile = ({ darkMode }) => {
     const { currentPassword, newPassword, confirmPassword } = passwordData;
     const errors = { currentPassword: "", newPassword: "", confirmPassword: "" };
 
-    // 🔐 Frontend validations
+    // Frontend validations
     if (!currentPassword) errors.currentPassword = "Current password is required";
     if (!newPassword) errors.newPassword = "New password is required";
     if (newPassword !== confirmPassword)
       errors.confirmPassword = "Passwords do not match";
 
     setPasswordErrors(errors);
-
     if (Object.values(errors).some((e) => e)) return;
 
     try {
-      // 🔄 Show loading indicator
       Swal.fire({
         title: "Updating Password...",
         text: "Please wait",
@@ -254,10 +235,8 @@ const Profile = ({ darkMode }) => {
         },
       });
 
-      // 🛠️ Send update request
       await updateUserProfile({ currentPassword, newPassword });
 
-      // ✅ Success popup
       Swal.fire({
         icon: "success",
         title: "Password Updated",
@@ -270,13 +249,11 @@ const Profile = ({ darkMode }) => {
       setPasswordErrors({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
       const msg = err.response?.data?.message || "Something went wrong";
-
-      Swal.close(); // ⛔ close loading before showing error
+      Swal.close();
 
       if (msg.toLowerCase().includes("current password")) {
         setPasswordErrors((prev) => ({ ...prev, currentPassword: msg }));
       } else {
-        // ❌ Error popup
         Swal.fire({
           icon: "error",
           title: "Update Failed",
@@ -287,8 +264,8 @@ const Profile = ({ darkMode }) => {
   };
 
   const handleCancel = () => {
-    setIsEditing(false)
-  }
+    setIsEditing(false);
+  };
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -305,7 +282,6 @@ const Profile = ({ darkMode }) => {
       });
 
       Swal.fire("Success", "Avatar updated!", "success");
-      // Optionally update avatar preview:
       setUser(res.data.user);
       setUserData(res.data.user);
     } catch (err) {
@@ -325,53 +301,61 @@ const Profile = ({ darkMode }) => {
           ...updatedDepartments[index],
           [name === "departmentName" ? "name" : "head"]: value,
         };
-
-        return {
-          ...prev,
-          departments: updatedDepartments,
-        };
-      } else {
-        return {
-          ...prev,
-          [name]: value,
-        };
+        return { ...prev, departments: updatedDepartments };
       }
+      return { ...prev, [name]: value };
     });
   };
-
 
   const addDepartment = () => {
     setCompanyData((prev) => ({
       ...prev,
-      departments: [...prev.departments, { name: "", head: "" }],
+      departments: [...prev.departments, { _id: "", name: "", head: "" }],
     }));
   };
 
   const handleSaveInfo = async () => {
     try {
-      const departmentPayload = companyData.departments?.map((dept) => ({
-        name: dept.name,
-        head: dept.head,
-      })) || [];
-
-      const payload = {
-        ...formData,
-        companyProfile: {
-          name: companyData.name,
-          address: companyData.address,
-          contactEmail: companyData.contactEmail,
-          contactPhone: companyData.contactPhone,
-          website: companyData.website,
-          totalEmployees: companyData.employees,
-          departments: departmentPayload,
+      Swal.fire({
+        title: "Saving...",
+        text: "Please wait while we update company info.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
         },
+      });
+
+      // Validate company data
+      if (!companyData.name) {
+        Swal.close();
+        Swal.fire({
+          icon: "error",
+          title: "Validation Error",
+          text: "Company name is required.",
+        });
+        return;
+      }
+
+      // Prepare payload for Tenant update
+      const tenantPayload = {
+        name: companyData.name,
+        address: companyData.address,
+        contactEmail: companyData.contactEmail,
+        contactPhone: companyData.contactPhone,
+        website: companyData.website,
+        totalEmployees: companyData.employees,
+        departments: companyData.departments.map((dept) => ({
+          _id: dept._id || undefined,
+          name: dept.name,
+          head: dept.head || undefined, // User ID for head
+        })),
       };
 
-      const response = await updateProfile(payload);
+      // Update Tenant
+      const response = await axiosInstance.put(`/tenants/${user.tenant?._id}`, tenantPayload);
 
       if (response.status === 200) {
-
-        updateCompanyInfo(payload.companyProfile);
+        updateCompanyInfo(response.data.tenant);
         Swal.fire({
           icon: "success",
           title: "Updated",
@@ -380,6 +364,7 @@ const Profile = ({ darkMode }) => {
           showConfirmButton: false,
         });
       } else {
+        Swal.close();
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -388,6 +373,7 @@ const Profile = ({ darkMode }) => {
       }
     } catch (error) {
       console.error("Update error:", error);
+      Swal.close();
       Swal.fire({
         icon: "error",
         title: "Something went wrong",
@@ -396,8 +382,8 @@ const Profile = ({ darkMode }) => {
     }
   };
 
-  const tabClass = (tab) => `nav-link ${activeTab === tab ? "active" : ""}`
-  const inputClass = "form-control"
+  const tabClass = (tab) => `nav-link ${activeTab === tab ? "active" : ""}`;
+  const inputClass = "form-control";
 
   return (
     <Container fluid className="profile-container py-4">
@@ -855,3 +841,364 @@ const Profile = ({ darkMode }) => {
 }
 
 export default Profile
+
+
+ // const [activeTab, setActiveTab] = useState("profile")
+  // const [isEditing, setIsEditing] = useState(false)
+  // const [showAlert, setShowAlert] = useState(false)
+  // const [userData, setUserData] = useState("");
+  // const [userId, setUserId] = useState("");
+  // const [isUploading, setIsUploading] = useState(false);
+  // const { setUser, user } = useAuth()
+  // const { updateCompanyInfo } = useAuth();
+
+  // const [formData, setFormData] = useState({
+  //   firstName: "",
+  //   lastName: "",
+  //   email: "",
+  //   phone: "",
+  //   department: "",
+  //   role: "",
+  //   bio: "",
+  //   timezone: "",
+  //   language: "",
+  // })
+
+  // const [passwordData, setPasswordData] = useState({
+  //   currentPassword: "",
+  //   newPassword: "",
+  //   confirmPassword: "",
+  // })
+
+  // const [passwordErrors, setPasswordErrors] = useState({
+  //   currentPassword: "",
+  //   newPassword: "",
+  //   confirmPassword: "",
+  // });
+
+  // const [formErrors, setFormErrors] = useState({
+  //   firstName: "",
+  //   lastName: "",
+  //   phone: "",
+  // });
+
+  // const [notifications, setNotifications] = useState({
+  //   emailNotifications: true,
+  //   pushNotifications: false,
+  //   surveyAlerts: true,
+  //   weeklyReports: true,
+  //   systemUpdates: false,
+  // })
+
+  // const [companyData, setCompanyData] = useState({
+  //   name: "",
+  //   address: "",
+  //   contactEmail: "",
+  //   contactPhone: "",
+  //   website: "",
+  //   employees: "",
+  //   departments: [{ name: "", head: "" }],
+  // });
+
+  // const availableDepartments = [
+  //   { name: "Administration" },
+  //   { name: "Management" },
+  //   { name: "Human Resources" },
+  //   { name: "Finance" },
+  //   { name: "IT" },
+  //   { name: "Marketing" },
+  //   { name: "Sales" },
+  //   { name: "Customer Support" },
+  // ];
+
+  // useEffect(() => {
+  //   const fetchUserProfile = async () => {
+  //     try {
+  //       const res = await getCurrentUser();
+  //       const user = res.data.user;
+  //       const nameParts = user.name?.trim().split(" ") || [];
+  //       const firstName = nameParts.slice(0, -1).join(" ");
+  //       const lastName = nameParts.slice(-1).join(" ");
+
+  //       setFormData({
+  //         firstName,
+  //         lastName,
+  //         email: user.email || "",
+  //         phone: user.phone || "",
+  //         department: user.department || "",
+  //         role: user.role || "",
+  //         bio: user.bio || "",
+  //         timezone: user.timezone || "",
+  //         language: user.language || "",
+  //       });
+
+  //       setUserId(user._id);
+  //       setUserData(user);
+
+  //       // ✅ Load company profile if available
+  //       if (user.role === "companyAdmin" && user.companyProfile) {
+  //         const company = user.companyProfile;
+  //         setCompanyData({
+  //           name: company.name || "",
+  //           address: company.address || "",
+  //           contactEmail: company.contactEmail || "",
+  //           contactPhone: company.contactPhone || "",
+  //           website: company.website || "",
+  //           employees: company.totalEmployees || "",
+  //           departments: company.departments || [],
+  //         });
+  //       }
+
+  //     } catch (err) {
+  //       console.error("Failed to fetch profile:", err);
+  //     }
+  //   };
+
+  //   fetchUserProfile();
+  // }, []);
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target
+  //   setFormData((prev) => ({ ...prev, [name]: value }))
+  // }
+
+  // const handleNotificationChange = (e) => {
+  //   const { name, checked } = e.target
+  //   setNotifications((prev) => ({ ...prev, [name]: checked }))
+  // }
+
+  // const handleSave = async () => {
+  //   const updatedName = `${formData.firstName} ${formData.lastName}`.trim();
+  //   const errors = { firstName: "", lastName: "", phone: "" };
+
+  //   // 🔍 Validate First Name
+  //   if (!formData.firstName.trim()) {
+  //     errors.firstName = "First name is required";
+  //   } else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(formData.firstName)) {
+  //     errors.firstName = "Only alphabets allowed";
+  //   }
+
+  //   // 🔍 Validate Last Name (optional)
+  //   if (formData.lastName && !/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(formData.lastName)) {
+  //     errors.lastName = "Only alphabets allowed";
+  //   }
+
+  //   // 🔍 Validate Phone
+  //   if (formData.phone && !/^\+?\d+$/.test(formData.phone)) {
+  //     errors.phone = "Only digits or + allowed";
+  //   }
+
+  //   setFormErrors(errors);
+  //   if (Object.values(errors).some((e) => e)) return;
+
+  //   try {
+  //     // 🔄 Show loading Swal
+  //     Swal.fire({
+  //       title: "Saving...",
+  //       text: "Please wait while we update your profile.",
+  //       allowOutsideClick: false,
+  //       didOpen: () => {
+  //         Swal.showLoading();
+  //       },
+  //     });
+
+  //     // 💾 Update profile
+  //     await updateProfile({
+  //       name: updatedName,
+  //       phone: formData.phone,
+  //       bio: formData.bio,
+  //     });
+
+  //     // ✅ Success Swal
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Profile Updated",
+  //       text: "Your changes have been saved successfully.",
+  //       timer: 2000,
+  //       showConfirmButton: false,
+  //     });
+
+  //     setIsEditing(false);
+  //     setShowAlert(true);
+  //     setTimeout(() => setShowAlert(false), 3000);
+  //   } catch (err) {
+  //     Swal.close(); // Close loader before showing error
+
+  //     // ❌ Error Swal
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Failed to Save",
+  //       text: err?.response?.data?.message || "An error occurred while saving your profile.",
+  //     });
+  //   }
+  // };
+
+  // const handlePasswordRequest = async () => {
+  //   const { currentPassword, newPassword, confirmPassword } = passwordData;
+  //   const errors = { currentPassword: "", newPassword: "", confirmPassword: "" };
+
+  //   // 🔐 Frontend validations
+  //   if (!currentPassword) errors.currentPassword = "Current password is required";
+  //   if (!newPassword) errors.newPassword = "New password is required";
+  //   if (newPassword !== confirmPassword)
+  //     errors.confirmPassword = "Passwords do not match";
+
+  //   setPasswordErrors(errors);
+
+  //   if (Object.values(errors).some((e) => e)) return;
+
+  //   try {
+  //     // 🔄 Show loading indicator
+  //     Swal.fire({
+  //       title: "Updating Password...",
+  //       text: "Please wait",
+  //       allowOutsideClick: false,
+  //       didOpen: () => {
+  //         Swal.showLoading();
+  //       },
+  //     });
+
+  //     // 🛠️ Send update request
+  //     await updateUserProfile({ currentPassword, newPassword });
+
+  //     // ✅ Success popup
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Password Updated",
+  //       text: "Your password has been changed successfully!",
+  //       timer: 2000,
+  //       showConfirmButton: false,
+  //     });
+
+  //     setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  //     setPasswordErrors({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  //   } catch (err) {
+  //     const msg = err.response?.data?.message || "Something went wrong";
+
+  //     Swal.close(); // ⛔ close loading before showing error
+
+  //     if (msg.toLowerCase().includes("current password")) {
+  //       setPasswordErrors((prev) => ({ ...prev, currentPassword: msg }));
+  //     } else {
+  //       // ❌ Error popup
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Update Failed",
+  //         text: msg,
+  //       });
+  //     }
+  //   }
+  // };
+
+  // const handleCancel = () => {
+  //   setIsEditing(false)
+  // }
+
+  // const handleAvatarChange = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
+
+  //   setIsUploading(true);
+
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("avatar", file);
+
+  //     const res = await axiosInstance.put(`/users/${userId}`, formData, {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //     });
+
+  //     Swal.fire("Success", "Avatar updated!", "success");
+  //     // Optionally update avatar preview:
+  //     setUser(res.data.user);
+  //     setUserData(res.data.user);
+  //   } catch (err) {
+  //     Swal.fire("Error", err.response?.data?.message || "Upload failed", "error");
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
+
+  // const handleCompanyChange = (e, index) => {
+  //   const { name, value } = e.target;
+
+  //   setCompanyData((prev) => {
+  //     if (typeof index === "number") {
+  //       const updatedDepartments = [...prev.departments];
+  //       updatedDepartments[index] = {
+  //         ...updatedDepartments[index],
+  //         [name === "departmentName" ? "name" : "head"]: value,
+  //       };
+
+  //       return {
+  //         ...prev,
+  //         departments: updatedDepartments,
+  //       };
+  //     } else {
+  //       return {
+  //         ...prev,
+  //         [name]: value,
+  //       };
+  //     }
+  //   });
+  // };
+
+
+  // const addDepartment = () => {
+  //   setCompanyData((prev) => ({
+  //     ...prev,
+  //     departments: [...prev.departments, { name: "", head: "" }],
+  //   }));
+  // };
+
+  // const handleSaveInfo = async () => {
+  //   try {
+  //     const departmentPayload = companyData.departments?.map((dept) => ({
+  //       name: dept.name,
+  //       head: dept.head,
+  //     })) || [];
+
+  //     const payload = {
+  //       ...formData,
+  //       companyProfile: {
+  //         name: companyData.name,
+  //         address: companyData.address,
+  //         contactEmail: companyData.contactEmail,
+  //         contactPhone: companyData.contactPhone,
+  //         website: companyData.website,
+  //         totalEmployees: companyData.employees,
+  //         departments: departmentPayload,
+  //       },
+  //     };
+
+  //     const response = await updateProfile(payload);
+
+  //     if (response.status === 200) {
+
+  //       updateCompanyInfo(payload.companyProfile);
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "Updated",
+  //         text: "Company info updated successfully!",
+  //         timer: 2000,
+  //         showConfirmButton: false,
+  //       });
+  //     } else {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Error",
+  //         text: "Update failed. Please try again.",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Update error:", error);
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Something went wrong",
+  //       text: error.response?.data?.message || "Server error. Try again later.",
+  //     });
+  //   }
+  // };
+
+  // const tabClass = (tab) => `nav-link ${activeTab === tab ? "active" : ""}`
+  // const inputClass = "form-control"

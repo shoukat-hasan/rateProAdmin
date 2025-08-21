@@ -309,7 +309,7 @@
 
 import axios from "axios";
 
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
   headers: {
@@ -375,16 +375,17 @@ export const verifyEmail = ({ email, code }) =>
 export const getCurrentUser = () => axiosInstance.get("/auth/me", { withCredentials: true });
 
 export const updateProfile = (data) =>
-  axiosInstance.put("/users/me", data);
+  axiosInstance.put("/users/me", data, { withCredentials: true });
 
 export const updateUserProfile = (formData) =>
-  axiosInstance.put("/auth/update-profile", formData);
+  axiosInstance.put("/auth/update-profile", formData, { withCredentials: true });
 
 export const uploadAvatar = (file) => {
   const formData = new FormData();
   formData.append("avatar", file);
 
   return axiosInstance.put("/auth/upload-avatar", formData, {
+    withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
     },
