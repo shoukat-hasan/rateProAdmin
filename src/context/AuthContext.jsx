@@ -182,7 +182,7 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const res = await axiosInstance.get("/auth/me", { withCredentials: true });
-        console.log("checkAuth: User data fetched", res.data.user);
+        // console.log("checkAuth: User data fetched", res.data.user);
         setUser(res.data.user);
       } catch (err) {
         console.error("checkAuth error:", err);

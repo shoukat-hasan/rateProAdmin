@@ -358,16 +358,16 @@
 //                 : undefined,
 //         },
 //       })
-  
+
 //       const { users, total, page: currentPage } = response.data
-  
+
 //       // Use tenant.name directly from getAllUsers response
 //       const processedUsers = users.map(user => ({
 //         ...user,
 //         status: user.isActive ? "Active" : "Inactive",
 //         companyName: user.tenant?.name || "-", // Use tenant.name
 //       }));
-  
+
 //       setUsers(processedUsers)
 //       setPagination((prev) => ({ ...prev, page: currentPage, total }))
 //     } catch (error) {
@@ -690,6 +690,412 @@
 // }
 
 // export default UserList
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import { Link } from "react-router-dom"
+// import {
+//   Container,
+//   Row,
+//   Col,
+//   Table,
+//   Badge,
+//   Button,
+//   InputGroup,
+//   Form,
+//   Card,
+//   Spinner,
+// } from "react-bootstrap"
+// import {
+//   MdEdit,
+//   MdDelete,
+//   MdSearch,
+//   MdAdd,
+//   MdPerson,
+//   MdToggleOn,
+//   MdToggleOff,
+//   MdPictureAsPdf,
+//   MdEmail,
+// } from "react-icons/md"
+// import Pagination from "../../components/Pagination/Pagination.jsx"
+// import axiosInstance, { deleteUserById, exportUserPDF, sendUserNotification, toggleUserActiveStatus } from "../../api/axiosInstance.js"
+// import { capitalize } from "../../utilities/capitalize.jsx"
+// import EmailModal from "../../components/Modal/EmailModal.jsx"
+// import { toast } from "react-toastify"
+// import Swal from "sweetalert2"
+// import { useAuth } from "../../context/AuthContext.jsx"
+
+// const UserList = ({ darkMode }) => {
+//   const { user: currentUser } = useAuth();
+//   const [users, setUsers] = useState([])
+//   const [loading, setLoading] = useState(true)
+//   const [searchTerm, setSearchTerm] = useState("")
+//   const [debouncedSearch, setDebouncedSearch] = useState("")
+//   const [currentUserId, setCurrentUserId] = useState(null)
+//   const [filters, setFilters] = useState({
+//     role: "",
+//     status: "",
+//   })
+//   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+//   const [showEmailModal, setShowEmailModal] = useState(false)
+//   const [emailSubject, setEmailSubject] = useState("")
+//   const [emailMessage, setEmailMessage] = useState("")
+//   const [selectedEmail, setSelectedEmail] = useState("")
+//   const [sending, setSending] = useState(false)
+//   const [selectedUserId, setSelectedUserId] = useState("")
+
+//   useEffect(() => {
+//     const delayDebounce = setTimeout(() => {
+//       setDebouncedSearch(searchTerm)
+//     }, 500)
+//     return () => clearTimeout(delayDebounce)
+//   }, [searchTerm])
+
+//   useEffect(() => {
+//     fetchUsers()
+//   }, [debouncedSearch, filters.role, filters.status, pagination.page])
+
+//   useEffect(() => {
+//     const loggedInUser = JSON.parse(localStorage.getItem("authUser"))
+//     setCurrentUserId(loggedInUser?._id || null)
+//   }, [])
+
+//   const fetchUsers = async () => {
+//     setLoading(true)
+//     try {
+//       const response = await axiosInstance.get("/users", {
+//         params: {
+//           page: pagination.page,
+//           limit: pagination.limit,
+//           search: debouncedSearch,
+//           role: filters.role,
+//           active:
+//             filters.status === "active"
+//               ? "true"
+//               : filters.status === "inactive"
+//                 ? "false"
+//                 : undefined,
+//         },
+//       })
+
+//       const { users, total, page: currentPage } = response.data
+
+//       // Use tenant.name directly from getAllUsers response
+//       const processedUsers = users.map(user => ({
+//         ...user,
+//         status: user.isActive ? "Active" : "Inactive",
+//         companyName: user.tenant?.name || "-", // Replaced companyProfile.name with tenant.name
+//       }))
+
+//       setUsers(processedUsers)
+//       console.log('Processed users:', processedUsers) // Debugging
+//       setPagination((prev) => ({ ...prev, page: currentPage, total }))
+//     } catch (error) {
+//       console.error("Failed to fetch users", error)
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   const handleFilterChange = (e) => {
+//     const { name, value } = e.target
+//     setFilters((prev) => ({ ...prev, [name]: value }))
+//   }
+
+//   const handleDeleteUser = async (userId) => {
+//     const currentUserId = JSON.parse(localStorage.getItem("authUser"))?._id
+
+//     if (userId === currentUserId) {
+//       Swal.fire({
+//         icon: "error",
+//         title: "Action Forbidden",
+//         text: "You cannot delete your own account!",
+//       })
+//       return
+//     }
+
+//     const result = await Swal.fire({
+//       title: "Are you sure?",
+//       text: "This user will be marked as deleted!",
+//       icon: "warning",
+//       showCancelButton: true,
+//       confirmButtonColor: "#d33",
+//       cancelButtonColor: "#3085d6",
+//       confirmButtonText: "Yes, delete it!",
+//     })
+
+//     if (result.isConfirmed) {
+//       try {
+//         const res = await deleteUserById(userId)
+//         setUsers((prev) => prev.filter((user) => user._id !== userId))
+//         toast.success(res.data.message || "User deleted successfully")
+//         Swal.fire("Deleted!", "User has been deleted.", "success")
+//       } catch (error) {
+//         toast.error(error.response?.data?.message || "Failed to delete user")
+//       }
+//     }
+//   }
+
+//   const handleToggleActive = async (userId, currentStatus) => {
+//     try {
+//       const res = await toggleUserActiveStatus(userId)
+//       setUsers((prev) =>
+//         prev.map((user) =>
+//           user._id === userId
+//             ? {
+//                 ...user,
+//                 isActive: !currentStatus,
+//                 status: !currentStatus ? "Active" : "Inactive",
+//               }
+//             : user
+//         )
+//       )
+//       toast.success(res.data.message || "User status updated")
+//     } catch (error) {
+//       toast.error(error.response?.data?.message || "Failed to update user status")
+//     }
+//   }
+
+//   const getRoleVariant = (role) => {
+//     const map = {
+//       Admin: "primary",
+//       Company: "info",
+//       User: "dark",
+//     }
+//     return map[role] || "secondary"
+//   }
+
+//   const getStatusVariant = (status) => {
+//     const map = {
+//       Active: "success",
+//       Inactive: "danger",
+//       Pending: "warning",
+//     }
+//     return map[status] || "secondary"
+//   }
+
+//   const handleOpenEmailModal = (id, email) => {
+//     setSelectedEmail(email)
+//     setSelectedUserId(id)
+//     setShowEmailModal(true)
+//   }
+
+//   const handleSendEmail = async () => {
+//     if (!emailSubject.trim() || !emailMessage.trim()) {
+//       Swal.fire("Error", "Please fill out both subject and message.", "error")
+//       return
+//     }
+
+//     setSending(true)
+
+//     try {
+//       await sendUserNotification(selectedUserId, emailSubject, emailMessage)
+//       Swal.fire("Success", "Email sent successfully!", "success")
+//       setShowEmailModal(false)
+//       setEmailSubject("")
+//       setEmailMessage("")
+//     } catch (error) {
+//       Swal.fire("Error", error.response?.data?.message || "Failed to send email", "error")
+//     } finally {
+//       setSending(false)
+//     }
+//   }
+
+//   const handleExport = async (userId) => {
+//     try {
+//       const response = await exportUserPDF(userId)
+//       const blob = new Blob([response.data], { type: response.headers["content-type"] })
+//       const url = window.URL.createObjectURL(blob)
+//       const link = document.createElement("a")
+//       link.href = url
+//       link.setAttribute("download", `user-${userId}.pdf`)
+//       document.body.appendChild(link)
+//       link.click()
+//       link.remove()
+//     } catch (err) {
+//       console.error("Export error", err)
+//     }
+//   }
+
+//   return (
+//     <Container fluid className="py-4">
+//       <Row className="mb-4">
+//         <Col>
+//           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+//             <h1 className="h4 mb-0">User Management</h1>
+//             <Button as={Link} to="/app/users/form" variant="primary">
+//               <MdAdd className="me-2" /> Create User
+//             </Button>
+//           </div>
+//         </Col>
+//       </Row>
+
+//       <Card className="mb-4 shadow-sm">
+//         <Card.Body>
+//           <Row className="g-3">
+//             <Col md>
+//               <InputGroup>
+//                 <InputGroup.Text>
+//                   <MdSearch />
+//                 </InputGroup.Text>
+//                 <Form.Control
+//                   type="text"
+//                   placeholder="Search users..."
+//                   value={searchTerm}
+//                   onChange={(e) => setSearchTerm(e.target.value)}
+//                 />
+//               </InputGroup>
+//             </Col>
+//             <Col md>
+//               <Form.Select name="role" value={filters.role} onChange={handleFilterChange}>
+//                 <option value="">All Roles</option>
+//                 <option value="company">Company</option>
+//                 <option value="user">User</option>
+//               </Form.Select>
+//             </Col>
+//             <Col md>
+//               <Form.Select name="status" value={filters.status} onChange={handleFilterChange}>
+//                 <option value="">All Status</option>
+//                 <option value="active">Active</option>
+//                 <option value="inactive">Inactive</option>
+//               </Form.Select>
+//             </Col>
+//           </Row>
+//         </Card.Body>
+//       </Card>
+
+//       <Card className="shadow-sm">
+//         <Card.Body className="p-0">
+//           {loading ? (
+//             <div className="text-center p-4">
+//               <Spinner animation="border" variant="primary" />
+//             </div>
+//           ) : (
+//             <div className="table-responsive">
+//               <Table hover className="mb-0 text-nowrap align-middle">
+//                 <thead className="bg-light text-dark text-uppercase">
+//                   <tr>
+//                     <th>User</th>
+//                     <th>Role</th>
+//                     {currentUser.role === "admin" && <th>Company Name</th>}
+//                     <th>Status</th>
+//                     <th>Email Verified</th>
+//                     <th className="text-center">Actions</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   {users.map((user) => (
+//                     <tr key={user._id} className="border-top">
+//                       <td>
+//                         <div className="d-flex align-items-center">
+//                           <div
+//                             className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+//                             style={{ width: 42, height: 42 }}
+//                           >
+//                             {user.avatar?.url ? (
+//                               <img
+//                                 src={user.avatar.url}
+//                                 alt={user.name}
+//                                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "100%" }}
+//                               />
+//                             ) : (
+//                               <span className="text-uppercase fw-bold text-muted">
+//                                 {user.name?.charAt(0)}
+//                               </span>
+//                             )}
+//                           </div>
+//                           <div>
+//                             <div className="fw-semibold text-truncate" style={{ maxWidth: 150 }}>{user.name}</div>
+//                             <small className="text-muted text-truncate d-block" style={{ maxWidth: 200 }}>{user.email}</small>
+//                           </div>
+//                         </div>
+//                       </td>
+//                       <td>
+//                         <Badge bg={getRoleVariant(user.role)} className="px-3 py-2">
+//                           {capitalize(user.role)}
+//                         </Badge>
+//                       </td>
+//                       {currentUser.role === "admin" && (
+//                         <td>{user.tenant?.name || "-"}</td> // Replaced user.companyName with user.tenant?.name
+//                       )}
+//                       <td>
+//                         <Badge bg={user.status === "Active" ? "success" : "secondary"} className="px-3 py-2">
+//                           {user.status}
+//                         </Badge>
+//                       </td>
+//                       <td>
+//                         <Badge bg={user.isVerified ? "success" : "secondary"} className="px-3 py-2">
+//                           {user.isVerified ? "Verified" : "Not Verified"}
+//                         </Badge>
+//                       </td>
+//                       <td className="text-center">
+//                         <div className="d-flex justify-content-center gap-2">
+//                           <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary">
+//                             <MdEdit />
+//                           </Button>
+//                           <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(user._id)} disabled={user._id === currentUserId || user.role === "admin"}
+//                             title={user._id === currentUserId ? "You can't delete your own account" : "Delete user"}>
+//                             <MdDelete />
+//                           </Button>
+//                           <Button
+//                             variant={user.isActive ? "outline-success" : "outline-secondary"}
+//                             size="sm"
+//                             className="me-2"
+//                             disabled={user._id === currentUserId || user.role === "admin"}
+//                             onClick={() => handleToggleActive(user._id, user.isActive)}
+//                           >
+//                             {user.isActive ? <MdToggleOn size={20} /> : <MdToggleOff size={20} />}
+//                           </Button>
+//                           <Button variant="outline-secondary" onClick={() => handleExport(user._id)}>
+//                             <MdPictureAsPdf className="" />
+//                           </Button>
+//                           <Button
+//                             variant="outline-info"
+//                             size="sm"
+//                             onClick={() => handleOpenEmailModal(user._id, user.email)}
+//                             title={`Send email to ${user.email}`}>
+//                             <MdEmail />
+//                           </Button>
+//                         </div>
+//                       </td>
+//                     </tr>
+//                   ))}
+//                 </tbody>
+//               </Table>
+//             </div>
+//           )}
+//         </Card.Body>
+
+//         <Card.Footer className="d-flex flex-column flex-md-row justify-content-between align-items-center px-3 py-2">
+//           <small className="text-muted">
+//             Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} users
+//           </small>
+//           <Pagination
+//             current={pagination.page}
+//             total={pagination.total}
+//             limit={pagination.limit}
+//             onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+//             darkMode={darkMode}
+//           />
+//         </Card.Footer>
+//       </Card>
+//       <EmailModal
+//         show={showEmailModal}
+//         onClose={() => setShowEmailModal(false)}
+//         onSend={handleSendEmail}
+//         subject={emailSubject}
+//         setSubject={setEmailSubject}
+//         message={emailMessage}
+//         setMessage={setEmailMessage}
+//         recipientEmail={selectedEmail}
+//         sending={sending}
+//       />
+//     </Container>
+//   )
+// }
+
+// export default UserList
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -780,18 +1186,21 @@ const UserList = ({ darkMode }) => {
 
       const { users, total, page: currentPage } = response.data
 
-      // Use tenant.name directly from getAllUsers response
-      const processedUsers = users.map(user => ({
-        ...user,
-        status: user.isActive ? "Active" : "Inactive",
-        companyName: user.tenant?.name || "-", // Replaced companyProfile.name with tenant.name
-      }))
+      const authUser = JSON.parse(localStorage.getItem("authUser"))
+      const loggedInUserId = authUser?._id
+      const processedUsers = users
+        .filter((user) => user._id !== loggedInUserId)
+        .map((user) => ({
+          ...user,
+          status: user.isActive ? "Active" : "Inactive",
+          companyName: user.tenant?.name || "-",
+        }))
 
       setUsers(processedUsers)
-      console.log('Processed users:', processedUsers) // Debugging
       setPagination((prev) => ({ ...prev, page: currentPage, total }))
     } catch (error) {
       console.error("Failed to fetch users", error)
+      toast.error(error.response?.data?.message || "Failed to fetch users")
     } finally {
       setLoading(false)
     }
@@ -800,11 +1209,10 @@ const UserList = ({ darkMode }) => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target
     setFilters((prev) => ({ ...prev, [name]: value }))
+    setPagination((prev) => ({ ...prev, page: 1 }))
   }
 
   const handleDeleteUser = async (userId) => {
-    const currentUserId = JSON.parse(localStorage.getItem("authUser"))?._id
-
     if (userId === currentUserId) {
       Swal.fire({
         icon: "error",
@@ -816,7 +1224,7 @@ const UserList = ({ darkMode }) => {
 
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "This user will be marked as deleted!",
+      text: "This user and associated members will be deleted!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -827,9 +1235,19 @@ const UserList = ({ darkMode }) => {
     if (result.isConfirmed) {
       try {
         const res = await deleteUserById(userId)
-        setUsers((prev) => prev.filter((user) => user._id !== userId))
-        toast.success(res.data.message || "User deleted successfully")
-        Swal.fire("Deleted!", "User has been deleted.", "success")
+        const { deletedUserId, affectedUsers } = res.data
+        setUsers((prev) =>
+          prev.filter((user) => user._id !== deletedUserId && !affectedUsers.includes(user._id))
+        )
+        setPagination((prev) => ({
+          ...prev,
+          total: prev.total - (1 + affectedUsers.length),
+        }))
+        if (users.length === 1 && pagination.page > 1) {
+          setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
+        }
+        toast.success(res.data.message || "User and associated members deleted successfully")
+        Swal.fire("Deleted!", "User and associated members have been deleted.", "success")
       } catch (error) {
         toast.error(error.response?.data?.message || "Failed to delete user")
       }
@@ -839,16 +1257,26 @@ const UserList = ({ darkMode }) => {
   const handleToggleActive = async (userId, currentStatus) => {
     try {
       const res = await toggleUserActiveStatus(userId)
+      const { updatedUser, affectedUsers } = res.data
       setUsers((prev) =>
-        prev.map((user) =>
-          user._id === userId
-            ? {
-                ...user,
-                isActive: !currentStatus,
-                status: !currentStatus ? "Active" : "Inactive",
-              }
-            : user
-        )
+        prev.map((user) => {
+          if (user._id === updatedUser._id) {
+            return {
+              ...user,
+              isActive: updatedUser.isActive,
+              status: updatedUser.isActive ? "Active" : "Inactive",
+            }
+          }
+          const affected = affectedUsers.find((u) => u._id === user._id)
+          if (affected) {
+            return {
+              ...user,
+              isActive: affected.isActive,
+              status: affected.isActive ? "Active" : "Inactive",
+            }
+          }
+          return user
+        })
       )
       toast.success(res.data.message || "User status updated")
     } catch (error) {
@@ -858,9 +1286,9 @@ const UserList = ({ darkMode }) => {
 
   const getRoleVariant = (role) => {
     const map = {
-      Admin: "primary",
-      Company: "info",
-      User: "dark",
+      admin: "primary",
+      companyAdmin: "info",
+      member: "dark",
     }
     return map[role] || "secondary"
   }
@@ -887,7 +1315,6 @@ const UserList = ({ darkMode }) => {
     }
 
     setSending(true)
-
     try {
       await sendUserNotification(selectedUserId, emailSubject, emailMessage)
       Swal.fire("Success", "Email sent successfully!", "success")
@@ -914,6 +1341,7 @@ const UserList = ({ darkMode }) => {
       link.remove()
     } catch (err) {
       console.error("Export error", err)
+      toast.error("Failed to export user PDF")
     }
   }
 
@@ -949,8 +1377,8 @@ const UserList = ({ darkMode }) => {
             <Col md>
               <Form.Select name="role" value={filters.role} onChange={handleFilterChange}>
                 <option value="">All Roles</option>
-                <option value="company">Company</option>
-                <option value="user">User</option>
+                <option value="companyAdmin">Company Admin</option>
+                <option value="member">Member</option>
               </Form.Select>
             </Col>
             <Col md>
@@ -1016,7 +1444,7 @@ const UserList = ({ darkMode }) => {
                         </Badge>
                       </td>
                       {currentUser.role === "admin" && (
-                        <td>{user.tenant?.name || "-"}</td> // Replaced user.companyName with user.tenant?.name
+                        <td>{user.tenant?.name || "-"}</td>
                       )}
                       <td>
                         <Badge bg={user.status === "Active" ? "success" : "secondary"} className="px-3 py-2">
@@ -1033,8 +1461,13 @@ const UserList = ({ darkMode }) => {
                           <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary">
                             <MdEdit />
                           </Button>
-                          <Button size="sm" variant="outline-danger" onClick={() => handleDeleteUser(user._id)} disabled={user._id === currentUserId || user.role === "admin"}
-                            title={user._id === currentUserId ? "You can't delete your own account" : "Delete user"}>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => handleDeleteUser(user._id)}
+                            disabled={user._id === currentUserId || user.role === "admin"}
+                            title={user._id === currentUserId ? "You can't delete your own account" : "Delete user"}
+                          >
                             <MdDelete />
                           </Button>
                           <Button
@@ -1053,7 +1486,8 @@ const UserList = ({ darkMode }) => {
                             variant="outline-info"
                             size="sm"
                             onClick={() => handleOpenEmailModal(user._id, user.email)}
-                            title={`Send email to ${user.email}`}>
+                            title={`Send email to ${user.email}`}
+                          >
                             <MdEmail />
                           </Button>
                         </div>

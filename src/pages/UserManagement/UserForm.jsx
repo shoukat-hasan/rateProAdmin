@@ -1636,6 +1636,7 @@ const UserForm = () => {
 
         // console.log("Creating user with payload:", preparedUser);
         await createUser(preparedUser);
+        console.log(preparedUser);
         Swal.fire({ icon: "success", title: "User Created" });
       }
 

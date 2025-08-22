@@ -320,8 +320,6 @@ export const axiosInstance = axios.create({
 // ===== Optional: Authorization Header if needed later =====
 axiosInstance.interceptors.request.use(
   (config) => {
-    // const token = localStorage.getItem('accessToken');
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error)
