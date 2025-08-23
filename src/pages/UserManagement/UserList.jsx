@@ -1188,9 +1188,17 @@ const UserList = ({ darkMode }) => {
 
       const authUser = JSON.parse(localStorage.getItem("authUser"))
       const loggedInUserId = authUser?._id
+      const loggedInUserRole = authUser?.role?.toLowerCase();
       const processedUsers = users
-        .filter((user) => user._id !== loggedInUserId)
-        .map((user) => ({
+        .filter((user) => {
+          // Exclude the logged-in user
+          if (user._id === loggedInUserId) return false;
+          // If logged-in user is a member, exclude admin and companyAdmin roles
+          if (loggedInUserRole === "member") {
+            return !["admin", "companyAdmin"].includes(user.role);
+          }
+          return true;
+        }).map((user) => ({
           ...user,
           status: user.isActive ? "Active" : "Inactive",
           companyName: user.tenant?.name || "-",
@@ -1212,6 +1220,67 @@ const UserList = ({ darkMode }) => {
     setPagination((prev) => ({ ...prev, page: 1 }))
   }
 
+  // const handleDeleteUser = async (userId) => {
+  //   if (userId === currentUserId) {
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Action Forbidden",
+  //       text: "You cannot delete your own account!",
+  //     })
+  //     return
+  //   }
+
+  //   const getDeleteMessage = (role) => {
+  //     if (role === "member") {
+  //       return "This user will be deleted!";
+  //     }
+  //     if (role === "companyAdmin") {
+  //       return "This company admin and all associated members will be deleted!";
+  //     }
+  //     return "This user and associated members will be deleted!";
+  //   };
+
+  //   const result = await Swal.fire({
+  //     title: "Are you sure?",
+  //     text: getDeleteMessage(targetUserRole),  // 👈 yahan role based message
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#d33",
+  //     cancelButtonColor: "#3085d6",
+  //     confirmButtonText: "Yes, delete it!",
+  //   });
+
+  //   if (result.isConfirmed) {
+  //     try {
+  //       const res = await deleteUserById(userId)
+  //       const { deletedUserId, affectedUsers, deletedUserRole } = res.data   // 👈 role bhi le lo
+  //       setUsers((prev) =>
+  //         prev.filter(
+  //           (user) => user._id !== deletedUserId && !affectedUsers.includes(user._id)
+  //         )
+  //       )
+  //       setPagination((prev) => ({
+  //         ...prev,
+  //         total: prev.total - (1 + affectedUsers.length),
+  //       }))
+  //       if (users.length === 1 && pagination.page > 1) {
+  //         setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
+  //       }
+
+  //       // ✅ role based message
+  //       if (deletedUserRole === "member") {
+  //         toast.success("User deleted successfully")
+  //         Swal.fire("Deleted!", "User has been deleted.", "success")
+  //       } else {
+  //         toast.success(res.data.message || "User and associated members deleted successfully")
+  //         Swal.fire("Deleted!", "User and associated members have been deleted.", "success")
+  //       }
+  //     } catch (error) {
+  //       toast.error(error.response?.data?.message || "Failed to delete user")
+  //     }
+  //   }
+  // }
+
   const handleDeleteUser = async (userId) => {
     if (userId === currentUserId) {
       Swal.fire({
@@ -1222,9 +1291,23 @@ const UserList = ({ darkMode }) => {
       return
     }
 
+    // 🔹 User ko list se find karo
+    const targetUser = users.find((u) => u._id === userId)
+    const targetUserRole = targetUser?.role || "member" // fallback safe
+
+    const getDeleteMessage = (role) => {
+      if (role === "member") {
+        return "This user will be deleted!"
+      }
+      if (role === "companyAdmin") {
+        return "This company admin and all associated members will be deleted!"
+      }
+      return "This user and associated members will be deleted!"
+    }
+
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "This user and associated members will be deleted!",
+      text: getDeleteMessage(targetUserRole), // ✅ ab role available hai
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -1235,19 +1318,29 @@ const UserList = ({ darkMode }) => {
     if (result.isConfirmed) {
       try {
         const res = await deleteUserById(userId)
-        const { deletedUserId, affectedUsers } = res.data
+        const { deletedUserId, affectedUsers, deletedUserRole } = res.data
+
         setUsers((prev) =>
-          prev.filter((user) => user._id !== deletedUserId && !affectedUsers.includes(user._id))
+          prev.filter(
+            (user) => user._id !== deletedUserId && !affectedUsers.includes(user._id)
+          )
         )
         setPagination((prev) => ({
           ...prev,
           total: prev.total - (1 + affectedUsers.length),
         }))
         if (users.length === 1 && pagination.page > 1) {
-          setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
+          setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
         }
-        toast.success(res.data.message || "User and associated members deleted successfully")
-        Swal.fire("Deleted!", "User and associated members have been deleted.", "success")
+
+        // ✅ role based success message
+        if (deletedUserRole === "member") {
+          toast.success("User deleted successfully")
+          Swal.fire("Deleted!", "User has been deleted.", "success")
+        } else {
+          toast.success(res.data.message || "User and associated members deleted successfully")
+          Swal.fire("Deleted!", "User and associated members have been deleted.", "success")
+        }
       } catch (error) {
         toast.error(error.response?.data?.message || "Failed to delete user")
       }

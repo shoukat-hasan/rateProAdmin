@@ -1464,6 +1464,21 @@ const rolePermissionMap = {
       "role:delete",
       "role:assign"
     ]
+  },
+  "Editor": {
+    group: null,
+    permissions: [
+      "user:create",
+      "user:update",
+      "role:update"
+    ]
+  },
+  "Viewer": {
+    group: null,
+    permissions: [
+      "user:read",
+      "role:read"
+    ]
   }
 };
 
@@ -1946,12 +1961,12 @@ const RoleManagement = () => {
                   <div className="permission-grid">
                     {Object.entries(groupedPermissions).length > 0 ? (
                       Object.entries(groupedPermissions).map(([group, perms]) => (
-                        <div key={group} className="mb-4">
+                        <div key={group} className="mb-4 w-100">
                           <h5>{group.charAt(0).toUpperCase() + group.slice(1)} Permissions</h5>
-                          <div className="d-flex flex-wrap gap-2">
+                          <div className="d-flex justify-content-between flex-wrap gap-2 ">
                             {perms.map((permission) =>
                               permission && permission._id && permission.name ? (
-                                <Card key={permission._id} className="permission-card mb-2" style={{ width: "18rem" }}>
+                                <Card key={permission._id} className="permission-card mb-2" style={{ width: "15rem" }}>
                                   <Card.Body className="p-3">
                                     <Form.Check
                                       type="checkbox"

@@ -482,8 +482,8 @@ body {
 }
 
 /* Access management styles */
-.permission-grid {
-  display: grid;
+/* .permission-grid { */
+  /* display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
 }
@@ -498,7 +498,7 @@ body {
   .permission-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-}
+} */
 
 .permission-card {
   border: 1px solid var(--light-border);

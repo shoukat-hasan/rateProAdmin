@@ -209,6 +209,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const hasPermission = (permissionName) => {
+    if (!user) {
+      return false;
+    }
+    for (const role of user.customRoles || []) {  
+      if (
+        role.permissions?.some((p) => {
+          if (typeof p === "string") {
+            return p === permissionName;
+          } else if (typeof p === "object") {
+            return p.name === permissionName;
+          }
+          return false;
+        })
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+  
   const logout = async () => {
     try {
       await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
@@ -233,7 +254,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, setUser, updateCompanyInfo, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, setUser, updateCompanyInfo, hasPermission, loading }}>
       {children}
     </AuthContext.Provider>
   );

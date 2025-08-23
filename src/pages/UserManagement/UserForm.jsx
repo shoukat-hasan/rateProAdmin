@@ -1406,7 +1406,7 @@ import { useAuth } from "../../context/AuthContext";
 
 const UserForm = () => {
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, hasPermission } = useAuth();
   const { id } = useParams(); // id may be undefined in create mode
   const isEditMode = Boolean(id);
   const [user, setUser] = useState({
@@ -1425,9 +1425,10 @@ const UserForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const currentUserRole = currentUser?.role || "";
-  const memberCanCreate = currentUser?.customRoles?.some((role) =>
-    role.permissions?.includes("user:create")
-  );
+  const memberCanCreate = hasPermission("user:create");
+  console.log(memberCanCreate)
+  const memberCanUpdate = hasPermission("user:update");
+  console.log(memberCanUpdate)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -1473,7 +1474,7 @@ const UserForm = () => {
   };
 
   useEffect(() => {
-    
+
     const fetchUser = async () => {
       if (!id) return; // Prevent fetching if id is undefined
       try {
@@ -1586,13 +1587,21 @@ const UserForm = () => {
       return;
     }
 
+    // 🚫 Restrict member without permission
+    if (!isEditMode && currentUserRole === "member" && !memberCanCreate) {
+      return Swal.fire("Forbidden", "You don't have permission to create users", "error");
+    }
+    if (isEditMode && currentUserRole === "member" && !memberCanUpdate) {
+      return Swal.fire("Forbidden", "You don't have permission to update users", "error");
+    }
+
     setIsSubmitting(true);
 
     try {
       if (isEditMode) {
         let payload = {};
         if (user.name !== user.originalName) payload.name = user.name;
-      
+
         if (user.role !== user.originalRole) {
           if (currentUserRole === "admin") {
             if (!(user.originalRole === "companyAdmin" && user.role === "user")) {
@@ -1602,20 +1611,20 @@ const UserForm = () => {
             }
           }
         }
-      
+
         if (currentUserRole === "admin" && user.role === "companyAdmin") {
           if (user.tenantName !== user.originalTenantName) payload.tenantName = user.tenantName;
         }
-      
+
         if (currentUserRole === "companyAdmin" || (currentUserRole === "member" && user.role === "member")) {
           if (user.departmentId !== user.originalDepartmentId) payload.department = user.departmentId;
         }
-      
+
         // 🔹 Add this
         if (user.isActive !== user.originalIsActive) {
           payload.isActive = user.isActive;
         }
-      
+
         await updateUser(id, payload);
         Swal.fire({ icon: "success", title: "User Updated" });
       } else {
@@ -1757,6 +1766,7 @@ const UserForm = () => {
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Role</Form.Label>
+                      {/* Role dropdown */}
                       <Form.Select
                         name="role"
                         value={user.role}
@@ -1770,7 +1780,7 @@ const UserForm = () => {
                             <option value="user">User</option>
                           </>
                         )}
-                        {(currentUserRole === "companyAdmin" || (currentUserRole === "member" && memberCanCreate)) && (
+                        {(currentUserRole === "companyAdmin" || memberCanCreate) && (
                           <option value="member">Member</option>
                         )}
                       </Form.Select>
@@ -1813,27 +1823,19 @@ const UserForm = () => {
                   </Row>
                 )}
 
-                {(currentUserRole === "companyAdmin" || (currentUserRole === "member" && user.role === "member")) && (
+                {(currentUserRole === "companyAdmin" || memberCanCreate) && (
                   <>
                     <Row>
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>Tenant ID</Form.Label>
-                          <Form.Control
-                            type="text"
-                            value={user.tenantId || ""}
-                            disabled
-                          />
+                          <Form.Control type="text" value={user.tenantId || ""} disabled />
                         </Form.Group>
                       </Col>
                       <Col md={6}>
                         <Form.Group className="mb-3">
                           <Form.Label>Tenant Name</Form.Label>
-                          <Form.Control
-                            type="text"
-                            value={user.tenantName}
-                            disabled
-                          />
+                          <Form.Control type="text" value={user.tenantName} disabled />
                         </Form.Group>
                       </Col>
                     </Row>
@@ -1846,15 +1848,6 @@ const UserForm = () => {
                             value={user.departmentId}
                             onChange={handleChange}
                           >
-                            {/* <option value="">Select Department</option>
-                            {Array.isArray(user.departments) && user.departments.length > 0 ? (
-                              user.departments.map((dept) => (
-                                <option key={dept._id} value={dept._id}>{dept.name}</option>
-                              ))
-                            ) : (
-                              <option disabled>No departments found</option>
-                            )} */}
-
                             <option value="">Select Department</option>
                             {Array.isArray(user.departments) && user.departments.length > 0 ? (
                               user.departments.map((dept) => (
@@ -1866,7 +1859,9 @@ const UserForm = () => {
                               <option disabled>No departments found</option>
                             )}
                           </Form.Select>
-                          {errors.departmentId && <div className="text-danger">{errors.departmentId}</div>}
+                          {errors.departmentId && (
+                            <div className="text-danger">{errors.departmentId}</div>
+                          )}
                         </Form.Group>
                       </Col>
                     </Row>
