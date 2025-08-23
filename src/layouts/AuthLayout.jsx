@@ -1,21 +1,3 @@
-// import { Container, Row, Col, Card } from "react-bootstrap"
-
-// const AuthLayout = ({ children }) => {
-//   return (
-//     <Container fluid className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-4 px-3">
-//       <Row className="w-100 justify-content-center">
-//         <Col xs={12} sm={10} md={8} lg={6} xl={4}>
-//           <Card className="shadow border-0">
-//             {children}
-//           </Card>
-//         </Col>
-//       </Row>
-//     </Container>
-//   )
-// }
-
-// export default AuthLayout
-
 import { Container, Row, Col, Card } from "react-bootstrap"
 
 const AuthLayout = ({ title, subtitle, icon, children, footer }) => {

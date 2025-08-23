@@ -35,6 +35,8 @@ import {
 } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
 import { Link, useNavigate } from "react-router-dom"
+import Swal from "sweetalert2"
+import { useAuth } from "../../context/AuthContext.jsx"
 
 // Register Chart.js components including Filler
 ChartJS.register(
@@ -62,7 +64,8 @@ const Dashboard = ({ darkMode, limit = 5 }) => {
   const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0 })
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate();
-  const [responses, setResponses] = useState([])
+  const [responses, setResponses] = useState([]);
+  const { user } = useAuth();
 
   const createNewSurvey = () => {
     navigate("/app/surveys/create");
@@ -75,6 +78,28 @@ const Dashboard = ({ darkMode, limit = 5 }) => {
   const ViewRecentSurveys = () => {
     navigate("/app/surveys/responses");
   };
+
+  useEffect(() => {
+    if (
+      user &&
+      (user.role === "companyAdmin") &&
+      !user.companyProfileUpdated
+    ) {
+      Swal.fire({
+        title: "⚠️ Company Profile Update Required",
+        text: "To unlock the full features of the platform, please complete your company profile. Without updating it, you may not be able to access all functionalities.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Update Profile",
+        cancelButtonText: "Maybe Later",
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/app/profile?tab=company")
+        }
+      })
+    }
+  }, [user, navigate])
 
 
   useEffect(() => {

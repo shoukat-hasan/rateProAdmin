@@ -195,22 +195,6 @@ const ForgotPassword = ({ darkMode }) => {
       setLoading(false)
     }
   }
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   if (!email) {
-  //     console.error("Please enter your email");
-  //     return;
-  //   }
-
-  //   try {
-  //     const res = await axiosInstance.post("/auth/forgotpassword", { email });
-  //     console.log("Response: ", res.data);
-  //   } catch (error) {
-  //     console.error("API Error:", error);
-  //   }
-  // };
-
 
   return (
     <AuthLayout

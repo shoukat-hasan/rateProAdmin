@@ -8,6 +8,7 @@ import axiosInstance, { getCurrentUser, updateProfile, updateUserProfile } from 
 import Swal from "sweetalert2"
 import { capitalize } from "../../utilities/capitalize";
 import { useAuth } from "../../context/AuthContext"
+import { useLocation } from "react-router-dom"
 
 const Profile = ({ darkMode }) => {
    const [activeTab, setActiveTab] = useState("profile");
@@ -17,6 +18,15 @@ const Profile = ({ darkMode }) => {
   const [userId, setUserId] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const { setUser, user, updateCompanyInfo } = useAuth();
+  const location = useLocation()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const tab = params.get("tab")
+    if (tab) {
+      setActiveTab(tab)  // agar ?tab=company aaya to direct company tab khulega
+    }
+  }, [location.search])
 
   const [formData, setFormData] = useState({
     firstName: "",
