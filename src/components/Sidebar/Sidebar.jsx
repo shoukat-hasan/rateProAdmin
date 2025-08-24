@@ -72,7 +72,6 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
 
   const role = user?.role?.toLowerCase()
 
-
   const [hoveredItem, setHoveredItem] = useState(null)
   const [collapsedDropdownOpen, setCollapsedDropdownOpen] = useState(null)
   const sidebarRef = useRef()
@@ -434,7 +433,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
 
       ],
     },
-    { path: "/app/support", name: "Support Tickets", icon: <MdSupport />, roles: ["admin"] },
+    // { path: "/app/support", name: "Support Tickets", icon: <MdSupport />, roles: ["admin"] },
     {
       name: "Settings",
       icon: <MdSettings />,

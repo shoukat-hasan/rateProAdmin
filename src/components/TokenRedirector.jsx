@@ -30,7 +30,7 @@ function TokenRedirector() {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const token = params.get("token");
+        const token = params.get("accessToken");
         const user = params.get("user");
 
         if (token && user) {
@@ -39,7 +39,7 @@ function TokenRedirector() {
 
                 // ✅ Save to localStorage
                 localStorage.setItem("authUser", JSON.stringify(parsedUser));
-                localStorage.setItem("token", token);
+                // localStorage.setItem("token", token);
 
                 // ✅ Redirect to dashboard
                 navigate("/app");
