@@ -1,5 +1,5 @@
 // src\pages\AccessManagement\RoleManagement.jsx
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Container, Row, Col, Card, Table, Badge, Button, Form, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { MdAdd, MdEdit, MdDelete, MdSave, MdCancel } from "react-icons/md";
 import Pagination from "../../components/Pagination/Pagination.jsx";
@@ -80,7 +80,6 @@ const rolePermissionMap = {
   }
 };
 
-
 // RoleManagement component for creating, editing, and assigning roles
 const RoleManagement = () => {
   const { user, loading: authLoading, hasPermission } = useAuth();
@@ -99,6 +98,10 @@ const RoleManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [assignedUserIds, setAssignedUserIds] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const inputRef = useRef(null);
 
   const currentUserRole = user?.role || "";
   const isMember = currentUserRole === "member";
@@ -145,6 +148,44 @@ const RoleManagement = () => {
     }, {});
   }, [filteredPermissions]);
 
+  // Filter users based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredUsers([]);
+      setShowDropdown(false);
+    } else {
+      const filtered = users.filter(
+        (user) =>
+          user.role !== "companyAdmin" &&
+          !assignedUserIds.includes(user._id) &&
+          (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredUsers(filtered);
+      setShowDropdown(true);
+    }
+  }, [searchTerm, users, assignedUserIds]);
+
+  // Handle user selection
+  const handleSelectUser = (user) => {
+    setSelectedUserId(user._id);
+    setSearchTerm(`${user.name} (${user.email})`); // Show selected user in input
+    setShowDropdown(false); // Close dropdown
+  };
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (inputRef.current && !inputRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   // Auto-select first available predefined role when creating
   useEffect(() => {
     if (showModal && !editingRole && availablePredefinedRoles.length > 0 && selectedRole === "") {
@@ -157,7 +198,8 @@ const RoleManagement = () => {
 
   // Fetch data on mount and when pagination.page changes
   useEffect(() => {
-    if (!authLoading && tenantId && user?.role === "companyAdmin") {
+    if (!authLoading && tenantId && (user?.role === "companyAdmin" || hasPermission("role:read"))) {
+
       let isMounted = true;
       setIsLoading(true);
       Promise.all([fetchRoles(), fetchPermissions(), fetchUsers()])
@@ -365,7 +407,8 @@ const RoleManagement = () => {
 
       // 🔥 FIX: assignedUserIds ko bhi update karo
       setAssignedUserIds((prev) => prev.filter((id) => id !== userId));
-
+      setSearchTerm("");
+      setShowDropdown(false);
       await fetchRoles(); // Refresh roles to update userCount
     } catch (err) {
       console.error("Error unassigning role:", err);
@@ -654,7 +697,31 @@ const RoleManagement = () => {
                               : "No description"}
                           </td>
                           <td>
-                            {/* ... same permissions badges code */}
+                            <div className="d-flex flex-wrap gap-1">
+                              {role.permissions && role.permissions.length > 0 ? (
+                                <>
+                                  {role.permissions.slice(0, 3).map((permission, index) => {
+                                    // Agar permission object he to name dikhado
+                                    const permName = typeof permission === "string"
+                                      ? permission // string aa jaye to directly use karo (ya backend se map karo)
+                                      : permission.name;
+
+                                    return (
+                                      <Badge key={permission._id || index} bg="secondary" className="small">
+                                        {permName.replace(":", " ")}
+                                      </Badge>
+                                    );
+                                  })}
+                                  {role.permissions.length > 3 && (
+                                    <Badge bg="light" text="dark" className="small">
+                                      +{role.permissions.length - 3} more
+                                    </Badge>
+                                  )}
+                                </>
+                              ) : (
+                                <Badge bg="secondary" className="small">No permissions</Badge>
+                              )}
+                            </div>
                           </td>
                           <td>
                             <Badge bg="primary" className="p-2">{role.userCount || 0}</Badge>
@@ -806,7 +873,7 @@ const RoleManagement = () => {
                 </Form.Group>
                 {editingRole && (
                   <Form.Group className="mb-3">
-                    <Form.Label>Assigned Users</Form.Label>
+                    <Form.Label className="fw-bold">Assigned Users</Form.Label>
                     {editingRole.users && editingRole.users.length > 0 ? (
                       <ul className="list-group">
                         {editingRole.users.map((user) => (
@@ -856,7 +923,7 @@ const RoleManagement = () => {
             <Modal.Body>
               <Form.Group>
                 <Form.Label>Select User</Form.Label>
-                <Form.Select
+                {/* <Form.Select
                   value={selectedUserId || ""}
                   onChange={(e) => setSelectedUserId(e.target.value)}
                   disabled={isLoading}
@@ -868,7 +935,56 @@ const RoleManagement = () => {
                         {user.name} ({user.email})
                       </option>
                     ))}
-                </Form.Select>
+                </Form.Select> */}
+
+                <div className="position-relative" ref={inputRef}>
+                  <Form.Control
+                    type="text"
+                    placeholder="Type to search user..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onFocus={() => {
+                      setSearchTerm("");
+                      setShowDropdown(true);
+                    }} // Clear input and show dropdown on focus
+                    disabled={isLoading}
+                  />
+                  {showDropdown && filteredUsers.length > 0 && (
+                    <ul
+                      className="list-group position-absolute w-100"
+                      style={{
+                        zIndex: 1000,
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      {filteredUsers.map((user) => (
+                        <li
+                          key={user._id}
+                          className="list-group-item list-group-item-action"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleSelectUser(user)}
+                        >
+                          {user.name} ({user.email})
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {showDropdown && searchTerm && filteredUsers.length === 0 && (
+                    <div
+                      className="position-absolute w-100 p-2 bg-white"
+                      style={{
+                        zIndex: 1000,
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      No users found
+                    </div>
+                  )}
+                </div>
               </Form.Group>
             </Modal.Body>
             <Modal.Footer>
