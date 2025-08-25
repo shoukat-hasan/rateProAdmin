@@ -21,7 +21,9 @@ const AccessManagement = () => {
   const [roles, setRoles] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
+  const [permissions, setPermissions] = useState([]);
+  const [permissionCount, setPermissionCount] = useState(0);
 
   // Task-to-role assignments (kept as-is per request)
   const [taskAssignments, setTaskAssignments] = useState([])
@@ -103,6 +105,20 @@ const AccessManagement = () => {
     return () => { mounted = false }
   }, [])
 
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const { data } = await axiosInstance.get("/permissions", { withCredentials: true });
+        setPermissions(Array.isArray(data?.permissions) ? data.permissions : []);
+        const apiPermissions = Array.isArray(data?.permissions) ? data.permissions : [];
+        setPermissionCount(apiPermissions.length);
+      } catch (err) {
+        console.error("Permissions fetch error:", err);
+      }
+    };
+    fetchPermissions();
+  }, []);
+
   // ===== Static tasks list (kept UI exactly same) =====
   const taskList = [
     "Create User",
@@ -115,18 +131,41 @@ const AccessManagement = () => {
     "Approve Leave Request",
   ]
 
-  const handleAssignTask = (task, role) => {
-    setTaskAssignments((prev) => {
-      const exists = prev.find((entry) => entry.task === task)
-      if (exists) {
-        return prev.map((entry) =>
-          entry.task === task ? { ...entry, role } : entry
-        )
-      } else {
-        return [...prev, { task, role }]
-      }
-    })
-  }
+  // const handleAssignTask = (task, role) => {
+  //   setTaskAssignments((prev) => {
+  //     const exists = prev.find((entry) => entry.task === task)
+  //     if (exists) {
+  //       return prev.map((entry) =>
+  //         entry.task === task ? { ...entry, role } : entry
+  //       )
+  //     } else {
+  //       return [...prev, { task, role }]
+  //     }
+  //   })
+  // }
+
+  const handleAssignTask = async (permission, userId) => {
+    try {
+      const { data } = await axiosInstance.post(
+        "/task-assignments",
+        { permission, userId },
+        { withCredentials: true }
+      );
+      setTaskAssignments((prev) => {
+        const exists = prev.find((entry) => entry.permission === permission);
+        if (exists) {
+          return prev.map((entry) =>
+            entry.permission === permission ? { ...entry, userId } : entry
+          );
+        } else {
+          return [...prev, { permission, userId }];
+        }
+      });
+    } catch (err) {
+      console.error("Assign task error:", err);
+      Swal.fire("Error", "Failed to assign task", "error");
+    }
+  };
 
   // ===== Helpers (unchanged UI) =====
   const getStatusVariant = (status) => {
@@ -226,7 +265,7 @@ const AccessManagement = () => {
           <Card className="h-100 border-0 shadow-sm text-center">
             <Card.Body>
               <div className="text-warning mb-2"><MdVpnKey size={32} /></div>
-              <h3>15</h3>
+              <h3>{permissionCount}</h3>
               <p className="text-muted mb-0">Permissions</p>
             </Card.Body>
           </Card>
@@ -337,7 +376,7 @@ const AccessManagement = () => {
       {/* Task Assignment Cards (kept identical) */}
       <Row className="mt-4">
         <Col>
-          <h5 className="mb-3">Assign System Tasks to Roles</h5>
+          {/* <h5 className="mb-3">Assign System Tasks to Roles</h5>
           <Row className="g-3">
             {taskList.map((task, index) => (
               <Col md={6} lg={4} key={index}>
@@ -371,6 +410,45 @@ const AccessManagement = () => {
                 </Card>
               </Col>
             ))}
+          </Row> */}
+          <h5 className="mb-3">Assign System Tasks to Users</h5>
+          <Row className="g-3">
+            {permissions.map((perm, index) => (
+              <Col md={6} lg={4} key={perm.name}>
+                <Card className="border-0 shadow-sm">
+                  <Card.Body>
+                    <Form.Check
+                      type="checkbox"
+                      id={`perm-${index}`}
+                      label={`${perm.description}`}
+                      checked={taskAssignments.some((a) => a.permission === perm.name)}
+                      onChange={(e) => {
+                        if (!e.target.checked) {
+                          setTaskAssignments((prev) =>
+                            prev.filter((a) => a.permission !== perm.name)
+                          )
+                          // delete assignment API call
+                          axiosInstance.delete(`/task-assignments/${perm.name}`, { withCredentials: true });
+                        }
+                      }}
+                    />
+                    <Form.Group className="mt-2">
+                      <Form.Select
+                        value={taskAssignments.find((a) => a.permission === perm.name)?.userId || ""}
+                        onChange={(e) => handleAssignTask(perm.name, e.target.value)}
+                      >
+                        <option value="">-- Assign to User --</option>
+                        {users
+                          .filter((u) => u.role !== "companyAdmin")
+                          .map((u) => (
+                            <option key={u.id} value={u.id}>{u.name}</option>
+                          ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
           </Row>
         </Col>
       </Row>
@@ -385,17 +463,33 @@ const AccessManagement = () => {
                 <Table hover className="mb-0">
                   <thead className="table-light">
                     <tr>
-                      <th>Task</th>
-                      <th>Assigned Role</th>
+                      <th>Permission</th>
+                      <th>Assigned User</th>
+                      <th className="text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {taskAssignments.map((entry, idx) => (
-                      <tr key={idx}>
-                        <td>{entry.task}</td>
-                        <td><Badge bg={getRoleVariant(entry.role)}>{entry.role}</Badge></td>
-                      </tr>
-                    ))}
+                    {taskAssignments.map((entry, idx) => {
+                      const user = users.find((u) => u.id === entry.userId);
+                      return (
+                        <tr key={idx}>
+                          <td>{entry.permission}</td>
+                          <td><Badge bg="primary">{user?.name || "Unknown"}</Badge></td>
+                          <td className="text-center">
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={async () => {
+                                await axiosInstance.delete(`/task-assignments/${entry._id}`, { withCredentials: true });
+                                setTaskAssignments((prev) => prev.filter((a) => a._id !== entry._id));
+                              }}
+                            >
+                              <MdDelete />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </Table>
               </div>
