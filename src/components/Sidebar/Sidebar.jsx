@@ -444,13 +444,13 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdPeople />,
       submenu: true,
       isOpen: audienceSubmenuOpen, 
-      roles: ["companyAdmin"],
+      roles: ["companyAdmin", "admin"],
       toggle: () => toggleSubmenu("audience"),
       permissions: ["audience:view", "audience:segment", "audience:contacts"],
       submenuItems: [
-        { path: "/app/audiences", name: "All Audiences", icon: <MdPeople />, roles: ["companyAdmin"] },
-        { path: "/app/audiences/segmentation", name: "Audience Segmentation", icon: <MdSegment />, roles: ["companyAdmin"] },
-        { path: "/app/audiences/contact-management", name: "Contact Management", icon: <MdContacts />, roles: ["companyAdmin"] },
+        { path: "/app/audiences", name: "All Audiences", icon: <MdPeople />, roles: ["companyAdmin", "admin"] },
+        { path: "/app/audiences/segmentation", name: "Audience Segmentation", icon: <MdSegment />, roles: ["companyAdmin", "admin"] },
+        { path: "/app/audiences/contact-management", name: "Contact Management", icon: <MdContacts />, roles: ["companyAdmin", "admin"] },
       ],
     },
     {
