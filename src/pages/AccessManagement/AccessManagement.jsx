@@ -948,7 +948,7 @@ const AccessManagement = () => {
           <Card className="border-0 shadow-sm">
             <Card.Header className="bg-transparent d-flex justify-content-between align-items-center">
               <h5 className="mb-0">Roles Overview</h5>
-              <Button as={Link} to="/app/access/roles" variant="outline-primary" size="sm">View All</Button>
+              <Button as={Link} to="/app/roles" variant="outline-primary" size="sm">View All</Button>
             </Card.Header>
             <Card.Body>
               {roles.map((role) => (
