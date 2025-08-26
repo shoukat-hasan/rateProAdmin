@@ -65,9 +65,11 @@ import Support from "./pages/Support/CreateTicket"
 import VerifyEmail from "./pages/Auth/VerifyEmail"
 import TokenRedirector from "./components/TokenRedirector"
 import { ToastContainer } from "react-toastify"
+import { useAuth } from "./context/AuthContext"
 
 function App() {
   const navigate = useNavigate();
+  const { loading } = useAuth();
   const [darkMode, setDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem("darkMode")
@@ -102,6 +104,7 @@ function App() {
   return (
     <div>
       <>
+      {loading && <FullScreenLoader />}
         <div className={`app-container ${darkMode ? "dark" : "light"}`}>
           <Routes>
             <Route path="/auth-redirect" element={<TokenRedirector />} />
