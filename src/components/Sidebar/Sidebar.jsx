@@ -57,7 +57,7 @@ import {
 import { useAuth } from "../../context/AuthContext"
 
 const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onToggle }) => {
-  const { user } = useAuth()
+  const { user, hasPermission } = useAuth()
   const location = useLocation()
   const [authSubmenuOpen, setAuthSubmenuOpen] = useState(false)
   const [surveySubmenuOpen, setSurveySubmenuOpen] = useState(false)
@@ -329,6 +329,32 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
     }
   }
 
+  const hasAccess = (item, user, hasPermission) => {
+    const role = user?.role?.toLowerCase();
+
+    // 🔹 Direct role check
+    if (item.roles && item.roles.map(r => r.toLowerCase()).includes(role)) {
+      return true;
+    }
+
+    // 🔹 Permission based check
+    if (item.permissions) {
+      if (item.permissions.some(p => hasPermission(p))) {
+        return true;
+      }
+    }
+
+    // 🔹 Submenu items check (agar parent khud match nahi karta)
+    if (item.submenuItems && item.submenuItems.length > 0) {
+      const anySubItemVisible = item.submenuItems.some(sub =>
+        hasAccess(sub, user, hasPermission)
+      );
+      if (anySubItemVisible) return true;
+    }
+
+    return false;
+  };
+
   const handleCollapsedDropdownClick = (itemName) => {
     if (collapsed) {
       setCollapsedDropdownOpen(collapsedDropdownOpen === itemName ? null : itemName)
@@ -359,24 +385,27 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   }
 
   const navItems = [
-    { path: "/app", name: "Dashboard", icon: <MdDashboard /> },
+    { path: "/app", name: "Dashboard", icon: <MdDashboard />, roles: ["admin", "companyAdmin", "member"] },
     {
       name: "Survey Management",
       icon: <MdAssignment />,
       submenu: true,
       isOpen: surveySubmenuOpen,
+      roles: ["admin", "companyAdmin"],
       toggle: () => toggleSubmenu("survey"),
+      permissions: ["survey:create", "survey:read", "survey:update", "survey:delete", "survey:templates", "survey:schedule", "survey:responses:view", "survey:analytics:view",
+        "survey:customize", "survey:share", "survey:settings:update", "survey:detail:view"],
       submenuItems: [
-        { path: "/app/surveys", name: "All Surveys", icon: <MdViewList /> },
-        { path: "/app/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline />, roles: ["companyAdmin"] },
-        { path: "/app/surveys/templates", name: "Survey Templates", icon: <MdTemplate />, roles: ["admin"] },
-        { path: "/app/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule /> },
-        { path: "/app/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer />, roles: ["companyAdmin"] },
-        { path: "/app/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics />, roles: ["companyAdmin"] },
-        { path: "/app/surveys/:id/customize", name: "Customization", icon: <MdCustomize /> },
-        { path: "/app/surveys/:id/share", name: "Survey Sharing", icon: <MdShare />, roles: ["companyAdmin"] },
-        { path: "/app/surveys/settings", name: "Survey Settings", icon: <MdSettings />, roles: ["companyAdmin"] },
-        { path: "/app/surveys/detail", name: "Survey Detail", icon: <MdVisibility />, roles: ["companyAdmin"] },
+        { path: "/app/surveys", name: "All Surveys", icon: <MdViewList />, roles: ["companyAdmin", "admin"], permissions: ["survey:read"] },
+        { path: "/app/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline />, roles: ["companyAdmin"], permissions: ["survey:create"] },
+        { path: "/app/surveys/templates", name: "Survey Templates", icon: <MdTemplate />, roles: ["admin", "companyAdmin"], permissions: ["survey:templates"] },
+        { path: "/app/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule />, roles: ["companyAdmin"], permissions: ["survey:schedule"] },
+        { path: "/app/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer />, roles: ["companyAdmin"], permissions: ["survey:responses:view"] },
+        { path: "/app/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics />, roles: ["companyAdmin"], permissions: ["survey:analytics:view"] },
+        { path: "/app/surveys/:id/customize", name: "Customization", icon: <MdCustomize />, roles: ["companyAdmin"], permissions: ["survey:customize"] },
+        { path: "/app/surveys/:id/share", name: "Survey Sharing", icon: <MdShare />, roles: ["companyAdmin"], permissions: ["survey:share"] },
+        { path: "/app/surveys/settings", name: "Survey Settings", icon: <MdSettings />, roles: ["companyAdmin"], permissions: ["survey:settings:update"] },
+        { path: "/app/surveys/detail", name: "Survey Detail", icon: <MdVisibility />, roles: ["companyAdmin"], permissions: ["survey:detail:view"] },
       ],
     },
     {
@@ -384,38 +413,44 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdGroup />,
       submenu: true,
       isOpen: userSubmenuOpen,
+      roles: ["companyAdmin"],
       toggle: () => toggleSubmenu("user"),
+      permissions: ["user:create", "user:read", "user:update", "user:delete", "user:toggle", "user:export", "user:notify"],
       submenuItems: [
-        { path: "/app/users", name: "All Users", icon: <MdPeople /> },
-        { path: "/app/users/form", name: "Create User", icon: <MdPersonAdd /> },
+        { path: "/app/users", name: "All Users", icon: <MdPeople />, roles: ["companyAdmin"], permissions: ["user:create", "user:read", "user:update", "user:delete", "user:toggle", "user:export", "user:notify"], },
+        { path: "/app/users/form", name: "Create User", icon: <MdPersonAdd />, roles: ["companyAdmin"], permissions: ["user:create", "user:update"], },
       ],
     },
-    { path: "/app/access", name: "Access Management", icon: <MdSecurity /> },
-    { path: "/app/roles", name: "Role Management", icon: <MdGroup /> },
+    { path: "/app/access", name: "Access Management", icon: <MdSecurity />, roles: ["companyAdmin"], },
+    { path: "/app/roles", name: "Role Management", icon: <MdGroup />, roles: ["companyAdmin"], permissions: ["role:create", "role:read", "role:update", "role:delete"], },
     {
       name: "Analytics & Reports",
       icon: <MdInsertChart />,
       submenu: true,
       isOpen: analyticsSubmenuOpen,
       toggle: () => toggleSubmenu("analytics"),
+      roles: ["companyAdmin"],
+      permissions: ["analytics:view", "analytics:realtime", "analytics:trends", "analytics:custom", "analytics:responses"],
       submenuItems: [
-        { path: "/app/analytics", name: "Analytics Overview", icon: <MdInsertChart /> },
-        { path: "/app/analytics/real-time", name: "Real-Time Results", icon: <MdRealTimeSync /> },
-        { path: "/app/analytics/trends", name: "Trend Analysis", icon: <MdTrendingUp /> },
-        { path: "/app/analytics/custom-reports", name: "Custom Reports", icon: <MdBarChart /> },
-        { path: "/app/analytics/response-overview", name: "Response Overview", icon: <MdShowChart /> },
+        { path: "/app/analytics", name: "Analytics Overview", icon: <MdInsertChart />, roles: ["companyAdmin"] },
+        { path: "/app/analytics/real-time", name: "Real-Time Results", icon: <MdRealTimeSync />, roles: ["companyAdmin"] },
+        { path: "/app/analytics/trends", name: "Trend Analysis", icon: <MdTrendingUp />, roles: ["companyAdmin"] },
+        { path: "/app/analytics/custom-reports", name: "Custom Reports", icon: <MdBarChart />, roles: ["companyAdmin"] },
+        { path: "/app/analytics/response-overview", name: "Response Overview", icon: <MdShowChart />, roles: ["companyAdmin"] },
       ],
     },
     {
       name: "Audience Management",
       icon: <MdPeople />,
       submenu: true,
-      isOpen: audienceSubmenuOpen,
+      isOpen: audienceSubmenuOpen, 
+      roles: ["companyAdmin"],
       toggle: () => toggleSubmenu("audience"),
+      permissions: ["audience:view", "audience:segment", "audience:contacts"],
       submenuItems: [
-        { path: "/app/audiences", name: "All Audiences", icon: <MdPeople /> },
-        { path: "/app/audiences/segmentation", name: "Audience Segmentation", icon: <MdSegment /> },
-        { path: "/app/audiences/contact-management", name: "Contact Management", icon: <MdContacts /> },
+        { path: "/app/audiences", name: "All Audiences", icon: <MdPeople />, roles: ["companyAdmin"] },
+        { path: "/app/audiences/segmentation", name: "Audience Segmentation", icon: <MdSegment />, roles: ["companyAdmin"] },
+        { path: "/app/audiences/contact-management", name: "Contact Management", icon: <MdContacts />, roles: ["companyAdmin"] },
       ],
     },
     {
@@ -425,28 +460,31 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       isOpen: contentmanagement,
       roles: ["admin"],
       toggle: () => toggleSubmenu("content"),
+      permissions: ["content:features", "content:pricing", "content:testimonials", "content:widgets"],
       submenuItems: [
-        { path: "/app/features", name: "Features", icon: <MdSettings /> },
-        { path: "/app/content/pricing", name: "Pricing", icon: <MdPayment /> },
-        { path: "/app/content/testimonials", name: "Testimonials", icon: <MdThumbUp /> },
-        { path: "/app/content/widgets", name: "Widgets", icon: <MdMailOutline /> },
+        { path: "/app/features", name: "Features", icon: <MdSettings />, roles: ["admin"] },
+        { path: "/app/content/pricing", name: "Pricing", icon: <MdPayment />, roles: ["admin"] },
+        { path: "/app/content/testimonials", name: "Testimonials", icon: <MdThumbUp />, roles: ["admin"] },
+        { path: "/app/content/widgets", name: "Widgets", icon: <MdMailOutline />, roles: ["admin"] },
 
       ],
     },
-    // { path: "/app/support", name: "Support Tickets", icon: <MdSupport />, roles: ["admin"] },
+    { path: "/app/support", name: "Support Tickets", icon: <MdSupport />, roles: ["admin"] },
     {
       name: "Settings",
       icon: <MdSettings />,
       submenu: true,
       isOpen: settingsSubmenuOpen,
+      roles: ["admin", "companyAdmin"],
       toggle: () => toggleSubmenu("settings"),
+      permissions: ["settings:general"],
       submenuItems: [
-        { path: "/app/settings", name: "General Settings", icon: <MdSettings />, roles: ["admin", "companyAdmin"] },
+        { path: "/app/settings", name: "General Settings", icon: <MdSettings />, roles: ["admin", "companyAdmin"], permissions: ["settings:general"], },
         { path: "/app/settings/email-templates", name: "Email Templates", icon: <MdMailOutline />, roles: ["admin"] },
         { path: "/app/settings/notification-settings", name: "Notification Settings", icon: <MdNotifications />, roles: ["admin"] },
         { path: "/app/settings/smtp-config", name: "SMTP Configuration", icon: <MdEmail />, roles: ["admin"] },
         { path: "/app/settings/custom-thank-you", name: "Thank You Page", icon: <MdThumbUp />, roles: ["admin"] },
-        { path: "/app/settings/theme-settings", name: "Theme Settings", icon: <MdColorLens />, roles: ["admin"] },
+        { path: "/app/settings/theme-settings", name: "Theme Settings", icon: <MdColorLens />, roles: ["admin", "companyAdmin", "member"],},
       ],
     },
   ]
@@ -480,7 +518,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       {/* Navigation */}
       <Nav className="flex-column flex-fill p-2">
         {navItems
-          .filter(item => !item.roles || item.roles.includes(role)) // 👈 role-based filtering
+          .filter(item => hasAccess(item, user, hasPermission))
           .map((item, index) => (
             <div key={index} className="mb-1 position-relative">
               {item.submenu ? (
@@ -535,9 +573,8 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                         <div className="fw-bold mb-2 text-primary">{item.name}</div>
 
                         {item.submenuItems
-                          .filter(subItem =>
-                            !subItem.roles || subItem.roles.map(r => r.toLowerCase()).includes(role)
-                          ).map((subItem, subIndex) => (
+                          .filter(subItem => hasAccess(subItem, user, hasPermission))
+                          .map((subItem, subIndex) => (
                             <div
                               key={subIndex}
                               className="d-flex align-items-center p-2 rounded text-decoration-none text-white small"
@@ -574,7 +611,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
                     <Collapse in={item.isOpen}>
                       <div className="ms-4">
                         {item.submenuItems
-                          .filter(subItem => !subItem.roles || subItem.roles.map(r => r.toLowerCase()).includes(role))
+                          .filter(subItem => hasAccess(subItem, user, hasPermission))
                           .map((subItem, subIndex) => (
                             <div
                               key={subIndex}
