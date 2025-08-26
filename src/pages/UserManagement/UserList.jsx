@@ -1132,7 +1132,7 @@ import Swal from "sweetalert2"
 import { useAuth } from "../../context/AuthContext.jsx"
 
 const UserList = ({ darkMode }) => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, hasPermission } = useAuth();
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -1149,6 +1149,17 @@ const UserList = ({ darkMode }) => {
   const [selectedEmail, setSelectedEmail] = useState("")
   const [sending, setSending] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState("")
+
+  const isMember = currentUser?.role === "member";
+
+  const memberCanCreate = !isMember || hasPermission("user:create");
+  const memberCanUpdate = !isMember || hasPermission("user:update");
+  const memberCanDelete = !isMember || hasPermission("user:delete");
+  const memberCanAssign = !isMember || hasPermission("user:assign");
+  const memberCanRead = !isMember || hasPermission("user:read");
+  const memberCanToggle = !isMember || hasPermission("user:toggle");
+  const memberCanExport = !isMember || hasPermission("user:export");
+  const memberCanNotify = !isMember || hasPermission("user:notify");
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -1444,7 +1455,7 @@ const UserList = ({ darkMode }) => {
         <Col>
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h1 className="h4 mb-0">User Management</h1>
-            <Button as={Link} to="/app/users/form" variant="primary">
+            <Button as={Link} to="/app/users/form" variant="primary" disabled={!memberCanUpdate}>
               <MdAdd className="me-2" /> Create User
             </Button>
           </div>
@@ -1551,14 +1562,14 @@ const UserList = ({ darkMode }) => {
                       </td>
                       <td className="text-center">
                         <div className="d-flex justify-content-center gap-2">
-                          <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary">
+                          <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary" disabled={!memberCanUpdate}>
                             <MdEdit />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline-danger"
                             onClick={() => handleDeleteUser(user._id)}
-                            disabled={user._id === currentUserId || user.role === "admin"}
+                            disabled={!memberCanDelete || user._id === currentUserId || user.role === "admin"}
                             title={user._id === currentUserId ? "You can't delete your own account" : "Delete user"}
                           >
                             <MdDelete />
@@ -1567,19 +1578,20 @@ const UserList = ({ darkMode }) => {
                             variant={user.isActive ? "outline-success" : "outline-secondary"}
                             size="sm"
                             className="me-2"
-                            disabled={user._id === currentUserId || user.role === "admin"}
+                            disabled={!memberCanToggle || user._id === currentUserId || user.role === "admin"}
                             onClick={() => handleToggleActive(user._id, user.isActive)}
                           >
                             {user.isActive ? <MdToggleOn size={20} /> : <MdToggleOff size={20} />}
                           </Button>
-                          <Button variant="outline-secondary" onClick={() => handleExport(user._id)}>
-                            <MdPictureAsPdf className="" />
+                          <Button variant="outline-secondary" onClick={() => handleExport(user._id)} disabled={!memberCanExport}>
+                            <MdPictureAsPdf />
                           </Button>
                           <Button
                             variant="outline-info"
                             size="sm"
                             onClick={() => handleOpenEmailModal(user._id, user.email)}
                             title={`Send email to ${user.email}`}
+                            disabled={!memberCanNotify}
                           >
                             <MdEmail />
                           </Button>

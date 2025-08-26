@@ -217,6 +217,12 @@ const UserForm = () => {
           payload.isActive = user.isActive;
         }
 
+        // ✅ Agar payload empty he to API call hi na ho
+        if (Object.keys(payload).length === 0) {
+          Swal.fire({ icon: "info", title: "No changes to update" });
+          return;
+        }
+
         await updateUser(id, payload);
         Swal.fire({ icon: "success", title: "User Updated" });
       } else {
