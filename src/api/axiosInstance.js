@@ -382,7 +382,7 @@ export const uploadAvatar = (file) => {
   const formData = new FormData();
   formData.append("avatar", file);
 
-  return axiosInstance.put("/auth/upload-avatar", formData, {
+  return axiosInstance.put("/users/me", formData, {
     withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",

@@ -284,7 +284,7 @@ const Profile = ({ darkMode }) => {
       const formData = new FormData();
       formData.append("avatar", file);
 
-      const res = await axiosInstance.put(`/users/${userId}`, formData, {
+      const res = await axiosInstance.put(`/users/me`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

@@ -1098,7 +1098,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import {
   Container,
@@ -1122,6 +1122,7 @@ import {
   MdToggleOff,
   MdPictureAsPdf,
   MdEmail,
+  MdCloudUpload,
 } from "react-icons/md"
 import Pagination from "../../components/Pagination/Pagination.jsx"
 import axiosInstance, { deleteUserById, exportUserPDF, sendUserNotification, toggleUserActiveStatus } from "../../api/axiosInstance.js"
@@ -1149,6 +1150,7 @@ const UserList = ({ darkMode }) => {
   const [selectedEmail, setSelectedEmail] = useState("")
   const [sending, setSending] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState("")
+  const fileInputRef = useRef(null);
 
   const isMember = currentUser?.role === "member";
 
@@ -1449,15 +1451,70 @@ const UserList = ({ darkMode }) => {
     }
   }
 
+  const handleButtonClick = () => {
+    fileInputRef.current.click(); // hidden file input ko click karega
+  };
+
+  const handleFileUpload = async (file) => {
+    const formData = new FormData();
+    formData.append("excel", file);
+  
+    console.log("📤 Uploading file:", file.name, file.type, file.size);
+  
+    try {
+      const res = await axiosInstance.post("/users/bulk-upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
+  
+      console.log("✅ Server Response:", res.data);
+    } catch (err) {
+      console.error("❌ Upload error:", err.response?.data || err.message);
+    }
+  };
+  
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    console.log("📂 File selected:", file?.name);
+  
+    if (file) handleFileUpload(file);
+  };
+  
+
   return (
     <Container fluid className="py-4">
       <Row className="mb-4">
         <Col>
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h1 className="h4 mb-0">User Management</h1>
-            <Button as={Link} to="/app/users/form" variant="primary" disabled={!memberCanUpdate}>
-              <MdAdd className="me-2" /> Create User
-            </Button>
+            <div className="d-flex justify-content-between gap-2">
+              <Button as={Link} to="/app/users/form" variant="primary" disabled={!memberCanUpdate}>
+                <MdAdd className="me-2" /> Create User
+              </Button>
+              {currentUser?.role === "companyAdmin" && (
+                <>
+                  <Button
+                    variant="primary"
+                    onClick={handleButtonClick}
+                    disabled={!memberCanUpdate}
+                  >
+                    <MdCloudUpload className="me-2" /> Import Data
+                  </Button>
+
+                  {/* hidden file input */}
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+                </>
+              )}
+
+            </div>
           </div>
         </Col>
       </Row>
