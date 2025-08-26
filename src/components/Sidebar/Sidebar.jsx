@@ -413,7 +413,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       icon: <MdGroup />,
       submenu: true,
       isOpen: userSubmenuOpen,
-      roles: ["companyAdmin"],
+      roles: ["companyAdmin", "admin"],
       toggle: () => toggleSubmenu("user"),
       permissions: ["user:create", "user:read", "user:update", "user:delete", "user:toggle", "user:export", "user:notify"],
       submenuItems: [
