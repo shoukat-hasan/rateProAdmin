@@ -362,22 +362,26 @@ const UserList = ({ darkMode }) => {
   const handleFileUpload = async (file) => {
     const formData = new FormData();
     formData.append("excel", file);
-  
+
     console.log("📤 Uploading file:", file.name, file.type, file.size);
-  
+
     try {
+      console.log("👉 setGlobalLoading(true) chal raha hai");
       setGlobalLoading(true); // 👈 loader start
-  
+
       const res = await axiosInstance.post("/users/bulk-upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
-  
-      const { createdUsers = [], errors = [], message } = res.data;
-  
+      console.log("✅ API Response aya:", res.data);
+      const { createdUsers = [], errors: rawErrors, message } = res.data;
+
+      const errors = rawErrors || []; // null protection
+
       const successCount = createdUsers.length;
       const errorCount = errors.length;
-  
+
+
       // 🟢 summary HTML
       const summaryHtml = `
         <p><b>${successCount}</b> user(s) created successfully.</p>
@@ -386,16 +390,16 @@ const UserList = ({ darkMode }) => {
         <p><b>${errorCount}</b> user(s) failed to create.</p>
         ${errorCount > 0 ? "<ul>" + errors.map(e => `<li>${e.email} - ${e.message}</li>`).join("") + "</ul>" : ""}
       `;
-  
+
       Swal.fire({
         icon: errorCount > 0 ? "warning" : "success",
         title: message || "Bulk user creation processed",
         html: summaryHtml,
         width: 600,
       });
-  
+
       await fetchUsers(); // 👈 refresh users list
-  
+
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -404,9 +408,10 @@ const UserList = ({ darkMode }) => {
       });
       console.error("❌ Upload error:", err.response?.data || err.message);
     } finally {
+      console.log("👉 setGlobalLoading(false) chal raha hai");
       setGlobalLoading(false); // 👈 loader stop
     }
-  };  
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -423,6 +428,17 @@ const UserList = ({ darkMode }) => {
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h1 className="h4 mb-0">User Management</h1>
             <div className="d-flex justify-content-between gap-2">
+              {currentUser?.role === "companyAdmin" && (
+                <>
+                  <a
+                    href="/downloads/import-sample.xlsx"
+                    download="import-sample.xlsx"
+                    className="text-white py-2 pe-3 text-decoration-none"
+                  >
+                    📥 Download Sample File
+                  </a>
+                </>
+              )}
               <Button as={Link} to="/app/users/form" variant="primary" disabled={!memberCanUpdate}>
                 <MdAdd className="me-2" /> Create User
               </Button>

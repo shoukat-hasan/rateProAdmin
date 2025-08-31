@@ -66,10 +66,11 @@ import VerifyEmail from "./pages/Auth/VerifyEmail"
 import TokenRedirector from "./components/TokenRedirector"
 import { ToastContainer } from "react-toastify"
 import { useAuth } from "./context/AuthContext"
+import FullScreenLoader from "./components/Loader/FullScreenLoader"
 
 function App() {
   const navigate = useNavigate();
-  const { loading } = useAuth();
+  const { loading, globalLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem("darkMode")
@@ -90,21 +91,10 @@ function App() {
     localStorage.setItem("darkMode", JSON.stringify(darkMode))
   }, [darkMode])
 
-  // useEffect(() => {
-
-  //   if () {
-  //     try {
-  //       localStorage.setItem("authUser", JSON.stringify(decoded));
-
-  //       navigate("/app/dashboard", { replace: true });
-  //     } 
-  //   }
-  // }, []);
-  
   return (
     <div>
       <>
-      {loading && <FullScreenLoader />}
+      {(loading || globalLoading) && <FullScreenLoader />}
         <div className={`app-container ${darkMode ? "dark" : "light"}`}>
           <Routes>
             <Route path="/auth-redirect" element={<TokenRedirector />} />

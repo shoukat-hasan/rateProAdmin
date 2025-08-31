@@ -751,7 +751,7 @@ const AccessManagement = () => {
         return;
       }
 
-      await axiosInstance.delete(`/api/task-assignments/${assignmentId}`, { withCredentials: true });
+      await axiosInstance.delete(`/task-assignments/${assignmentId}`, { withCredentials: true });
       setTaskAssignments((prev) => prev.filter((a) => a._id !== assignmentId));
       Swal.fire('Success', 'Task removed successfully', 'success');
     } catch (err) {
