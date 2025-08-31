@@ -433,9 +433,9 @@ const UserList = ({ darkMode }) => {
                   <a
                     href="/downloads/import-sample.xlsx"
                     download="import-sample.xlsx"
-                    className="text-black-50 py-2 pe-3 text-decoration-none"
+                    className="btn btn-outline-secondary"
                   >
-                    📥 Download Sample File
+                    📥 Download Sample
                   </a>
                 </>
               )}
