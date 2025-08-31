@@ -11,7 +11,7 @@ import { useAuth } from "../../context/AuthContext"
 import { useLocation } from "react-router-dom"
 
 const Profile = ({ darkMode }) => {
-   const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [userData, setUserData] = useState("");
@@ -773,7 +773,7 @@ const Profile = ({ darkMode }) => {
                     {companyData.departments.map((dept, idx) => (
                       <div key={idx} className="row mb-2">
                         <div className="col-md-5">
-                          <select
+                          {/* <select
                             name="departmentName"
                             value={dept.name}
                             onChange={(e) => handleCompanyChange(e, idx)}
@@ -785,7 +785,15 @@ const Profile = ({ darkMode }) => {
                                 {d.name}
                               </option>
                             ))}
-                          </select>
+                          </select> */}
+                          <input
+                            type="text"
+                            name="departmentName"
+                            placeholder="Department Name"
+                            value={dept.name}
+                            onChange={(e) => handleCompanyChange(e, idx)}
+                            className={inputClass}
+                          />
                         </div>
                         <div className="col-md-5">
                           <input
