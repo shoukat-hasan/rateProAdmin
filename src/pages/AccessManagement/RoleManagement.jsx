@@ -19,7 +19,9 @@ const rolePermissionMap = {
       "user:delete",
       "user:toggle",
       "user:export",
-      "user:notify"
+      "user:notify",
+      "user:mass-upload",
+      "user:file-template"
     ]
   },
   "Role Manager": {
@@ -118,12 +120,9 @@ const RoleManagement = () => {
   // Memoize rolePermissions to prevent unnecessary re-renders
   const memoizedRolePermissions = useMemo(() => rolePermissions, [rolePermissions]);
 
-  // Available predefined roles that haven't been created yet
   const availablePredefinedRoles = useMemo(() => {
-    return Object.keys(rolePermissionMap).filter(
-      (role) => !roles.some((r) => r.name === role)
-    );
-  }, [roles]);
+    return Object.keys(rolePermissionMap);
+  }, []);
 
   // Filter permissions based on selected role (for both create and edit)
   const filteredPermissions = useMemo(() => {

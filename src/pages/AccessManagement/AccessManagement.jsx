@@ -538,6 +538,7 @@ import {
 import Pagination from "../../components/Pagination/Pagination.jsx"
 import axiosInstance from "../../api/axiosInstance"
 import Swal from "sweetalert2"
+import { formatLocalDateTime } from "../../utilities/dateUtils.js";
 
 const AccessManagement = () => {
   const [users, setUsers] = useState([])
@@ -646,59 +647,6 @@ const AccessManagement = () => {
     fetchAll()
     return () => { mounted = false }
   }, [])
-
-  // const handleAssignTask = async (permissionId, userId) => {
-  //   try {
-  //     if (!userId || !permissionId) {
-  //       console.error('Missing userId or permissionId', { userId, permissionId })
-  //       Swal.fire('Error', 'Please select a user and permission', 'error')
-  //       return
-  //     }
-
-  //     console.log('Sending request to assign task:', { userId, permissionId })
-
-  //     const { data } = await axiosInstance.post(
-  //       '/api/task-assignments', // Fixed URL
-  //       { permissionId, userId },
-  //       { withCredentials: true }
-  //     )
-
-  //     setTaskAssignments((prev) => {
-  //       const exists = prev.find((entry) => entry.permissionId === data.assignment.permissionId._id)
-  //       if (exists) {
-  //         return prev.map((entry) =>
-  //           entry.permissionId === data.assignment.permissionId._id
-  //             ? { ...entry, userId: data.assignment.userId._id, userName: data.assignment.userId.name }
-  //             : entry
-  //         )
-  //       } else {
-  //         return [...prev, {
-  //           _id: data.assignment._id,
-  //           permissionId: data.assignment.permissionId._id,
-  //           permission: data.assignment.permissionId.name,
-  //           userId: data.assignment.userId._id,
-  //           userName: data.assignment.userId.name
-  //         }]
-  //       }
-  //     })
-
-  //     Swal.fire('Success', 'Task assigned successfully', 'success')
-  //   } catch (err) {
-  //     console.error('Assign task error:', err)
-  //     Swal.fire('Error', err.response?.data?.message || 'Failed to assign task', 'error')
-  //   }
-  // }
-
-  // const handleRemoveTask = async (assignmentId) => {
-  //   try {
-  //     await axiosInstance.delete(`/api/task-assignments/${assignmentId}`, { withCredentials: true })
-  //     setTaskAssignments((prev) => prev.filter((a) => a._id !== assignmentId))
-  //     Swal.fire('Success', 'Task removed successfully', 'success')
-  //   } catch (err) {
-  //     console.error('Remove task error:', err)
-  //     Swal.fire('Error', err.response?.data?.message || 'Failed to remove task', 'error')
-  //   }
-  // }
 
   // src/pages/AccessManagement/AccessManagement.jsx (only relevant parts shown)
   const handleAssignTask = async (permissionId, userId) => {
@@ -917,7 +865,7 @@ const AccessManagement = () => {
                         </td>
                         <td><Badge bg={getRoleVariant(user.role)}>{user.role}</Badge></td>
                         <td><Badge bg={getStatusVariant(user.status)}>{user.status}</Badge></td>
-                        <td>{user.lastLogin}</td>
+                        <td>{formatLocalDateTime(user.lastLogin)}</td>
                         <td>
                           <div className="d-flex justify-content-center gap-1">
                             <Button as={Link} to={`/app/users/${user.id}/edit`} variant="outline-primary" size="sm">

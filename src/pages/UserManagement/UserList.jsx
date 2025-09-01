@@ -14,6 +14,7 @@ import {
   Form,
   Card,
   Spinner,
+  Modal,
 } from "react-bootstrap"
 import {
   MdEdit,
@@ -53,6 +54,8 @@ const UserList = ({ darkMode }) => {
   const [selectedEmail, setSelectedEmail] = useState("")
   const [sending, setSending] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState("")
+  const [show, setShow] = useState(false);
+  const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
   // const { loading: authLoading } = useAuth(); 
 
@@ -136,67 +139,6 @@ const UserList = ({ darkMode }) => {
     setFilters((prev) => ({ ...prev, [name]: value }))
     setPagination((prev) => ({ ...prev, page: 1 }))
   }
-
-  // const handleDeleteUser = async (userId) => {
-  //   if (userId === currentUserId) {
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Action Forbidden",
-  //       text: "You cannot delete your own account!",
-  //     })
-  //     return
-  //   }
-
-  //   const getDeleteMessage = (role) => {
-  //     if (role === "member") {
-  //       return "This user will be deleted!";
-  //     }
-  //     if (role === "companyAdmin") {
-  //       return "This company admin and all associated members will be deleted!";
-  //     }
-  //     return "This user and associated members will be deleted!";
-  //   };
-
-  //   const result = await Swal.fire({
-  //     title: "Are you sure?",
-  //     text: getDeleteMessage(targetUserRole),  // 👈 yahan role based message
-  //     icon: "warning",
-  //     showCancelButton: true,
-  //     confirmButtonColor: "#d33",
-  //     cancelButtonColor: "#3085d6",
-  //     confirmButtonText: "Yes, delete it!",
-  //   });
-
-  //   if (result.isConfirmed) {
-  //     try {
-  //       const res = await deleteUserById(userId)
-  //       const { deletedUserId, affectedUsers, deletedUserRole } = res.data   // 👈 role bhi le lo
-  //       setUsers((prev) =>
-  //         prev.filter(
-  //           (user) => user._id !== deletedUserId && !affectedUsers.includes(user._id)
-  //         )
-  //       )
-  //       setPagination((prev) => ({
-  //         ...prev,
-  //         total: prev.total - (1 + affectedUsers.length),
-  //       }))
-  //       if (users.length === 1 && pagination.page > 1) {
-  //         setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
-  //       }
-
-  //       // ✅ role based message
-  //       if (deletedUserRole === "member") {
-  //         toast.success("User deleted successfully")
-  //         Swal.fire("Deleted!", "User has been deleted.", "success")
-  //       } else {
-  //         toast.success(res.data.message || "User and associated members deleted successfully")
-  //         Swal.fire("Deleted!", "User and associated members have been deleted.", "success")
-  //       }
-  //     } catch (error) {
-  //       toast.error(error.response?.data?.message || "Failed to delete user")
-  //     }
-  //   }
-  // }
 
   const handleDeleteUser = async (userId) => {
     if (userId === currentUserId) {
@@ -355,11 +297,18 @@ const UserList = ({ darkMode }) => {
     }
   }
 
-  const handleButtonClick = () => {
-    fileInputRef.current.click(); // hidden file input ko click karega
+  const handleShow = () => setShow(true);
+  const handleClose = () => {
+    setFile(null);
+    setShow(false);
+  };
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
   const handleFileUpload = async (file) => {
+    if (!file) return alert("Please select a file first!");
     const formData = new FormData();
     formData.append("excel", file);
 
@@ -386,7 +335,7 @@ const UserList = ({ darkMode }) => {
       const summaryHtml = `
         <p><b>${successCount}</b> user(s) created successfully.</p>
         ${successCount > 0 ? "<ul>" + createdUsers.map(u => `<li>${u.email}</li>`).join("") + "</ul>" : ""}
-        
+
         <p><b>${errorCount}</b> user(s) failed to create.</p>
         ${errorCount > 0 ? "<ul>" + errors.map(e => `<li>${e.email} - ${e.message}</li>`).join("") + "</ul>" : ""}
       `;
@@ -399,7 +348,7 @@ const UserList = ({ darkMode }) => {
       });
 
       await fetchUsers(); // 👈 refresh users list
-
+      handleClose();
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -413,13 +362,20 @@ const UserList = ({ darkMode }) => {
     }
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    console.log("📂 File selected:", file?.name);
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   console.log("📂 File selected:", file?.name);
 
-    if (file) handleFileUpload(file);
+  //   if (file) handleFileUpload(file);
+  // };
+
+  const handleNoPermission = (action = "perform this action") => {
+    Swal.fire({
+      icon: "error",
+      title: "Access Denied",
+      text: `You don't have permission to ${action}.`,
+    });
   };
-
 
   return (
     <Container fluid className="py-4">
@@ -428,7 +384,7 @@ const UserList = ({ darkMode }) => {
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h1 className="h4 mb-0">User Management</h1>
             <div className="d-flex justify-content-between gap-2">
-              {currentUser?.role === "companyAdmin" && (
+              {/* {currentUser?.role === "companyAdmin" && (
                 <>
                   <a
                     href="/downloads/import-sample.xlsx"
@@ -438,11 +394,13 @@ const UserList = ({ darkMode }) => {
                     📥 Download Sample
                   </a>
                 </>
+              )} */}
+              {(currentUser?.role === "companyAdmin" || memberCanCreate) && (
+                <Button as={Link} to="/app/users/form" variant="primary">
+                  <MdAdd className="me-2" /> Create User
+                </Button>
               )}
-              <Button as={Link} to="/app/users/form" variant="primary" disabled={!memberCanUpdate}>
-                <MdAdd className="me-2" /> Create User
-              </Button>
-              {currentUser?.role === "companyAdmin" && (
+              {/* {currentUser?.role === "companyAdmin" && (
                 <>
                   <Button
                     variant="primary"
@@ -452,7 +410,6 @@ const UserList = ({ darkMode }) => {
                     <MdCloudUpload className="me-2" /> Import Data
                   </Button>
 
-                  {/* hidden file input */}
                   <input
                     type="file"
                     accept=".xlsx,.xls"
@@ -460,6 +417,18 @@ const UserList = ({ darkMode }) => {
                     onChange={handleFileChange}
                     style={{ display: "none" }}
                   />
+                </>
+              )} */}
+
+              {currentUser?.role === "companyAdmin" && (
+                <>
+                  <Button
+                    variant="primary"
+                    onClick={handleShow}
+                    disabled={!memberCanUpdate}
+                  >
+                    <MdCloudUpload className="me-2" /> Import Data
+                  </Button>
                 </>
               )}
 
@@ -568,14 +537,24 @@ const UserList = ({ darkMode }) => {
                       </td>
                       <td className="text-center">
                         <div className="d-flex justify-content-center gap-2">
-                          <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary" disabled={!memberCanUpdate}>
+                          <Button as={Link} to={`/app/users/${user._id}/edit`} size="sm" variant="outline-primary" onClick={(e) => {
+                            if (!memberCanUpdate) {
+                              e.preventDefault();
+                              handleNoPermission("update users");
+                            }
+                          }}>
                             <MdEdit />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline-danger"
-                            onClick={() => handleDeleteUser(user._id)}
-                            disabled={!memberCanDelete || user._id === currentUserId || user.role === "admin"}
+                            onClick={() => {
+                              if (!memberCanDelete || user._id === currentUserId || user.role === "admin") {
+                                handleNoPermission("delete this user");
+                              } else {
+                                handleDeleteUser(user._id);
+                              }
+                            }}
                             title={user._id === currentUserId ? "You can't delete your own account" : "Delete user"}
                           >
                             <MdDelete />
@@ -584,20 +563,36 @@ const UserList = ({ darkMode }) => {
                             variant={user.isActive ? "outline-success" : "outline-secondary"}
                             size="sm"
                             className="me-2"
-                            disabled={!memberCanToggle || user._id === currentUserId || user.role === "admin"}
-                            onClick={() => handleToggleActive(user._id, user.isActive)}
+                            onClick={() => {
+                              if (!memberCanToggle || user._id === currentUserId || user.role === "admin") {
+                                handleNoPermission("toggle this user");
+                              } else {
+                                handleToggleActive(user._id, user.isActive);
+                              }
+                            }}
                           >
                             {user.isActive ? <MdToggleOn size={20} /> : <MdToggleOff size={20} />}
                           </Button>
-                          <Button variant="outline-secondary" onClick={() => handleExport(user._id)} disabled={!memberCanExport}>
+                          <Button variant="outline-secondary" onClick={() => {
+                            if (!memberCanExport) {
+                              handleNoPermission("export users");
+                            } else {
+                              handleExport(user._id);
+                            }
+                          }}>
                             <MdPictureAsPdf />
                           </Button>
                           <Button
                             variant="outline-info"
                             size="sm"
-                            onClick={() => handleOpenEmailModal(user._id, user.email)}
+                            onClick={() => {
+                              if (!memberCanNotify) {
+                                handleNoPermission("send notifications");
+                              } else {
+                                handleOpenEmailModal(user._id, user.email);
+                              }
+                            }}
                             title={`Send email to ${user.email}`}
-                            disabled={!memberCanNotify}
                           >
                             <MdEmail />
                           </Button>
@@ -635,8 +630,47 @@ const UserList = ({ darkMode }) => {
         recipientEmail={selectedEmail}
         sending={sending}
       />
+
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Import Contacts</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <p className="text-center">Upload a .xlsx or .xls file with your contacts</p>
+          <input
+          className="w-100 border"
+            type="file"
+            accept=".xlsx,.xls"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+          />
+          <small className="text-muted">
+            File should include columns: Name, Email, Phone, Company, Segment
+          </small>
+
+          <div className="mt-3">
+            <a
+              href="/downloads/import-sample.xlsx"
+              download="import-sample.xlsx"
+              className="btn btn-outline-secondary"
+            >
+              📥 Download Template
+            </a>
+          </div>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="success"  onClick={() => handleFileUpload(file)} disabled={!file}>
+            Import Contacts
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   )
 }
 
-export default UserList
+export default UserList;
