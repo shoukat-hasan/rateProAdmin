@@ -69,6 +69,8 @@ const UserList = ({ darkMode }) => {
   const memberCanToggle = !isMember || hasPermission("user:toggle");
   const memberCanExport = !isMember || hasPermission("user:export");
   const memberCanNotify = !isMember || hasPermission("user:notify");
+  const memberCanUpload = !isMember || hasPermission("user:mass-upload");
+  const memberCanDownload = !isMember || hasPermission("user:file-template");
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -420,7 +422,7 @@ const UserList = ({ darkMode }) => {
                 </>
               )} */}
 
-              {currentUser?.role === "companyAdmin" && (
+              {(currentUser?.role === "companyAdmin" || memberCanUpload) && (
                 <>
                   <Button
                     variant="primary"
@@ -639,7 +641,7 @@ const UserList = ({ darkMode }) => {
         <Modal.Body>
           <p className="text-center">Upload a .xlsx or .xls file with your contacts</p>
           <input
-          className="w-100 border"
+            className="w-100 border"
             type="file"
             accept=".xlsx,.xls"
             ref={fileInputRef}
@@ -648,23 +650,24 @@ const UserList = ({ darkMode }) => {
           <small className="text-muted">
             File should include columns: Name, Email, Phone, Company, Segment
           </small>
-
-          <div className="mt-3">
-            <a
-              href="/downloads/import-sample.xlsx"
-              download="import-sample.xlsx"
-              className="btn btn-outline-secondary"
-            >
-              📥 Download Template
-            </a>
-          </div>
+          {(currentUser?.role === "companyAdmin" || memberCanDownload) && (
+            <div className="mt-3">
+              <a
+                href="/downloads/import-sample.xlsx"
+                download="import-sample.xlsx"
+                className="btn btn-outline-secondary"
+              >
+                📥 Download Template
+              </a>
+            </div>
+          )}
         </Modal.Body>
 
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant="success"  onClick={() => handleFileUpload(file)} disabled={!file}>
+          <Button variant="success" onClick={() => handleFileUpload(file)} disabled={!file}>
             Import Contacts
           </Button>
         </Modal.Footer>
