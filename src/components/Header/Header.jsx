@@ -1,10 +1,10 @@
 // src\components\Header\Header.jsx
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
-import { Navbar, Dropdown, Form, InputGroup, Button } from "react-bootstrap"
+import { Navbar, Dropdown, Form, InputGroup, Button, Badge, Offcanvas } from "react-bootstrap"
 import {
   MdMenu,
   MdLightMode,
@@ -16,176 +16,315 @@ import {
   MdSettings,
   MdExitToApp,
   MdAccountCircle,
+  MdMoreVert,
+  MdFullscreen,
+  MdFullscreenExit
 } from "react-icons/md"
 import LanguageSelector from "../LanguageSelector/LanguageSelector.jsx"
 import { capitalize } from "../../utilities/capitalize"
+import "./Header.css"
 
 
-const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, sidebarOpen, sidebarCollapsed }) => {
+const Header = ({ 
+  isMobile, 
+  isTablet, 
+  isDesktop, 
+  darkMode, 
+  toggleTheme, 
+  toggleSidebar, 
+  sidebarOpen, 
+  sidebarCollapsed,
+  screenSize: _screenSize 
+}) => {
   const [searchFocused, setSearchFocused] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  
   const navigate = useNavigate()
   const { logout, user } = useAuth()
 
-  // Handle scroll effect
+  // Handle scroll effect with performance optimization
   useEffect(() => {
+    let ticking = false
+    
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 10)
+          ticking = false
+        })
+        ticking = true
+      }
     }
-    window.addEventListener("scroll", handleScroll)
+    
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const handleLogout = () => {
+  // Handle fullscreen toggle
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen()
+      setIsFullscreen(true)
+    } else {
+      document.exitFullscreen()
+      setIsFullscreen(false)
+    }
+  }, [])
+
+  // Handle search
+  const handleSearch = useCallback((e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
+      setShowMobileSearch(false)
+      setSearchQuery('')
+    }
+  }, [searchQuery, navigate])
+
+  const handleLogout = useCallback(() => {
     logout()
     navigate("/login")
-  }
+  }, [logout, navigate])
+
+  // Close mobile search on escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowMobileSearch(false)
+      }
+    }
+    
+    if (showMobileSearch) {
+      document.addEventListener('keydown', handleKeyDown)
+      return () => document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showMobileSearch])
 
   return (
-    <Navbar
-      expand="lg"
-      fixed="top"
-      className={`px-3 py-2 ${scrolled ? "shadow-sm" : ""}`}
-      style={{
-        height: "var(--header-height)",
-        backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
-        borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
-        transition: "all 0.3s ease",
-      }}
-    >
-      <div className="d-flex align-items-center w-100">
-        {/* Menu toggle button - now properly controlled */}
-        <Button
-          variant="link"
-          className="me-3 p-1 text-decoration-none"
-          onClick={toggleSidebar}
-          style={{
-            color: darkMode ? "#fff" : "#000",
-            minWidth: "40px",
-            marginRight: "12px",
-          }}
-        >
-          {sidebarCollapsed || !sidebarOpen ? <MdMenu size={24} /> : <MdClose size={24} />}
-        </Button>
-
-        {/* Page title - hidden on mobile when search is active */}
-        <Navbar.Brand className="mb-0 h1 d-none d-sm-flex ps-2" style={{ flex: 1, color: darkMode ? "#fff" : "#000" }}>
-          Rate Pro Dashboard
-        </Navbar.Brand>
-
-        {/* Search bar - full width on mobile when active */}
-        <div
-          className={`${isMobile || isTablet ? (showMobileSearch ? "d-flex" : "d-none d-md-flex") : "d-flex"}`}
-          style={{
-            flex: isMobile && showMobileSearch ? 1 : 2,
-            maxWidth: isMobile && showMobileSearch ? "none" : "400px",
-            marginLeft: "auto",
-            marginRight: "1rem",
-            transition: "all 0.3s ease",
-            color: darkMode ? "text-white" : "#000",
-          }}
-        >
-          <InputGroup
-            className={`search-input-group ${searchFocused ? "shadow" : ""}`}
+    <>
+      <Navbar
+        expand="lg"
+        fixed="top"
+        className={`header-navbar ${scrolled ? "scrolled" : ""} ${darkMode ? "dark" : "light"}`}
+        style={{
+          height: "var(--header-height)",
+          backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+          borderBottom: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          backdropFilter: scrolled ? "blur(10px)" : "none",
+          zIndex: 1050
+        }}
+      >
+        <div className="header-content d-flex align-items-center w-100">
+          {/* Menu toggle button - enhanced for mobile */}
+         {/*  <Button
+            variant="link"
+            className="sidebar-toggle me-2 me-lg-3 p-2 text-decoration-none rounded-circle"
+            onClick={toggleSidebar}
+            title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             style={{
-              boxShadow: searchFocused
-                ? darkMode
-                  ? "0 0 0 0.2rem rgba(31, 218, 228, 0.25)"
-                  : "0 0 0 0.2rem rgba(31, 218, 228, 0.25)"
-                : "none",
-              borderRadius: "0.375rem",
-              color: darkMode ? "text-white" : "#000",
+              color: darkMode ? "#fff" : "#000",
+              minWidth: "44px",
+              minHeight: "44px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
             }}
           >
-            <InputGroup.Text
-              className={`bg-transparent border-end-0`}
-              style={{
-                borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
-                backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
-                color: darkMode ? "text-white" : "#000",
-              }}
-            >
-              <MdSearch />
-            </InputGroup.Text>
-            <Form.Control
-              type="text"
-              placeholder="Search..."
-              className={`border-start-0 search-input`}
-              style={{
-                backgroundColor: darkMode ? "var(--dark-bg)" : "var(--light-bg)",
-                color: darkMode ? "text-white" : "#000",
-                borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
-              }}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
-            />
-          </InputGroup>
-        </div>
+            {sidebarCollapsed || !sidebarOpen ? <MdMenu size={isMobile ? 22 : 24} /> : <MdClose size={isMobile ? 22 : 24} />}
+          </Button> */}
 
-        {/* Mobile search toggle - hidden when search is active */}
-        {(isMobile || isTablet) && !showMobileSearch && (
-          <Button
-            variant="link"
-            className="me-2 p-1 text-decoration-none d-md-none"
-            onClick={() => setShowMobileSearch(true)}
-            style={{ color: darkMode ? "#fff" : "#000" }}
+          {/* Brand/Logo - responsive visibility */}
+          <Navbar.Brand 
+            className={`brand-logo mb-0 ${showMobileSearch ? "d-none" : "d-none d-sm-flex"} ${isMobile ? "d-none" : ""}`}
+            style={{ 
+              flex: isMobile ? 0 : 1, 
+              color: darkMode ? "#fff" : "#000",
+              fontSize: isMobile ? "1.1rem" : "1.25rem",
+              fontWeight: "600"
+            }}
           >
-            <MdSearch size={24} />
-          </Button>
-        )}
+            Rate Pro
+          </Navbar.Brand>
 
-        {/* Close search button - only on mobile when search is active */}
-        {(isMobile || isTablet) && showMobileSearch && (
-          <Button
-            variant="link"
-            className="me-2 p-1 text-decoration-none"
-            onClick={() => setShowMobileSearch(false)}
-            style={{ color: darkMode ? "#fff" : "#000" }}
+          {/* Enhanced Search bar */}
+          <div
+            className={`search-container ${
+              isMobile || isTablet 
+                ? (showMobileSearch ? "search-active d-flex" : "d-none d-md-flex") 
+                : "d-flex"
+            }`}
+            style={{
+              flex: (isMobile || isTablet) && showMobileSearch ? 1 : "0 1 400px",
+              maxWidth: (isMobile || isTablet) && showMobileSearch ? "none" : "400px",
+              marginLeft: isMobile ? "0" : "auto",
+              marginRight: isMobile ? "0" : "1rem",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+            }}
           >
-            <MdClose size={24} />
-          </Button>
-        )}
-
-        {/* Right side controls - hidden on mobile when search is active */}
-        <div className={`d-flex align-items-center ${showMobileSearch ? "d-none d-md-flex" : ""}`}>
-          {/* Language selector - hidden on small mobile */}
-          <div className="me-2 d-none d-sm-block">
-            <LanguageSelector />
+            <Form onSubmit={handleSearch} className="w-100">
+              <InputGroup
+                className={`search-input-group ${searchFocused ? "focused" : ""}`}
+                style={{
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  boxShadow: searchFocused
+                    ? "0 0 0 2px rgba(31, 218, 228, 0.25)"
+                    : scrolled ? "0 2px 8px rgba(0,0,0,0.1)" : "none"
+                }}
+              >
+                <InputGroup.Text
+                  className="search-icon border-end-0"
+                  style={{
+                    borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                    backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+                    color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                    cursor: "pointer"
+                  }}
+                  onClick={handleSearch}
+                >
+                  <MdSearch size={18} />
+                </InputGroup.Text>
+                <Form.Control
+                  type="text"
+                  placeholder={isMobile ? "Search" : "Search surveys, responses..."}
+                  className="search-input border-start-0"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
+                    color: darkMode ? "var(--dark-text)" : "var(--light-text)",
+                    borderColor: darkMode ? "var(--dark-border)" : "var(--light-border)",
+                    fontSize: isMobile ? "16px" : "14px", // Prevents zoom on iOS
+                    minHeight: isMobile ? "44px" : "38px"
+                  }}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                />
+              </InputGroup>
+            </Form>
           </div>
 
-          {/* Theme toggle */}
-          <Button
-            variant="link"
-            className="p-1 me-2 text-decoration-none rounded-circle"
-            onClick={toggleTheme}
-            title={darkMode ? "Light mode" : "Dark mode"}
-            style={{ color: darkMode ? "#fff" : "#000" }}
-          >
-            {darkMode ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
-          </Button>
-
-          {/* Notifications dropdown - Fixed alignment */}
-          <Dropdown align="end" className="me-2">
-            <Dropdown.Toggle
+          {/* Mobile search toggle */}
+          {(isMobile || isTablet) && !showMobileSearch && (
+            <Button
               variant="link"
-              className="p-1 text-decoration-none rounded-circle position-relative"
+              className="search-toggle me-2 p-2 text-decoration-none d-md-none rounded-circle"
+              onClick={() => setShowMobileSearch(true)}
+              title="Search"
               style={{
                 color: darkMode ? "#fff" : "#000",
-                border: "none",
-                backgroundColor: "transparent",
+                minWidth: "44px",
+                minHeight: "44px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
               }}
             >
-              <MdNotifications size={20} />
-              <span
-                className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                style={{ fontSize: "10px" }}
-              >
-                3
-              </span>
-            </Dropdown.Toggle>
+              <MdSearch size={20} />
+            </Button>
+          )}
 
-            <Dropdown.Menu
+          {/* Close search button */}
+          {(isMobile || isTablet) && showMobileSearch && (
+            <Button
+              variant="link"
+              className="search-close me-2 p-2 text-decoration-none rounded-circle"
+              onClick={() => setShowMobileSearch(false)}
+              title="Close search"
+              style={{
+                color: darkMode ? "#fff" : "#000",
+                minWidth: "44px",
+                minHeight: "44px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              <MdClose size={20} />
+            </Button>
+          )}
+
+          {/* Header controls */}
+          <div className={`header-controls d-flex align-items-center ${showMobileSearch ? "d-none d-md-flex" : ""}`}>
+            {/* Language selector - responsive visibility */}
+            <div className="language-selector me-2 d-none d-lg-block">
+              <LanguageSelector />
+            </div>
+
+            {/* Fullscreen toggle - desktop only */}
+            {isDesktop && (
+              <Button
+                variant="link"
+                className="fullscreen-toggle p-2 me-2 text-decoration-none rounded-circle"
+                onClick={toggleFullscreen}
+                title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                style={{
+                  color: darkMode ? "#fff" : "#000",
+                  minWidth: "40px",
+                  minHeight: "40px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                {isFullscreen ? <MdFullscreenExit size={18} /> : <MdFullscreen size={18} />}
+              </Button>
+            )}
+
+            {/* Theme toggle - enhanced */}
+            <Button
+              variant="link"
+              className="theme-toggle p-2 me-2 text-decoration-none rounded-circle"
+              onClick={toggleTheme}
+              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              style={{
+                color: darkMode ? "#fff" : "#000",
+                minWidth: "40px",
+                minHeight: "40px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.2s ease"
+              }}
+            >
+              {darkMode ? <MdLightMode size={18} /> : <MdDarkMode size={18} />}
+            </Button>
+
+            {/* Notifications dropdown - Enhanced for mobile */}
+            <Dropdown 
+              align="end" 
+              className="notifications-dropdown me-2"
+              show={showNotifications}
+              onToggle={setShowNotifications}
+            >
+              <Dropdown.Toggle
+                variant="link"
+                className="notifications-toggle p-2 text-decoration-none rounded-circle position-relative"
+                style={{
+                  color: darkMode ? "#fff" : "#000",
+                  border: "none",
+                  backgroundColor: "transparent",
+                  minWidth: "40px",
+                  minHeight: "40px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                <MdNotifications size={18} />
+                <Badge 
+                  bg="danger" 
+                  className="position-absolute top-0 start-100 translate-middle rounded-pill"
+                  style={{ fontSize: "10px", padding: "2px 6px" }}
+                >
+                  3
+                </Badge>
+              </Dropdown.Toggle>            <Dropdown.Menu
               style={{
                 width: isMobile ? "100vw" : "320px",
                 backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
@@ -381,9 +520,10 @@ const Header = ({ isMobile, isTablet, darkMode, toggleTheme, toggleSidebar, side
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
+          </div>
         </div>
-      </div>
-    </Navbar>
+      </Navbar>
+    </>
   )
 }
 

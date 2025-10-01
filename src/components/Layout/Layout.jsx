@@ -1,138 +1,220 @@
 // src\components\Layout\Layout.jsx
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Outlet } from "react-router-dom"
 import { Container } from "react-bootstrap"
 import Sidebar from "../Sidebar/Sidebar.jsx"
 import Header from "../Header/Header.jsx"
+import "./Layout.css"
 
 const Layout = ({ darkMode, toggleTheme, onToggle }) => {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
+  // Responsive breakpoints
+  const [screenSize, setScreenSize] = useState({
+    isMobile: false,
+    isTablet: false,
+    isDesktop: false,
+    width: typeof window !== 'undefined' ? window.innerWidth : 1200
+  })
+  
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // Enhanced responsive detection
+  const updateScreenSize = useCallback(() => {
+    const width = window.innerWidth
+    const newScreenSize = {
+      isMobile: width < 768,
+      isTablet: width >= 768 && width < 1024,
+      isDesktop: width >= 1024,
+      width
+    }
+    
+    setScreenSize(prevSize => {
+      // Only update if values actually changed
+      if (prevSize.isMobile !== newScreenSize.isMobile ||
+          prevSize.isTablet !== newScreenSize.isTablet ||
+          prevSize.isDesktop !== newScreenSize.isDesktop) {
+        return newScreenSize
+      }
+      return prevSize
+    })
+  }, [])
 
   // Handle Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && !sidebarCollapsed) {
-        onToggle?.()
+      if (e.key === 'Escape') {
+        if (screenSize.isMobile || screenSize.isTablet) {
+          setSidebarOpen(false)
+        } else if (!sidebarCollapsed) {
+          onToggle?.()
+        }
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [sidebarCollapsed, onToggle])
+  }, [screenSize.isMobile, screenSize.isTablet, sidebarCollapsed, onToggle])
 
-  // Load sidebar collapsed state from localStorage
+  // Initialize and handle responsive behavior
   useEffect(() => {
-    const savedState = localStorage.getItem('sidebarCollapsed')
-    if (savedState !== null) {
-      setSidebarCollapsed(JSON.parse(savedState))
-    }
-  }, [])
-
-  // Save sidebar collapsed state to localStorage
-  useEffect(() => {
-    localStorage.setItem('sidebarCollapsed', JSON.stringify(sidebarCollapsed))
-  }, [sidebarCollapsed])
-
-  // Handle responsive behavior safely
-  useEffect(() => {
+    updateScreenSize()
+    setIsInitialized(true)
+    
     const handleResize = () => {
-      const width = window.innerWidth
-      const mobile = width < 768
-      const tablet = width >= 768 && width < 992
-
-      // Only update if values actually change
-      setIsMobile((prev) => prev !== mobile ? mobile : prev)
-      setIsTablet((prev) => prev !== tablet ? tablet : prev)
-
-      // Sidebar behavior for mobile/tablet
-      if (width < 992) {
-        setSidebarOpen(false)
-      }
-
-      // Sidebar collapse for desktop
-      if (!mobile && !tablet) {
-        setSidebarCollapsed((prev) => (prev !== (width < 1200) ? (width < 1200) : prev))
-      }
+      updateScreenSize()
     }
 
-    handleResize() // initial run
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [])
+  }, [updateScreenSize])
 
-  const toggleSidebar = () => {
-    if (isMobile || isTablet) {
-      setSidebarOpen((prev) => !prev)
+  // Handle sidebar state based on screen size
+  useEffect(() => {
+    if (!isInitialized) return
+
+    if (screenSize.isMobile || screenSize.isTablet) {
+      // Mobile/Tablet: Sidebar is overlay, closed by default
+      setSidebarOpen(false)
     } else {
-      setSidebarCollapsed((prev) => !prev)
+      // Desktop: Load saved collapsed state
+      const savedState = localStorage.getItem('sidebarCollapsed')
+      if (savedState !== null) {
+        setSidebarCollapsed(JSON.parse(savedState))
+      } else {
+        // Auto-collapse on smaller desktop screens
+        setSidebarCollapsed(screenSize.width < 1200)
+      }
     }
-  }
+  }, [screenSize.isMobile, screenSize.isTablet, screenSize.width, isInitialized])
 
-  const closeSidebar = () => {
-    if (isMobile || isTablet) {
+  // Save sidebar collapsed state to localStorage (desktop only)
+  useEffect(() => {
+    if (screenSize.isDesktop) {
+      localStorage.setItem('sidebarCollapsed', JSON.stringify(sidebarCollapsed))
+    }
+  }, [sidebarCollapsed, screenSize.isDesktop])
+
+  // Enhanced sidebar control functions
+  const toggleSidebar = useCallback(() => {
+    if (screenSize.isMobile || screenSize.isTablet) {
+      setSidebarOpen(prev => !prev)
+    } else {
+      setSidebarCollapsed(prev => !prev)
+    }
+  }, [screenSize.isMobile, screenSize.isTablet])
+
+  const closeSidebar = useCallback(() => {
+    if (screenSize.isMobile || screenSize.isTablet) {
       setSidebarOpen(false)
     } else {
       setSidebarCollapsed(true)
     }
-  }
+  }, [screenSize.isMobile, screenSize.isTablet])
 
-  const getContentStyle = () => {
-    if (isMobile || isTablet) {
+  // Enhanced content styling with better responsive behavior
+  const getContentStyle = useCallback(() => {
+    const baseStyle = {
+      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+      minHeight: "100vh",
+      position: "relative"
+    }
+
+    if (screenSize.isMobile) {
       return {
-        transition: "margin-left 0.3s ease, padding 0.3s ease",
+        ...baseStyle,
         marginLeft: 0,
-        width: "100%"
-      }
-    } else {
-      return {
-        transition: "margin-left 0.3s ease, padding 0.3s ease",
-        marginLeft: sidebarCollapsed ? "70px" : "280px",
-        width: `calc(100% - ${sidebarCollapsed ? "70px" : "280px"})`
+        width: "100%",
+        padding: "0"
       }
     }
-  }
+
+    if (screenSize.isTablet) {
+      return {
+        ...baseStyle,
+        marginLeft: 0,
+        width: "100%",
+        padding: "0 8px"
+      }
+    }
+
+    // Desktop
+    const sidebarWidth = sidebarCollapsed ? "var(--sidebar-collapsed-width)" : "var(--sidebar-width)"
+    return {
+      ...baseStyle,
+      marginLeft: sidebarWidth,
+      width: `calc(100% - ${sidebarWidth})`,
+      padding: "0"
+    }
+  }, [screenSize.isMobile, screenSize.isTablet, sidebarCollapsed])
+
+  // Get container padding based on screen size
+  const getContainerPadding = useCallback(() => {
+    if (screenSize.isMobile) return "p-2 p-sm-3"
+    if (screenSize.isTablet) return "p-3 p-md-4"
+    return "p-3 p-lg-4"
+  }, [screenSize.isMobile, screenSize.isTablet])
 
   return (
-    <div className={`d-flex min-vh-100 ${darkMode ? "dark" : "light"}`}>
+    <div className={`layout-container ${darkMode ? "dark" : "light"}`}>
       <Sidebar
-        isOpen={isMobile || isTablet ? sidebarOpen : true} // Always open on desktop
-        isMobile={isMobile}
-        isTablet={isTablet}
-        collapsed={!isMobile && !isTablet && sidebarCollapsed} // Only collapsed on desktop
+        isOpen={screenSize.isMobile || screenSize.isTablet ? sidebarOpen : true}
+        isMobile={screenSize.isMobile}
+        isTablet={screenSize.isTablet}
+        isDesktop={screenSize.isDesktop}
+        collapsed={screenSize.isDesktop && sidebarCollapsed}
         darkMode={darkMode}
         onClose={closeSidebar}
         onToggle={toggleSidebar}
-
+        screenSize={screenSize}
       />
 
-      <div className="flex-fill d-flex flex-column" style={getContentStyle()}>
+      <div className="content-wrapper" style={getContentStyle()}>
         <Header
           darkMode={darkMode}
           toggleTheme={toggleTheme}
-          isMobile={isMobile}
-          isTablet={isTablet}
+          {...screenSize}
           sidebarOpen={sidebarOpen}
           sidebarCollapsed={sidebarCollapsed}
           toggleSidebar={toggleSidebar}
+          screenSize={screenSize}
         />
 
-        <main className="flex-fill overflow-auto">
-          <Container fluid className="p-3 p-md-4 h-100 mt-5">
-            <Outlet />
+        <main className="main-content">
+          <Container 
+            fluid 
+            className={`main-container ${getContainerPadding()}`}
+            style={{ 
+              marginTop: "var(--header-height)",
+              minHeight: `calc(100vh - var(--header-height))`
+            }}
+          >
+            <div className="content-area">
+              <Outlet />
+            </div>
           </Container>
         </main>
       </div>
 
-      {/* Mobile/Tablet overlay */}
-      {(isMobile || isTablet) && sidebarOpen && (
+      {/* Enhanced mobile overlay with better UX */}
+      {(screenSize.isMobile || screenSize.isTablet) && sidebarOpen && (
         <div
-          className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50"
-          style={{ zIndex: 1040 }}
+          className="sidebar-overlay"
           onClick={closeSidebar}
+          onTouchStart={closeSidebar}
+          role="button"
+          tabIndex={-1}
+          aria-label="Close sidebar"
         />
+      )}
+
+      {/* Loading state for better UX */}
+      {!isInitialized && (
+        <div className="layout-loading">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
       )}
     </div>
   )

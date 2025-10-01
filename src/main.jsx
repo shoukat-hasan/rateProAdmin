@@ -7,14 +7,18 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import "./index.css"
 import { AuthProvider } from "./context/AuthContext.jsx"
 import { BrowserRouter } from "react-router-dom"
+import { I18nextProvider } from "react-i18next";
+import i18n from "./utilities/i18n.js";
 
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </AuthProvider>
+    <I18nextProvider i18n={i18n}>
+      <AuthProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </AuthProvider>
+    </I18nextProvider>
   </React.StrictMode>
 )

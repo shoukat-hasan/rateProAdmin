@@ -1,7 +1,7 @@
 // src\App.jsx
 "use client"
 
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute"
 
@@ -25,7 +25,9 @@ import CustomThankYou from "./pages/Settings/CustomThankYou"
 import NotFound from "./pages/NotFound/NotFound"
 
 import SurveyList from "./pages/Surveys/SurveyList"
-import CreateSurvey from "./pages/Surveys/CreateSurvey"
+import SurveyForm from "./pages/Surveys/SurveyForm"
+import SurveyBuilder from "./pages/Surveys/SurveyBuilder"
+import SurveyDistribution from "./pages/Surveys/SurveyDistribution"
 import SurveySettings from "./pages/Surveys/SurveySettings"
 import SurveyDetail from "./pages/Surveys/SurveyDetail"
 import SurveyResponses from "./pages/Surveys/SurveyResponses"
@@ -38,6 +40,7 @@ import Templates from "./pages/Templates/Templates"
 import Audiences from "./pages/Audiences/Audiences"
 import AudienceSegmentation from "./pages/Audiences/AudienceSegmentation"
 import Analytics from "./pages/Analytics/Analytics"
+import AnalyticsDashboard from "./pages/Analytics/AnalyticsDashboard"
 import RealTimeResults from "./pages/Analytics/RealTimeResults"
 import TrendAnalysis from "./pages/Analytics/TrendAnalysis"
 import CustomReports from "./pages/Analytics/CustomReports"
@@ -64,12 +67,17 @@ import ContactManagement from "./pages/Audiences/ContactManagement"
 import Support from "./pages/Support/CreateTicket"
 import VerifyEmail from "./pages/Auth/VerifyEmail"
 import TokenRedirector from "./components/TokenRedirector"
+import WhatsAppSettings from "./pages/Communication/WhatsAppSettings"
+import SMSSettings from "./pages/Communication/SMSSettings"
+import FeedbackAnalysis from "./pages/Analytics/FeedbackAnalysis"
+import AIManagement from "./pages/AI/AIManagement"
+import ActionManagement from "./pages/Actions/ActionManagement"
 import { ToastContainer } from "react-toastify"
 import { useAuth } from "./context/AuthContext"
 import FullScreenLoader from "./components/Loader/FullScreenLoader"
 
 function App() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { loading, globalLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(() => {
     try {
@@ -78,7 +86,8 @@ function App() {
         ? JSON.parse(saved)
         : window.matchMedia("(prefers-color-scheme: dark)").matches
     } catch (err) {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
+      console.log("Error getting dark mode from localStorage:", err);
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
     }
   })
 
@@ -129,16 +138,19 @@ function App() {
 
               {/* Surveys */}
               <Route path="surveys" element={<SurveyList />} />
-              <Route path="surveys/create" element={<CreateSurvey />} />
-              <Route path="surveys/:id/edit" element={<CreateSurvey />} />
-              <Route path="surveys/:id/detail" element={<SurveyDetail />} />
-              <Route path="surveys/:id/responses" element={<SurveyResponses />} />
-              <Route path="surveys/:id/analytics" element={<SurveyAnalytics />} />
-              <Route path="surveys/:id/customize" element={<SurveyCustomization />} />
-              <Route path="surveys/:id/share" element={<SurveySharing />} />
+              <Route path="surveys/create" element={<SurveyBuilder />} />
+              <Route path="surveys/builder" element={<SurveyBuilder />} />
+              <Route path="surveys/edit/:id" element={<SurveyForm />} />
+              <Route path="surveys/detail/:id" element={<SurveyDetail />} />
+              <Route path="surveys/responses/:id" element={<SurveyResponses />} />
+              <Route path="surveys/analytics/:id" element={<SurveyAnalytics />} />
+              <Route path="surveys/distribution/:id" element={<SurveyDistribution />} />
+              <Route path="surveys/customize/:id" element={<SurveyCustomization />} />
+              <Route path="surveys/share/:id" element={<SurveySharing />} />
               <Route path="surveys/scheduling" element={<SurveyScheduling />} />
               <Route path="surveys/templates" element={<SurveyTemplates />} />
-              <Route path="surveys/:id/takesurvey" element={<TakeSurvey />} />
+              <Route path="surveys/templates/create" element={<SurveyBuilder />} />
+              <Route path="surveys/takesurvey/:id" element={<TakeSurvey />} />
               <Route path="surveys/settings" element={<SurveySettings />} />
 
               {/* Users */}
@@ -157,6 +169,8 @@ function App() {
 
               {/* Analytics */}
               <Route path="analytics" element={<Analytics />} />
+              <Route path="analytics/dashboard" element={<AnalyticsDashboard />} />
+              <Route path="analytics/feedback" element={<FeedbackAnalysis />} />
               <Route path="analytics/custom-reports" element={<CustomReports />} />
               <Route path="analytics/real-time" element={<RealTimeResults />} />
               <Route path="analytics/trends" element={<TrendAnalysis />} />
@@ -169,6 +183,16 @@ function App() {
 
               {/* Templates */}
               <Route path="templates" element={<Templates />} />
+
+              {/* Actions */}
+              <Route path="actions" element={<ActionManagement />} />
+
+              {/* AI Management */}
+              <Route path="ai" element={<AIManagement />} />
+
+              {/* Communication */}
+              <Route path="communication/whatsapp" element={<WhatsAppSettings />} />
+              <Route path="communication/sms" element={<SMSSettings />} />
 
               {/* Settings */}
               <Route path="settings" element={<Settings />} />

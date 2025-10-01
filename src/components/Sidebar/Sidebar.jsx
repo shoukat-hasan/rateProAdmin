@@ -27,16 +27,15 @@ import {
   MdApi,
   MdSegment,
   MdTrendingUp,
-  MdSync as MdRealTimeSync,
-  MdDescription as MdTemplate,
+  MdSync,
+  MdDescription,
   MdPersonAdd,
   MdManageAccounts,
   MdQuestionAnswer,
   MdAnalytics,
   MdShare,
-  MdOutlineSettingsApplications as MdCustomize,
+  MdOutlineSettingsApplications,
   MdViewList,
-  MdDescription,
   MdLogin,
   MdLock,
   MdVisibility,
@@ -53,8 +52,15 @@ import {
   MdThumbUp,
   MdCode,
   MdCampaign,
+  MdTask,
+  MdPsychology,
+  MdMessage,
+  MdWhatsApp,
+  MdSms,
+  MdFeedback,
 } from "react-icons/md"
 import { useAuth } from "../../context/AuthContext"
+import "./Sidebar.css"
 
 const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onToggle }) => {
   const { user, hasPermission } = useAuth()
@@ -70,10 +76,10 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   const [incentivesSubmenuOpen, setIncentivesSubmenuOpen] = useState(false)
   const [contentmanagement, setcontentmanagement] = useState(false)
 
-  const role = user?.role?.toLowerCase()
-
-  const [hoveredItem, setHoveredItem] = useState(null)
+  const [_hoveredItem, setHoveredItem] = useState(null)
   const [collapsedDropdownOpen, setCollapsedDropdownOpen] = useState(null)
+  const [touchStartY, setTouchStartY] = useState(0)
+  const [isScrolling, setIsScrolling] = useState(false)
   const sidebarRef = useRef()
 
   // Reset submenu states when sidebar collapses
@@ -220,13 +226,6 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
     }
   }, [location.pathname])
 
-  const handleCloseClick = () => {
-    if (isMobile || isTablet) {
-      onClose?.()
-    } else {
-      onToggle?.()
-    }
-  }
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -374,6 +373,28 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       }, 300)
     }
   }
+
+  // Mobile touch handlers for better UX
+  const handleTouchStart = (e) => {
+    setTouchStartY(e.touches[0].clientY)
+    setIsScrolling(false)
+  }
+
+  const handleTouchMove = (e) => {
+    const touchY = e.touches[0].clientY
+    const deltaY = Math.abs(touchY - touchStartY)
+    if (deltaY > 10) {
+      setIsScrolling(true)
+    }
+  }
+
+  const handleItemClick = (path, hasSubmenu = false) => {
+    if (!isScrolling) {
+      if (!hasSubmenu && (isMobile || isTablet)) {
+        onClose()
+      }
+    }
+  }
   const sidebarStyle = {
     width: collapsed ? "70px" : "280px", height: "100vh", position: "fixed", top: 0,
     left: isMobile || isTablet ? (isOpen ? 0 : "-280px") : 0, zIndex: 1050, transition: "all 0.3s ease",
@@ -398,11 +419,11 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       submenuItems: [
         { path: "/app/surveys", name: "All Surveys", icon: <MdViewList />, roles: ["companyAdmin", "admin"], permissions: ["survey:read"] },
         { path: "/app/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline />, roles: ["companyAdmin"], permissions: ["survey:create"] },
-        { path: "/app/surveys/templates", name: "Survey Templates", icon: <MdTemplate />, roles: ["admin", "companyAdmin"], permissions: ["survey:templates"] },
+        { path: "/app/surveys/templates", name: "Survey Templates", icon: <MdDescription />, roles: ["admin", "companyAdmin"], permissions: ["survey:templates"] },
         { path: "/app/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule />, roles: ["companyAdmin"], permissions: ["survey:schedule"] },
         { path: "/app/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer />, roles: ["companyAdmin"], permissions: ["survey:responses:view"] },
         { path: "/app/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics />, roles: ["companyAdmin"], permissions: ["survey:analytics:view"] },
-        { path: "/app/surveys/:id/customize", name: "Customization", icon: <MdCustomize />, roles: ["companyAdmin"], permissions: ["survey:customize"] },
+        { path: "/app/surveys/:id/customize", name: "Customization", icon: <MdOutlineSettingsApplications />, roles: ["companyAdmin"], permissions: ["survey:customize"] },
         { path: "/app/surveys/:id/share", name: "Survey Sharing", icon: <MdShare />, roles: ["companyAdmin"], permissions: ["survey:share"] },
         { path: "/app/surveys/settings", name: "Survey Settings", icon: <MdSettings />, roles: ["companyAdmin"], permissions: ["survey:settings:update"] },
         { path: "/app/surveys/detail", name: "Survey Detail", icon: <MdVisibility />, roles: ["companyAdmin"], permissions: ["survey:detail:view"] },
@@ -423,6 +444,8 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
     },
     { path: "/app/access", name: "Access Management", icon: <MdSecurity />, roles: ["companyAdmin"], },
     { path: "/app/roles", name: "Role Management", icon: <MdGroup />, roles: ["companyAdmin"], permissions: ["role:create", "role:read", "role:update", "role:delete"], },
+    { path: "/app/actions", name: "Action Management", icon: <MdTask />, roles: ["companyAdmin", "admin"], },
+    { path: "/app/ai", name: "AI Management", icon: <MdPsychology />, roles: ["companyAdmin", "admin"], },
     {
       name: "Analytics & Reports",
       icon: <MdInsertChart />,
@@ -433,10 +456,26 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       permissions: ["analytics:view", "analytics:realtime", "analytics:trends", "analytics:custom", "analytics:responses"],
       submenuItems: [
         { path: "/app/analytics", name: "Analytics Overview", icon: <MdInsertChart />, roles: ["companyAdmin", "admin"] },
-        { path: "/app/analytics/real-time", name: "Real-Time Results", icon: <MdRealTimeSync />, roles: ["companyAdmin", "admin"] },
+        { path: "/app/analytics/dashboard", name: "Executive Dashboard", icon: <MdAnalytics />, roles: ["companyAdmin", "admin"] },
+        { path: "/app/analytics/feedback", name: "Feedback Analysis", icon: <MdFeedback />, roles: ["companyAdmin", "admin"] },
+        { path: "/app/analytics/real-time", name: "Real-Time Results", icon: <MdSync />, roles: ["companyAdmin", "admin"] },
         { path: "/app/analytics/trends", name: "Trend Analysis", icon: <MdTrendingUp />, roles: ["companyAdmin", "admin"] },
         { path: "/app/analytics/custom-reports", name: "Custom Reports", icon: <MdBarChart />, roles: ["companyAdmin", "admin"] },
         { path: "/app/analytics/response-overview", name: "Response Overview", icon: <MdShowChart />, roles: ["companyAdmin", "admin"] },
+      ],
+    },
+    {
+      name: "Communication",
+      icon: <MdMessage />,
+      submenu: true,
+      isOpen: communicationSubmenuOpen,
+      toggle: () => toggleSubmenu("communication"),
+      roles: ["companyAdmin", "admin"],
+      permissions: ["communication:whatsapp", "communication:sms", "communication:email"],
+      submenuItems: [
+        { path: "/app/settings/email-templates", name: "Email Templates", icon: <MdMailOutline />, roles: ["companyAdmin", "admin"] },
+        { path: "/app/communication/whatsapp", name: "WhatsApp Settings", icon: <MdWhatsApp />, roles: ["companyAdmin", "admin"] },
+        { path: "/app/communication/sms", name: "SMS Settings", icon: <MdSms />, roles: ["companyAdmin", "admin"] },
       ],
     },
     {
@@ -494,159 +533,115 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
   }
 
   return (
-    <div ref={sidebarRef} style={sidebarStyle} className="d-flex flex-column">
+    <div 
+      ref={sidebarRef} 
+      style={sidebarStyle} 
+      className={`sidebar d-flex flex-column ${collapsed ? 'collapsed' : 'expanded'} ${isMobile ? 'mobile' : ''} ${isOpen && isMobile ? 'open' : ''} ${darkMode ? 'dark-mode' : ''}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+    >
       {/* Header */}
-      <div
-        className="d-flex justify-content-between align-items-center p-3 border-bottom"
-        style={{ height: "var(--header-height)" }}
-      >
-        {!collapsed && <h4 className="mb-0 text-primary fw-bold">Rate Pro</h4>}
+      <div className="sidebar-header">
+        {!collapsed && <h4 className="sidebar-logo">Rate Pro</h4>}
         <Button
           variant="link"
-          className="p-1 text-decoration-none"
-          onClick={handleCloseClick}
-          style={{
-            color: "inherit",
-            marginLeft: collapsed ? "0" : "auto",
-          }}
+          className="sidebar-toggle"
+          onClick={onToggle}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          tabIndex={0}
         >
-          {collapsed ? <MdMenu size={24} /> : <MdClose size={24} />}
+          {collapsed ? <MdMenu size={isMobile ? 20 : 24} /> : <MdClose size={isMobile ? 20 : 24} />}
         </Button>
       </div>
 
       {/* Navigation */}
-      <Nav className="flex-column flex-fill p-2">
+      <Nav className="sidebar-nav flex-column flex-fill">
         {navItems
           .filter(item => hasAccess(item, user, hasPermission))
           .map((item, index) => (
-            <div key={index} className="mb-1 position-relative">
+            <div key={index} className="nav-item">
               {item.submenu ? (
                 <>
-                  <Button
-                    variant="link"
-                    className="w-100 text-start text-decoration-none d-flex align-items-center p-2 rounded transition-all"
+                  <button
+                    className="nav-link"
                     onClick={collapsed ? () => handleCollapsedDropdownClick(item.name) : item.toggle}
                     onMouseEnter={() => {
                       setHoveredItem(item.name)
-                      if (collapsed) handleCollapsedDropdownHover(item.name)
+                      if (collapsed && !isMobile) handleCollapsedDropdownHover(item.name)
                     }}
                     onMouseLeave={() => {
                       setHoveredItem(null)
-                      if (collapsed) handleCollapsedDropdownLeave()
+                      if (collapsed && !isMobile) handleCollapsedDropdownLeave()
                     }}
-                    style={{
-                      color: hoveredItem === item.name ? "var(--primary-color)" : "inherit",
-                      border: "none",
-                      backgroundColor: "transparent",
-                      transition: "all 0.3s ease",
-                    }}
+                    aria-expanded={item.isOpen}
+                    aria-controls={`submenu-${item.name}`}
                   >
-                    <span className="me-3" style={{ minWidth: "24px" }}>
+                    <span className="nav-icon">
                       {item.icon}
                     </span>
                     {!collapsed && (
                       <>
-                        <span className="flex-fill">{item.name}</span>
-                        <span>{item.isOpen ? <MdExpandLess /> : <MdExpandMore />}</span>
+                        <span className="nav-text">{item.name}</span>
+                        <span className={`nav-arrow ${item.isOpen ? 'rotated' : ''}`}>
+                          <MdExpandMore />
+                        </span>
                       </>
                     )}
-                  </Button>
+                    {collapsed && (
+                      <div className="nav-tooltip">
+                        {item.name}
+                      </div>
+                    )}
+                  </button>
 
                   {/* Collapsed Dropdown */}
-                  {collapsed && collapsedDropdownOpen === item.name && (
+                  {collapsed && collapsedDropdownOpen === item.name && !isMobile && (
                     <div
-                      className="position-absolute bg-dark text-white rounded shadow-lg"
-                      style={{
-                        left: "100%",
-                        top: "0",
-                        marginLeft: "10px",
-                        minWidth: "200px",
-                        zIndex: 1000,
-                        maxHeight: "400px",
-                        overflowY: "auto",
-                      }}
+                      className="collapsed-dropdown"
                       onMouseEnter={() => setCollapsedDropdownOpen(item.name)}
                       onMouseLeave={() => setCollapsedDropdownOpen(null)}
                     >
-                      <div className="p-2">
-                        <div className="fw-bold mb-2 text-primary">{item.name}</div>
+                      <div className="collapsed-dropdown-header">{item.name}</div>
 
-                        {item.submenuItems
-                          .filter(subItem => hasAccess(subItem, user, hasPermission))
-                          .map((subItem, subIndex) => (
-                            <div
-                              key={subIndex}
-                              className="d-flex align-items-center p-2 rounded text-decoration-none text-white small"
-                              onClick={() => {
-                                setCollapsedDropdownOpen(null)
-                                if (isMobile || isTablet) onClose()
-                              }}
-                              style={{
-                                backgroundColor: isActiveRoute(subItem.path) ? "var(--primary-color)" : "transparent",
-                                color: isActiveRoute(subItem.path) ? "white" : "#e9ecef",
-                                cursor: "pointer",
-                              }}
+                      {item.submenuItems
+                        .filter(subItem => hasAccess(subItem, user, hasPermission))
+                        .map((subItem, subIndex) => (
+                          <div
+                            key={subIndex}
+                            className={`collapsed-dropdown-item ${isActiveRoute(subItem.path) ? 'active' : ''}`}
+                            onClick={() => {
+                              setCollapsedDropdownOpen(null)
+                              handleItemClick(subItem.path)
+                            }}
+                          >
+                            <NavLink
+                              to={subItem.path}
+                              className="collapsed-dropdown-link"
                             >
-                              <NavLink
-                                to={subItem.path}
-                                className="d-flex align-items-center text-decoration-none w-100"
-                                style={{
-                                  color: "inherit",
-                                }}
-                              >
-                                <span className="me-2" style={{ minWidth: "16px" }}>
-                                  {subItem.icon}
-                                </span>
-                                <span>{subItem.name}</span>
-                              </NavLink>
-                            </div>
-                          ))}
-                      </div>
+                              <span className="collapsed-dropdown-icon">
+                                {subItem.icon}
+                              </span>
+                              <span>{subItem.name}</span>
+                            </NavLink>
+                          </div>
+                        ))}
                     </div>
                   )}
 
                   {/* Expanded Submenu */}
                   {!collapsed && (
-                    <Collapse in={item.isOpen}>
-                      <div className="ms-4">
+                    <Collapse in={item.isOpen} id={`submenu-${item.name}`}>
+                      <div className="submenu">
                         {item.submenuItems
                           .filter(subItem => hasAccess(subItem, user, hasPermission))
                           .map((subItem, subIndex) => (
-                            <div
-                              key={subIndex}
-                              className="d-flex align-items-center p-2 rounded text-decoration-none mb-1"
-                              style={{
-                                backgroundColor: isActiveRoute(subItem.path)
-                                  ? "var(--primary-color)"
-                                  : "transparent",
-                                color: isActiveRoute(subItem.path) ? "white" : "inherit",
-                                transition: "all 0.3s ease",
-                              }}
-                              onMouseEnter={(e) => {
-                                if (!isActiveRoute(subItem.path)) {
-                                  e.target.style.backgroundColor = "var(--primary-color)"
-                                  e.target.style.color = "white"
-                                  e.target.style.opacity = "0.8"
-                                }
-                              }}
-                              onMouseLeave={(e) => {
-                                if (!isActiveRoute(subItem.path)) {
-                                  e.target.style.backgroundColor = "transparent"
-                                  e.target.style.color = "inherit"
-                                  e.target.style.opacity = "1"
-                                }
-                              }}
-                            >
+                            <div key={subIndex} className="submenu-item">
                               <NavLink
                                 to={subItem.path}
-                                className="d-flex align-items-center text-decoration-none w-100"
-                                onClick={() => (isMobile || isTablet) && onClose()}
-                                style={{
-                                  color: "inherit",
-                                }}
+                                className={`submenu-link ${isActiveRoute(subItem.path) ? 'active' : ''}`}
+                                onClick={() => handleItemClick(subItem.path)}
                               >
-                                <span className="me-3" style={{ minWidth: "20px" }}>
+                                <span className="submenu-icon">
                                   {subItem.icon}
                                 </span>
                                 <span>{subItem.name}</span>
@@ -659,55 +654,24 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
 
                 </>
               ) : (
-                <div
-                  className="d-flex align-items-center p-2 rounded text-decoration-none position-relative mb-1"
-                  style={{
-                    backgroundColor: isActiveRoute(item.path)
-                      ? "var(--primary-color)"
-                      : hoveredItem === item.name
-                        ? "var(--primary-color)"
-                        : "transparent",
-                    color: isActiveRoute(item.path) || hoveredItem === item.name ? "white" : "inherit",
-                    opacity: hoveredItem === item.name && !isActiveRoute(item.path) ? "0.8" : "1",
-                    transition: "all 0.3s ease",
-                  }}
+                <NavLink
+                  to={item.path}
+                  className={`nav-link ${isActiveRoute(item.path) ? 'active' : ''}`}
+                  onClick={() => handleItemClick(item.path)}
                   onMouseEnter={() => setHoveredItem(item.name)}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <NavLink
-                    to={item.path}
-                    className="d-flex align-items-center text-decoration-none w-100"
-                    onClick={() => (isMobile || isTablet) && onClose()}
-                    style={{
-                      color: "inherit",
-                    }}
-                  >
-                    <span className="me-3" style={{ minWidth: "24px" }}>
-                      {item.icon}
-                    </span>
-                    {!collapsed && <span>{item.name}</span>}
-                  </NavLink>
-
-                  {/* Tooltip for collapsed state */}
+                  <span className="nav-icon">
+                    {item.icon}
+                  </span>
+                  {!collapsed && <span className="nav-text">{item.name}</span>}
+                  
                   {collapsed && (
-                    <div
-                      className="position-absolute bg-dark text-white px-2 py-1 rounded small"
-                      style={{
-                        left: "100%",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        marginLeft: "10px",
-                        whiteSpace: "nowrap",
-                        opacity: hoveredItem === item.name ? 1 : 0,
-                        pointerEvents: "none",
-                        transition: "opacity 0.2s",
-                        zIndex: 1000,
-                      }}
-                    >
+                    <div className="nav-tooltip">
                       {item.name}
                     </div>
                   )}
-                </div>
+                </NavLink>
               )}
             </div>
           ))}
