@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react"
 import { Container, Row, Col, Card, Form, Button, Alert } from "react-bootstrap"
 import { MdSms, MdSave, MdSettings } from "react-icons/md"
-import axios from "../../api/axios"
+import axiosInstance from "../../api/axiosInstance"
 
 const SMSSettings = () => {
   const [loading, setLoading] = useState(false)
@@ -25,7 +25,7 @@ const SMSSettings = () => {
     try {
       setLoading(true)
       // This would call your SMS settings endpoint
-      // const response = await axios.get('/api/sms/settings')
+      // const response = await axiosInstance.get('/api/sms/settings')
       // if (response.data.success) {
       //   setSettings(response.data.data || settings)
       // }
@@ -52,7 +52,7 @@ const SMSSettings = () => {
       setMessage({ type: '', text: '' })
 
       // This would call your SMS settings save endpoint
-      const response = await axios.post('/api/sms/settings', settings)
+      const response = await axiosInstance.post('/api/sms/settings', settings)
       
       if (response.data.success) {
         setMessage({ type: 'success', text: 'SMS settings saved successfully!' })
@@ -72,7 +72,7 @@ const SMSSettings = () => {
   const testSMS = async () => {
     try {
       setLoading(true)
-      const response = await axios.post('/api/sms/test', {
+      const response = await axiosInstance.post('/api/sms/test', {
         to: '+1234567890', // Test number
         message: 'Test SMS from RatePro'
       })

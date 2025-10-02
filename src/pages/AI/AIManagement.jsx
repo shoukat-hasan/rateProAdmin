@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from "react"
 import { Container, Row, Col, Card, Form, Button, Table, Badge, Modal, Spinner } from "react-bootstrap"
-import { MdPsychology, MdAutoAwesome, MdTranslate, MdOptimizeDefine, MdInsights } from "react-icons/md"
-import axios from "../../api/axios"
+import { MdPsychology, MdAutoAwesome, MdTranslate, MdInsights, MdTrendingUp } from "react-icons/md"
+import axiosInstance from "../../api/axiosInstance"
 
 const AIManagement = () => {
   const [loading, setLoading] = useState(false)
@@ -26,7 +26,7 @@ const AIManagement = () => {
 
   const fetchSurveys = async () => {
     try {
-      const response = await axios.get('/api/surveys')
+      const response = await axiosInstance.get('/api/surveys')
       if (response.data.success) {
         setSurveys(response.data.data || [])
       }
@@ -38,7 +38,7 @@ const AIManagement = () => {
   const generateSurveyFromProfile = async () => {
     try {
       setLoading(true)
-      const response = await axios.post('/api/ai/generate-from-profile', {
+      const response = await axiosInstance.post('/api/ai/generate-from-profile', {
         companyProfile
       })
       
@@ -58,7 +58,7 @@ const AIManagement = () => {
     
     try {
       setLoading(true)
-      const response = await axios.post('/api/ai/optimize', {
+      const response = await axiosInstance.post('/api/ai/optimize', {
         surveyId: selectedSurvey
       })
       
@@ -79,7 +79,7 @@ const AIManagement = () => {
     
     try {
       setLoading(true)
-      const response = await axios.post('/api/ai/analyze-feedback', {
+      const response = await axiosInstance.post('/api/ai/analyze-feedback', {
         surveyId: selectedSurvey
       })
       
@@ -99,7 +99,7 @@ const AIManagement = () => {
     
     try {
       setLoading(true)
-      const response = await axios.post('/api/ai/generate-insights', {
+      const response = await axiosInstance.post('/api/ai/generate-insights', {
         surveyId: selectedSurvey
       })
       
@@ -146,7 +146,7 @@ const AIManagement = () => {
                       variant={activeTab === 'optimize' ? 'primary' : 'outline-primary'}
                       onClick={() => setActiveTab('optimize')}
                     >
-                      <MdOptimizeDefine className="me-1" />
+                      <MdTrendingUp className="me-1" />
                       Optimize Survey
                     </Button>
                     <Button 
@@ -298,7 +298,7 @@ const AIManagement = () => {
                           disabled={loading || !selectedSurvey}
                           className="w-100"
                         >
-                          {loading ? <Spinner size="sm" className="me-2" /> : <MdOptimizeDefine className="me-2" />}
+                          {loading ? <Spinner size="sm" className="me-2" /> : <MdTrendingUp className="me-2" />}
                           Optimize Survey
                         </Button>
                       </Card.Body>

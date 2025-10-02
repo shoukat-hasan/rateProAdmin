@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import {
   Container, Row, Col, Card, Button, Badge, Form,
   InputGroup, Modal, Spinner, Alert, Tabs, Tab,
@@ -32,11 +32,13 @@ import './SurveyBuilder.css';
 const SurveyBuilder = ({ darkMode }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id: surveyId } = useParams();
   const { user, setGlobalLoading } = useAuth();
 
   // Extract template data if coming from templates page
   const templateData = location.state?.template;
   const fromTemplates = location.state?.from === 'templates';
+  const isEditing = !!surveyId;
 
   // Main Survey State
   const [survey, setSurvey] = useState({
@@ -57,6 +59,10 @@ const SurveyBuilder = ({ darkMode }) => {
       backgroundColor: '#ffffff',
       textColor: '#333333',
       showBranding: true
+    },
+    translations: {
+      en: {},
+      ar: {}
     }
   });
 
@@ -69,15 +75,17 @@ const SurveyBuilder = ({ darkMode }) => {
   const [showSettingsOffcanvas, setShowSettingsOffcanvas] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // AI Assistant State
   const [aiPrompt, setAIPrompt] = useState('');
   const [companyProfile, setCompanyProfile] = useState({
-    industry: templateData?.category || '',
-    products: '',
-    targetAudience: '',
-    surveyGoal: ''
+    industry: "",
+    products: "", // string hi rakho
+    targetAudience: "",
+    surveyGoal: ""
   });
+
 
   // Question Types Configuration
   const questionTypes = [
@@ -222,6 +230,75 @@ const SurveyBuilder = ({ darkMode }) => {
     }
   }, [templateData, fromTemplates]);
 
+  // Load existing survey if editing
+  useEffect(() => {
+    const loadSurvey = async () => {
+      if (surveyId && !templateData) {
+        try {
+          setLoading(true);
+          const response = await axiosInstance.get(`/surveys/${surveyId}`);
+
+          if (response.data && (response.data.survey || response.data.data) && response.status < 400) {
+            const surveyData = response.data.survey || response.data.data;
+
+            setSurvey({
+              title: surveyData.title || '',
+              description: surveyData.description || '',
+              category: surveyData.category || '',
+              language: surveyData.language || ['English'],
+              isPublic: surveyData.settings?.isPublic ?? true,
+              allowAnonymous: surveyData.settings?.isAnonymous ?? true,
+              collectEmail: false, // Not in backend model
+              multipleResponses: false, // Not in backend model
+              thankYouMessage: surveyData.thankYouPage?.message || 'Thank you for your valuable feedback!',
+              redirectUrl: surveyData.thankYouPage?.redirectUrl || '',
+              customCSS: '', // Not in backend model
+              branding: {
+                logo: surveyData.logo?.url || '',
+                primaryColor: surveyData.themeColor || '#007bff',
+                backgroundColor: '#ffffff', // Default
+                textColor: '#333333', // Default
+                showBranding: true // Default
+              },
+              translations: {
+                en: surveyData.translations?.en || { title: surveyData.title, description: surveyData.description },
+                ar: surveyData.translations?.ar || {}
+              }
+            });
+
+            if (surveyData.questions && surveyData.questions.length > 0) {
+              // Transform backend questions to frontend format
+              const transformedQuestions = surveyData.questions.map((q, index) => ({
+                id: q.id || Date.now() + index,
+                type: mapQuestionTypeFromBackend(q.type),
+                title: q.questionText || '',
+                description: q.description || '',
+                required: q.required || false,
+                options: q.options || [],
+                settings: q.settings || {},
+                translations: q.translations || {}
+              }));
+              setQuestions(transformedQuestions);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading survey:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Loading Failed',
+            text: 'Failed to load survey data. You may not have permission or the survey may not exist.'
+          }).then(() => {
+            navigate('/surveys');
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadSurvey();
+  }, [surveyId, templateData, navigate]);
+
   // Generate questions from template
   const generateQuestionsFromTemplate = (template) => {
     const baseQuestions = [
@@ -278,6 +355,15 @@ const SurveyBuilder = ({ darkMode }) => {
 
   // AI Survey Generation from Company Profile (Flow.md Implementation)
   const generateAISurvey = async () => {
+    console.log('🔍 Current companyProfile state:', companyProfile);
+    console.log('🔍 Form values check:', {
+      industry: companyProfile.industry,
+      products: companyProfile.products,
+      audience: companyProfile.targetAudience,
+      goal: companyProfile.surveyGoal
+    });
+
+    
     if (!aiPrompt.trim() && !companyProfile.industry) {
       Swal.fire({
         icon: 'warning',
@@ -289,29 +375,44 @@ const SurveyBuilder = ({ darkMode }) => {
 
     setIsGeneratingAI(true);
     try {
-      // Call our enhanced AI API from flow.md implementation
-      const response = await axiosInstance.post('/ai/generate-from-profile', {
-        companyProfile: {
-          industry: companyProfile.industry,
-          products: companyProfile.products || [],
-          targetAudience: companyProfile.targetAudience || 'customers',
-          tone: companyProfile.tone || 'friendly'
-        },
-        surveyGoal: aiPrompt,
-        questionCount: companyProfile.questionCount || 6,
-        includeNPS: companyProfile.includeNPS !== false,
-        languages: survey.language || ['English', 'Arabic']
-      });
+      // Enhanced payload with proper mapping
+      const requestPayload = {
+        industry: companyProfile.industry || 'general',
+        products: companyProfile.products
+          ? companyProfile.products.split(',').map(p => p.trim())
+          : [],
+        targetAudience: companyProfile.targetAudience || 'customers',
+        goal: companyProfile.surveyGoal || aiPrompt || 'customer feedback',
+        questionCount: 8, // Based on user requirements (8-12 questions)
+        surveyType: 'customer-feedback',
+        useTemplates: true,
+        languages: survey.language || ['English'],
+        // Add the additional instructions from the user
+        additionalInstructions: aiPrompt.trim() || '',
+        // Add specific requirements for hospitality
+        tone: 'friendly-professional',
+        includeSections: ['overall-experience', 'service-quality', 'facilities', 'staff', 'suggestions'],
+        includeNPS: true
+      };
 
-      if (response.data.success) {
-        const { survey: aiSurvey, questions: aiQuestions } = response.data.data;
+      console.log('🔍 Sending AI Request with payload:', requestPayload);
+
+      // Call our enhanced AI API from flow.md implementation
+      const response = await axiosInstance.post('/ai/generate-from-profile', requestPayload);
+
+      if (response.data && (response.data.success || response.data.data || response.status < 400)) {
+        const aiData = response.data.data || response.data;
+        const aiSurvey = aiData.survey || {};
+        const aiQuestions = aiData.questions || [];
+
+        console.log('✅ AI Response received:', { aiSurvey, questionCount: aiQuestions.length });
 
         // Transform AI response to match our question format
         const transformedQuestions = aiQuestions.map((q, index) => ({
           id: Date.now() + index,
           type: mapAIQuestionType(q.type),
-          title: q.title,
-          description: q.description,
+          title: q.title || q.text || `Question ${index + 1}`,
+          description: q.description || '',
           required: q.required !== false,
           options: q.options || [],
           settings: q.settings || {},
@@ -321,11 +422,11 @@ const SurveyBuilder = ({ darkMode }) => {
 
         setQuestions(transformedQuestions);
 
-        // Update survey details from AI
+        // Update survey details from AI with better mapping
         setSurvey(prev => ({
           ...prev,
-          title: aiSurvey.title || aiPrompt || `${companyProfile.industry} Survey`,
-          description: aiSurvey.description || `AI-generated survey for ${companyProfile.industry} industry`,
+          title: aiSurvey.title || survey.title || `${companyProfile.industry} Customer Survey`,
+          description: aiSurvey.description || survey.description || `${companyProfile.surveyGoal} survey for ${companyProfile.industry}`,
           category: companyProfile.industry || prev.category,
           language: aiSurvey.languages || prev.language
         }));
@@ -337,20 +438,32 @@ const SurveyBuilder = ({ darkMode }) => {
           icon: 'success',
           title: '✨ AI Survey Generated!',
           html: `
-            <p>Your survey has been created with AI-powered questions tailored for <strong>${companyProfile.industry}</strong>.</p>
-            <p>Generated ${transformedQuestions.length} optimized questions with bilingual support.</p>
+            <div style="text-align: left;">
+              <p><strong>Industry:</strong> ${companyProfile.industry}</p>
+              <p><strong>Target:</strong> ${companyProfile.targetAudience}</p>
+              <p><strong>Generated:</strong> ${transformedQuestions.length} optimized questions</p>
+              <p><strong>Includes:</strong> Rating scales, multiple choice, NPS, and feedback sections</p>
+            </div>
           `,
-          timer: 3000,
+          timer: 4000,
           showConfirmButton: false
         });
+      } else {
+        throw new Error('Invalid AI response format');
       }
 
     } catch (error) {
-      console.error('Error generating AI survey:', error);
+      console.error('❌ Error generating AI survey:', error);
+      console.log('Error details:', error.response?.data);
+
       Swal.fire({
         icon: 'error',
         title: 'Generation Failed',
-        text: 'Failed to generate AI survey. Please try again.'
+        html: `
+          <p>Failed to generate AI survey.</p>
+          <small>Error: ${error.response?.data?.message || error.message}</small>
+          <br><small>Please try again or check your internet connection.</small>
+        `
       });
     } finally {
       setIsGeneratingAI(false);
@@ -377,6 +490,43 @@ const SurveyBuilder = ({ darkMode }) => {
     return typeMapping[aiType] || 'text_short';
   };
 
+  // Helper function to map frontend question types to backend enum values
+  const mapQuestionTypeToBackend = (frontendType) => {
+    const typeMapping = {
+      'rating': 'rating',
+      'single_choice': 'radio',
+      'multiple_choice': 'checkbox',
+      'text_short': 'text',
+      'text_long': 'textarea',
+      'nps': 'nps',
+      'likert': 'likert',
+      'yes_no': 'yesno',
+      'date': 'date',
+      'file_upload': 'text', // Fallback to text for now
+      'ranking': 'ranking',
+      'matrix': 'matrix'
+    };
+    return typeMapping[frontendType] || 'text';
+  };
+
+  // Helper function to map backend question types to frontend types
+  const mapQuestionTypeFromBackend = (backendType) => {
+    const typeMapping = {
+      'rating': 'rating',
+      'radio': 'single_choice',
+      'checkbox': 'multiple_choice',
+      'text': 'text_short',
+      'textarea': 'text_long',
+      'nps': 'nps',
+      'likert': 'likert',
+      'yesno': 'yes_no',
+      'date': 'date',
+      'ranking': 'ranking',
+      'matrix': 'matrix'
+    };
+    return typeMapping[backendType] || 'text_short';
+  };
+
   // AI Suggest Next Question (Flow.md feature)
   const suggestNextQuestion = async () => {
     if (questions.length === 0) {
@@ -394,25 +544,39 @@ const SurveyBuilder = ({ darkMode }) => {
       const response = await axiosInstance.post('/ai/suggest-logic', {
         existingQuestions: questions.map(q => ({
           type: q.type,
-          title: q.title,
+          text: q.title,
           required: q.required
         })),
-        surveyGoal: survey.title || aiPrompt,
-        industry: companyProfile.industry
+        surveyGoal: survey.title || companyProfile.surveyGoal || 'customer feedback',
+        industry: companyProfile.industry || 'general'
       });
 
-      if (response.data.success) {
-        const suggestion = response.data.data.suggestion;
+      if (response.data && (response.data.success || response.data.data || response.status < 400)) {
+        const responseData = response.data.data || response.data;
+        const suggestion = responseData.suggestion || responseData;
+
+        if (!suggestion.text && !suggestion.title) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'No Suggestions Available',
+            text: 'AI could not generate a relevant question suggestion at this time.'
+          });
+          return;
+        }
+
+        const questionText = suggestion.text || suggestion.title;
+        const questionType = suggestion.type || 'text_short';
+        const questionDesc = suggestion.description || '';
 
         Swal.fire({
           icon: 'info',
-          title: '✨ AI Suggestion',
+          title: '✨ AI Question Suggestion',
           html: `
             <div style="text-align: left;">
               <h6>Recommended Next Question:</h6>
-              <p><strong>${suggestion.title}</strong></p>
-              <p>${suggestion.description}</p>
-              <small>Type: ${suggestion.type} | Priority: ${suggestion.priority}</small>
+              <p><strong>${questionText}</strong></p>
+              ${questionDesc ? `<p>${questionDesc}</p>` : ''}
+              <small>Type: ${questionType} | Based on your current questions</small>
             </div>
           `,
           showCancelButton: true,
@@ -422,11 +586,11 @@ const SurveyBuilder = ({ darkMode }) => {
           if (result.isConfirmed) {
             const newQuestion = {
               id: Date.now(),
-              type: mapAIQuestionType(suggestion.type),
-              title: suggestion.title,
-              description: suggestion.description,
+              type: mapAIQuestionType(questionType),
+              title: questionText,
+              description: questionDesc,
               required: suggestion.required || false,
-              options: suggestion.options || [],
+              options: suggestion.options || (questionType.includes('choice') ? ['Option 1', 'Option 2', 'Option 3'] : []),
               settings: suggestion.settings || {}
             };
             setQuestions([...questions, newQuestion]);
@@ -459,75 +623,93 @@ const SurveyBuilder = ({ darkMode }) => {
     try {
       setIsGeneratingAI(true);
 
-      // This would call our AI optimization endpoint
-      const analysisData = {
-        totalQuestions: questions.length,
-        questionTypes: questions.reduce((acc, q) => {
-          acc[q.type] = (acc[q.type] || 0) + 1;
-          return acc;
-        }, {}),
-        requiredQuestions: questions.filter(q => q.required).length,
-        estimatedTime: Math.ceil(questions.length * 0.5) // 30 seconds per question
-      };
-
-      const suggestions = [];
-
-      // Survey length optimization
-      if (questions.length > 8) {
-        suggestions.push({
-          type: 'warning',
-          title: 'Survey Length',
-          message: `Your survey has ${questions.length} questions. Consider reducing to 6-8 for better completion rates.`
-        });
-      }
-
-      // Question type balance
-      const openQuestions = questions.filter(q => q.type.includes('text')).length;
-      if (openQuestions > 2) {
-        suggestions.push({
-          type: 'info',
-          title: 'Question Balance',
-          message: 'Too many open-ended questions may reduce response rates. Consider converting some to multiple choice.'
-        });
-      }
-
-      // Required questions check
-      if (analysisData.requiredQuestions === questions.length) {
-        suggestions.push({
-          type: 'warning',
-          title: 'Required Questions',
-          message: 'All questions are required. Consider making some optional to improve completion rates.'
-        });
-      }
-
-      if (suggestions.length === 0) {
-        suggestions.push({
-          type: 'success',
-          title: 'Well Optimized!',
-          message: 'Your survey structure looks good. Great balance of question types and length.'
-        });
-      }
-
-      Swal.fire({
-        icon: suggestions[0].type === 'success' ? 'success' : 'info',
-        title: '🔍 Survey Analysis',
-        html: `
-          <div style="text-align: left;">
-            <div class="mb-3">
-              <small><strong>Analysis:</strong></small><br>
-              <small>Questions: ${analysisData.totalQuestions} | Required: ${analysisData.requiredQuestions} | Est. Time: ${analysisData.estimatedTime} min</small>
-            </div>
-            ${suggestions.map(s => `
-              <div class="alert alert-${s.type === 'warning' ? 'warning' : s.type === 'success' ? 'success' : 'info'} p-2 mb-2">
-                <strong>${s.title}:</strong> ${s.message}
-              </div>
-            `).join('')}
-          </div>
-        `,
-        width: '500px',
-        showConfirmButton: true,
-        confirmButtonText: 'Got It!'
+      const response = await axiosInstance.post('/ai/optimize', {
+        survey: {
+          title: survey.title,
+          description: survey.description,
+          category: survey.category
+        },
+        questions: questions.map(q => ({
+          type: q.type,
+          text: q.title,
+          required: q.required,
+          options: q.options
+        })),
+        industry: companyProfile.industry || 'general',
+        targetAudience: companyProfile.targetAudience || 'customers'
       });
+
+      if (response.data && (response.data.success || response.data.data || response.data.optimized || response.status < 400)) {
+        const optimization = response.data.data || response.data.optimized || response.data;
+        const suggestions = optimization.suggestions || [];
+        const metrics = optimization.metrics || {};
+
+        // Fallback analysis if API doesn't return suggestions
+        if (suggestions.length === 0) {
+          const analysisData = {
+            totalQuestions: questions.length,
+            requiredQuestions: questions.filter(q => q.required).length,
+            estimatedTime: Math.ceil(questions.length * 0.5)
+          };
+
+          if (questions.length > 8) {
+            suggestions.push({
+              type: 'warning',
+              title: 'Survey Length',
+              message: `Your survey has ${questions.length} questions. Consider reducing to 6-8 for better completion rates.`
+            });
+          }
+
+          const openQuestions = questions.filter(q => q.type.includes('text')).length;
+          if (openQuestions > 2) {
+            suggestions.push({
+              type: 'info',
+              title: 'Question Balance',
+              message: 'Too many open-ended questions may reduce response rates. Consider converting some to multiple choice.'
+            });
+          }
+
+          if (analysisData.requiredQuestions === questions.length) {
+            suggestions.push({
+              type: 'warning',
+              title: 'Required Questions',
+              message: 'All questions are required. Consider making some optional to improve completion rates.'
+            });
+          }
+
+          if (suggestions.length === 0) {
+            suggestions.push({
+              type: 'success',
+              title: 'Well Optimized!',
+              message: 'Your survey structure looks good. Great balance of question types and length.'
+            });
+          }
+        }
+
+        const estimatedTime = metrics.estimatedTime || Math.ceil(questions.length * 0.5);
+        const completionRate = metrics.expectedCompletionRate || '85-92%';
+
+        Swal.fire({
+          icon: suggestions[0].type === 'success' ? 'success' : 'info',
+          title: '🔍 AI Survey Analysis',
+          html: `
+            <div style="text-align: left;">
+              <div class="mb-3">
+                <small><strong>Survey Metrics:</strong></small><br>
+                <small>Questions: ${questions.length} | Required: ${questions.filter(q => q.required).length} | Est. Time: ${estimatedTime} min | Completion Rate: ${completionRate}</small>
+              </div>
+              ${suggestions.map(s => `
+                <div class="alert alert-${s.type === 'warning' ? 'warning' : s.type === 'success' ? 'success' : 'info'} p-2 mb-2">
+                  <strong>${s.title}:</strong> ${s.message}
+                </div>
+              `).join('')}
+            </div>
+          `,
+          width: '500px',
+          showConfirmButton: true,
+          confirmButtonText: 'Got It!'
+        });
+      }
 
     } catch (error) {
       console.error('Error optimizing survey:', error);
@@ -613,28 +795,81 @@ const SurveyBuilder = ({ darkMode }) => {
         throw new Error('At least one question is required');
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Prepare survey data in backend format
+      const surveyData = {
+        title: survey.title,
+        description: survey.description,
+        category: survey.category,
+        themeColor: survey.branding?.primaryColor || '#0047AB',
+        // Transform questions to backend format
+        questions: questions.map((q, index) => ({
+          id: q.id?.toString() || (index + 1).toString(),
+          questionText: q.title,
+          type: mapQuestionTypeToBackend(q.type),
+          options: q.options || [],
+          required: q.required || false,
+          translations: q.translations || {},
+          logicRules: q.logicRules || []
+        })),
+        settings: {
+          isPublic: survey.isPublic,
+          isAnonymous: survey.allowAnonymous,
+          isPasswordProtected: false,
+          password: ''
+        },
+        translations: {
+          en: {
+            title: survey.title,
+            description: survey.description
+          },
+          ar: survey.translations?.ar || {}
+        },
+        thankYouPage: {
+          message: survey.thankYouMessage || 'Thank you for your feedback!',
+          redirectUrl: survey.redirectUrl || '',
+          qrCode: {
+            enabled: false,
+            url: ''
+          }
+        },
+        status: 'draft'
+      };
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Survey Saved!',
-        text: 'Your survey has been saved successfully.',
-        timer: 2000,
-        showConfirmButton: false
-      });
+      let response;
+      if (isEditing && surveyId) {
+        // Update existing survey
+        response = await axiosInstance.put(`/surveys/${surveyId}`, surveyData);
+      } else {
+        // Create new survey
+        response = await axiosInstance.post('/surveys/create', surveyData);
+      }
 
-      // Navigate to survey list after save
-      setTimeout(() => {
-        navigate('/surveys');
-      }, 2000);
+      if (response.data && response.data.message && response.status < 400) {
+        Swal.fire({
+          icon: 'success',
+          title: isEditing ? 'Survey Updated!' : 'Survey Saved!',
+          text: `Your survey has been ${isEditing ? 'updated' : 'saved'} successfully.`,
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        // Navigate to survey list after save
+        setTimeout(() => {
+          navigate('/app/surveys');
+        }, 2000);
+      } else {
+        throw new Error(response.data?.message || 'Failed to save survey');
+      }
 
     } catch (error) {
       console.error('Error saving survey:', error);
+      console.log('Full error response:', error.response);
+      console.log('Error response data:', error.response?.data);
+
       Swal.fire({
         icon: 'error',
         title: 'Save Failed',
-        text: error.message || 'Failed to save survey. Please try again.'
+        text: error.response?.data?.message || error.message || 'Failed to save survey. Please try again.'
       });
     } finally {
       setSaving(false);
@@ -656,8 +891,87 @@ const SurveyBuilder = ({ darkMode }) => {
     if (result.isConfirmed) {
       setSaving(true);
       try {
-        await saveSurvey();
-        // Additional publish logic here
+        // Validate survey
+        if (!survey.title.trim()) {
+          throw new Error('Survey title is required');
+        }
+        if (questions.length === 0) {
+          throw new Error('At least one question is required');
+        }
+
+        // Prepare survey data with published status in backend format
+        const surveyData = {
+          title: survey.title,
+          description: survey.description,
+          category: survey.category,
+          themeColor: survey.branding?.primaryColor || '#0047AB',
+          // Transform questions to backend format
+          questions: questions.map((q, index) => ({
+            id: q.id?.toString() || (index + 1).toString(),
+            questionText: q.title,
+            type: mapQuestionTypeToBackend(q.type),
+            options: q.options || [],
+            required: q.required || false,
+            translations: q.translations || {},
+            logicRules: q.logicRules || []
+          })),
+          settings: {
+            isPublic: survey.isPublic,
+            isAnonymous: survey.allowAnonymous,
+            isPasswordProtected: false,
+            password: ''
+          },
+          translations: {
+            en: {
+              title: survey.title,
+              description: survey.description
+            },
+            ar: survey.translations?.ar || {}
+          },
+          thankYouPage: {
+            message: survey.thankYouMessage || 'Thank you for your feedback!',
+            redirectUrl: survey.redirectUrl || '',
+            qrCode: {
+              enabled: false,
+              url: ''
+            }
+          },
+          status: 'active' // Set as active when publishing
+        };
+
+        let response;
+        if (isEditing && surveyId) {
+          // Update and publish existing survey
+          response = await axiosInstance.put(`/surveys/${surveyId}`, surveyData);
+        } else {
+          // Create and publish new survey
+          response = await axiosInstance.post('/surveys/create', surveyData);
+        }
+
+        if (response.data && response.data.message && response.status < 400) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Survey Published!',
+            text: 'Your survey is now live and ready to receive responses.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+
+          // Navigate to survey list after publish
+          setTimeout(() => {
+            navigate('/surveys');
+          }, 2000);
+        } else {
+          throw new Error(response.data?.message || 'Failed to publish survey');
+        }
+
+      } catch (error) {
+        console.error('Error publishing survey:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Publish Failed',
+          text: error.response?.data?.message || error.message || 'Failed to publish survey. Please try again.'
+        });
       } finally {
         setSaving(false);
       }
@@ -677,6 +991,20 @@ const SurveyBuilder = ({ darkMode }) => {
 
     return Math.round((completed / total) * 100);
   };
+
+  if (loading) {
+    return (
+      <Container fluid className="survey-builder">
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+          <div className="text-center">
+            <Spinner animation="border" variant="primary" className="mb-3" />
+            <h5>Loading Survey...</h5>
+            <p className="text-muted">Please wait while we fetch your survey data.</p>
+          </div>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container fluid className="survey-builder">
@@ -730,22 +1058,94 @@ const SurveyBuilder = ({ darkMode }) => {
                     onClick={async () => {
                       try {
                         setIsGeneratingAI(true);
-                        // Add Arabic to languages
+
+                        // Call translation API
+                        const response = await axiosInstance.post('/ai/translate', {
+                          survey: {
+                            title: survey.title,
+                            description: survey.description
+                          },
+                          questions: questions.map(q => ({
+                            id: q.id,
+                            title: q.title,
+                            description: q.description,
+                            options: q.options
+                          })),
+                          targetLanguage: 'ar',
+                          sourceLanguage: 'en'
+                        });
+
+                        if (response.data && (response.data.success || response.data.translations || response.data.translated || response.status < 400)) {
+                          const translations = response.data.data || response.data.translations || response.data;
+
+                          // Update questions with Arabic translations
+                          const updatedQuestions = questions.map(q => {
+                            const translation = translations.questions?.find(t => t.id === q.id);
+                            if (translation) {
+                              return {
+                                ...q,
+                                translations: {
+                                  ...q.translations,
+                                  ar: {
+                                    title: translation.title,
+                                    description: translation.description,
+                                    options: translation.options
+                                  }
+                                }
+                              };
+                            }
+                            return q;
+                          });
+
+                          setQuestions(updatedQuestions);
+
+                          // Add Arabic to languages and update survey translations
+                          setSurvey(prev => ({
+                            ...prev,
+                            language: [...prev.language, 'Arabic'],
+                            translations: {
+                              ...prev.translations,
+                              ar: {
+                                title: translations.survey?.title || prev.title,
+                                description: translations.survey?.description || prev.description
+                              }
+                            }
+                          }));
+
+                          Swal.fire({
+                            icon: 'success',
+                            title: '✨ Arabic Translation Added!',
+                            text: 'Your survey has been translated to Arabic. Questions will now display bilingually.',
+                            timer: 3000,
+                            showConfirmButton: false
+                          });
+                        } else {
+                          // Fallback: just add Arabic language without translations
+                          setSurvey(prev => ({
+                            ...prev,
+                            language: [...prev.language, 'Arabic']
+                          }));
+
+                          Swal.fire({
+                            icon: 'info',
+                            title: 'Arabic Support Added',
+                            text: 'Arabic language support has been enabled. You can add Arabic translations manually.'
+                          });
+                        }
+                      } catch (error) {
+                        console.error('Translation error:', error);
+
+                        // Fallback: just add Arabic language
                         setSurvey(prev => ({
                           ...prev,
                           language: [...prev.language, 'Arabic']
                         }));
 
-                        // Show success message
                         Swal.fire({
-                          icon: 'success',
-                          title: '✨ Arabic Added!',
-                          text: 'Arabic language support has been enabled. Questions will be displayed bilingually.',
-                          timer: 2000,
-                          showConfirmButton: false
+                          icon: 'warning',
+                          title: 'Translation Service Unavailable',
+                          text: 'Arabic support added, but automatic translation failed. You can add translations manually.'
                         });
-                      } catch (error) {
-                        console.error('Translation error:', error);
                       } finally {
                         setIsGeneratingAI(false);
                       }
@@ -1289,10 +1689,13 @@ const SurveyBuilder = ({ darkMode }) => {
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label className="fw-semibold">Industry/Category</Form.Label>
+                <Form.Label className="fw-semibold">Industry/Category *</Form.Label>
                 <Form.Select
                   value={companyProfile.industry}
-                  onChange={(e) => setCompanyProfile({ ...companyProfile, industry: e.target.value })}
+                  onChange={(e) => {
+                    console.log('Industry selected:', e.target.value);
+                    setCompanyProfile({ ...companyProfile, industry: e.target.value });
+                  }}
                 >
                   <option value="">Select Industry</option>
                   {industries.map(industry => (
@@ -1308,37 +1711,49 @@ const SurveyBuilder = ({ darkMode }) => {
                 <Form.Control
                   type="text"
                   value={companyProfile.products}
-                  onChange={(e) => setCompanyProfile({ ...companyProfile, products: e.target.value })}
-                  placeholder="e.g., Coffee, Bakery Items, Catering"
+                  onChange={(e) => {
+                    console.log('Products updated:', e.target.value);
+                    setCompanyProfile({ ...companyProfile, products: e.target.value });
+                  }}
+                  placeholder="e.g., Hotel Rooms, Restaurant, Spa"
                 />
+                <Form.Text className="text-muted">
+                  Separate multiple items with commas
+                </Form.Text>
               </Form.Group>
             </Col>
 
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label className="fw-semibold">Target Audience</Form.Label>
+                <Form.Label className="fw-semibold">Target Audience *</Form.Label>
                 <Form.Select
                   value={companyProfile.targetAudience}
-                  onChange={(e) => setCompanyProfile({ ...companyProfile, targetAudience: e.target.value })}
+                  onChange={(e) => {
+                    console.log('Audience selected:', e.target.value);
+                    setCompanyProfile({ ...companyProfile, targetAudience: e.target.value });
+                  }}
                 >
                   <option value="">Select Audience</option>
                   <option value="customers">Customers</option>
+                  <option value="guests">Guests/Visitors</option>
                   <option value="employees">Employees</option>
                   <option value="vendors">Vendors/Partners</option>
                   <option value="students">Students</option>
                   <option value="patients">Patients</option>
-                  <option value="guests">Guests/Visitors</option>
                 </Form.Select>
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label className="fw-semibold">Survey Goal</Form.Label>
+                <Form.Label className="fw-semibold">Survey Goal *</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={2}
                   value={companyProfile.surveyGoal}
-                  onChange={(e) => setCompanyProfile({ ...companyProfile, surveyGoal: e.target.value })}
-                  placeholder="e.g., Measure customer satisfaction with our café services"
+                  onChange={(e) => {
+                    console.log('Goal updated:', e.target.value);
+                    setCompanyProfile({ ...companyProfile, surveyGoal: e.target.value });
+                  }}
+                  placeholder="e.g., Customer Satisfaction"
                 />
               </Form.Group>
             </Col>
@@ -1348,22 +1763,49 @@ const SurveyBuilder = ({ darkMode }) => {
             <Form.Label className="fw-semibold">Additional Instructions (Optional)</Form.Label>
             <Form.Control
               as="textarea"
-              rows={3}
+              rows={4}
               value={aiPrompt}
               onChange={(e) => setAIPrompt(e.target.value)}
-              placeholder="Tell AI what specific aspects you want to focus on, question types to include, or any special requirements..."
+              placeholder="Survey Length: Survey me 8–12 sawal hone chahiye jo short aur easy-to-answer hon.
+
+Question Types:
+- Likert scale (1–5 rating)
+- Multiple choice  
+- Short text (feedback)
+
+Tone: Survey friendly aur professional ho, taki hotel guests comfortably jawab dein.
+
+Sections:
+- Overall stay experience
+- Room comfort & cleanliness
+- Restaurant food quality & service
+- Spa & leisure services
+- Staff behavior & professionalism
+- Suggestions for improvement"
             />
           </Form.Group>
+
+          {/* Debug Info */}
+          {process.env.NODE_ENV === 'development' && (
+            <Alert variant="info" className="small">
+              <strong>Debug Info:</strong><br />
+              Industry: {companyProfile.industry || 'Not selected'}<br />
+              Products: {companyProfile.products || 'Not specified'}<br />
+              Audience: {companyProfile.targetAudience || 'Not selected'}<br />
+              Goal: {companyProfile.surveyGoal || 'Not specified'}
+            </Alert>
+          )}
 
           <Alert variant="info" className="d-flex align-items-start">
             <FaLightbulb className="me-2 mt-1" />
             <div>
               <strong>AI will generate:</strong>
               <ul className="mb-0 mt-1">
-                <li>5-8 relevant questions based on your industry</li>
-                <li>Mix of rating, choice, and open-text questions</li>
-                <li>Appropriate question flow with conditional logic</li>
-                <li>Bilingual support (English & Arabic)</li>
+                <li>8-12 relevant questions based on your industry</li>
+                <li>Mix of Likert scale, rating, choice, and text questions</li>
+                <li>Hospitality-focused sections (rooms, restaurant, spa, staff)</li>
+                <li>Professional yet friendly tone for guest comfort</li>
+                <li>NPS question for recommendation tracking</li>
               </ul>
             </div>
           </Alert>
@@ -1374,8 +1816,11 @@ const SurveyBuilder = ({ darkMode }) => {
           </Button>
           <Button
             variant="primary"
-            onClick={generateAISurvey}
-            disabled={isGeneratingAI || !companyProfile.industry}
+            onClick={() => {
+              console.log('🎯 Generate button clicked with profile:', companyProfile);
+              generateAISurvey();
+            }}
+            disabled={isGeneratingAI || !companyProfile.industry || !companyProfile.targetAudience}
           >
             {isGeneratingAI ? (
               <>
@@ -1533,6 +1978,121 @@ const SurveyBuilder = ({ darkMode }) => {
           </div>
         </Modal.Body>
       </Modal>
+
+      {/* Settings Offcanvas */}
+      <Offcanvas
+        show={showSettingsOffcanvas}
+        onHide={() => setShowSettingsOffcanvas(false)}
+        placement="end"
+      >
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title className="d-flex align-items-center">
+            <MdSettings className="me-2" />
+            Survey Settings
+          </Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <Form>
+            <h6 className="mb-3">Response Settings</h6>
+
+            <Form.Check
+              type="switch"
+              id="public-survey-off"
+              label="Make survey public"
+              checked={survey.isPublic}
+              onChange={(e) => setSurvey({ ...survey, isPublic: e.target.checked })}
+              className="mb-3"
+            />
+
+            <Form.Check
+              type="switch"
+              id="anonymous-responses-off"
+              label="Allow anonymous responses"
+              checked={survey.allowAnonymous}
+              onChange={(e) => setSurvey({ ...survey, allowAnonymous: e.target.checked })}
+              className="mb-3"
+            />
+
+            <Form.Check
+              type="switch"
+              id="collect-email-off"
+              label="Collect email addresses"
+              checked={survey.collectEmail}
+              onChange={(e) => setSurvey({ ...survey, collectEmail: e.target.checked })}
+              className="mb-3"
+            />
+
+            <Form.Check
+              type="switch"
+              id="multiple-responses-off"
+              label="Allow multiple responses from same user"
+              checked={survey.multipleResponses}
+              onChange={(e) => setSurvey({ ...survey, multipleResponses: e.target.checked })}
+              className="mb-4"
+            />
+
+            <h6 className="mb-3">Branding</h6>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Primary Color</Form.Label>
+              <Form.Control
+                type="color"
+                value={survey.branding.primaryColor}
+                onChange={(e) => setSurvey({
+                  ...survey,
+                  branding: { ...survey.branding, primaryColor: e.target.value }
+                })}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Background Color</Form.Label>
+              <Form.Control
+                type="color"
+                value={survey.branding.backgroundColor}
+                onChange={(e) => setSurvey({
+                  ...survey,
+                  branding: { ...survey.branding, backgroundColor: e.target.value }
+                })}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>Text Color</Form.Label>
+              <Form.Control
+                type="color"
+                value={survey.branding.textColor}
+                onChange={(e) => setSurvey({
+                  ...survey,
+                  branding: { ...survey.branding, textColor: e.target.value }
+                })}
+              />
+            </Form.Group>
+
+            <h6 className="mb-3">Completion</h6>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Thank You Message</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={survey.thankYouMessage}
+                onChange={(e) => setSurvey({ ...survey, thankYouMessage: e.target.value })}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Redirect URL (Optional)</Form.Label>
+              <Form.Control
+                type="url"
+                value={survey.redirectUrl}
+                onChange={(e) => setSurvey({ ...survey, redirectUrl: e.target.value })}
+                placeholder="https://example.com"
+              />
+            </Form.Group>
+          </Form>
+        </Offcanvas.Body>
+      </Offcanvas>
     </Container>
   );
 };

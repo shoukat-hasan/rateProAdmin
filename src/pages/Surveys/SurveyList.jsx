@@ -71,11 +71,11 @@ const SurveyList = ({ darkMode }) => {
   };
 
   const handleAnalytics = (surveyId) => {
-    navigate(`/surveys/analytics/${surveyId}`);
+    navigate(`/app/surveys/analytics/${surveyId}`);
   };
 
   const handleDistribution = (surveyId) => {
-    navigate(`/surveys/distribution/${surveyId}`);
+    navigate(`/app/surveys/distribution/${surveyId}`);
   };
 
   const handleDelete = (survey) => {
@@ -268,7 +268,7 @@ const SurveyList = ({ darkMode }) => {
                   </Button>
                   <Button
                     variant="primary"
-                    href="/surveys/builder"
+                    onClick={() => navigate("/app/surveys/create")}
                     className="d-flex align-items-center px-3"
                   >
                     <i className="fas fa-plus me-2"></i>
@@ -380,7 +380,7 @@ const SurveyList = ({ darkMode }) => {
                   <p className="text-muted mb-3">No surveys found</p>
                   <Button
                     variant="primary"
-                    href="/surveys/builder"
+                    onClick={() => navigate("/app/surveys/create")}
                     className="px-4"
                   >
                     <i className="fas fa-plus me-2"></i>

@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react"
 import { Container, Row, Col, Card, Form, Button, Table, Badge, Spinner } from "react-bootstrap"
 import { MdAnalytics, MdRefresh, MdSentimentSatisfied, MdSentimentDissatisfied, MdTrendingUp } from "react-icons/md"
-import axios from "../../api/axios"
+import axiosInstance from "../../api/axiosInstance"
 
 const FeedbackAnalysis = () => {
   const [loading, setLoading] = useState(false)
@@ -19,7 +19,7 @@ const FeedbackAnalysis = () => {
 
   const fetchSurveys = async () => {
     try {
-      const response = await axios.get('/api/surveys')
+      const response = await axiosInstance.get('/api/surveys')
       if (response.data.success) {
         setSurveys(response.data.data || [])
       }
@@ -33,7 +33,7 @@ const FeedbackAnalysis = () => {
     
     try {
       setLoading(true)
-      const response = await axios.post('/api/feedback/analyze', {
+      const response = await axiosInstance.post('/api/feedback/analyze', {
         surveyId: selectedSurvey,
         timeRange
       })
@@ -53,7 +53,7 @@ const FeedbackAnalysis = () => {
     
     try {
       setLoading(true)
-      const response = await axios.post('/api/feedback/actions/generate', {
+      const response = await axiosInstance.post('/api/feedback/actions/generate', {
         surveyId: selectedSurvey,
         analysis: analysis
       })

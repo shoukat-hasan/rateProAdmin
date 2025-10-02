@@ -138,9 +138,10 @@ function App() {
 
               {/* Surveys */}
               <Route path="surveys" element={<SurveyList />} />
-              <Route path="surveys/create" element={<SurveyBuilder />} />
-              <Route path="surveys/builder" element={<SurveyBuilder />} />
-              <Route path="surveys/edit/:id" element={<SurveyForm />} />
+              <Route path="surveys/create" element={<SurveyBuilder darkMode={darkMode} />} />
+              <Route path="surveys/builder" element={<SurveyBuilder darkMode={darkMode} />} />
+              <Route path="surveys/builder/edit/:id" element={<SurveyBuilder darkMode={darkMode} />} />
+              {/* <Route path="surveys/edit/:id" element={<SurveyForm />} /> */}
               <Route path="surveys/detail/:id" element={<SurveyDetail />} />
               <Route path="surveys/responses/:id" element={<SurveyResponses />} />
               <Route path="surveys/analytics/:id" element={<SurveyAnalytics />} />

@@ -3,8 +3,9 @@
 
 import { useState, useEffect } from "react"
 import { Container, Row, Col, Card, Form, Button, Alert } from "react-bootstrap"
-import { MdWhatsApp, MdSave, MdSettings } from "react-icons/md"
-import axios from "../../api/axios"
+import { MdSave, MdSettings } from "react-icons/md"
+import { IoLogoWhatsapp } from "react-icons/io5";
+import axiosInstance from "../../api/axiosInstance"
 
 const WhatsAppSettings = () => {
   const [loading, setLoading] = useState(false)
@@ -26,7 +27,7 @@ const WhatsAppSettings = () => {
   const fetchSettings = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('/api/whatsapp')
+      const response = await axiosInstance.get('/api/whatsapp')
       if (response.data.success) {
         setSettings(response.data.data || settings)
       }
@@ -52,7 +53,7 @@ const WhatsAppSettings = () => {
       setLoading(true)
       setMessage({ type: '', text: '' })
 
-      const response = await axios.post('/api/whatsapp', settings)
+      const response = await axiosInstance.post('/api/whatsapp', settings)
       
       if (response.data.success) {
         setMessage({ type: 'success', text: 'WhatsApp settings saved successfully!' })
@@ -75,7 +76,7 @@ const WhatsAppSettings = () => {
         <Col>
           <Card>
             <Card.Header className="d-flex align-items-center">
-              <MdWhatsApp className="me-2 text-success" size={24} />
+              <IoLogoWhatsapp  className="me-2 text-success" size={24} />
               <h5 className="mb-0">WhatsApp Integration Settings</h5>
             </Card.Header>
             <Card.Body>

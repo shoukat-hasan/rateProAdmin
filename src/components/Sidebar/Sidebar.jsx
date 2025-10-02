@@ -55,10 +55,10 @@ import {
   MdTask,
   MdPsychology,
   MdMessage,
-  MdWhatsApp,
   MdSms,
   MdFeedback,
 } from "react-icons/md"
+import { IoLogoWhatsapp } from "react-icons/io5";
 import { useAuth } from "../../context/AuthContext"
 import "./Sidebar.css"
 
@@ -421,12 +421,12 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
         { path: "/app/surveys/create", name: "Create Survey", icon: <MdAddCircleOutline />, roles: ["companyAdmin"], permissions: ["survey:create"] },
         { path: "/app/surveys/templates", name: "Survey Templates", icon: <MdDescription />, roles: ["admin", "companyAdmin"], permissions: ["survey:templates"] },
         { path: "/app/surveys/scheduling", name: "Survey Scheduling", icon: <MdSchedule />, roles: ["companyAdmin"], permissions: ["survey:schedule"] },
-        { path: "/app/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer />, roles: ["companyAdmin"], permissions: ["survey:responses:view"] },
-        { path: "/app/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics />, roles: ["companyAdmin"], permissions: ["survey:analytics:view"] },
-        { path: "/app/surveys/:id/customize", name: "Customization", icon: <MdOutlineSettingsApplications />, roles: ["companyAdmin"], permissions: ["survey:customize"] },
-        { path: "/app/surveys/:id/share", name: "Survey Sharing", icon: <MdShare />, roles: ["companyAdmin"], permissions: ["survey:share"] },
+        // { path: "/app/surveys/:id/responses", name: "Survey Responses", icon: <MdQuestionAnswer />, roles: ["companyAdmin"], permissions: ["survey:responses:view"] },
+        // { path: "/app/surveys/analytics", name: "Survey Analytics", icon: <MdAnalytics />, roles: ["companyAdmin"], permissions: ["survey:analytics:view"] },
+        // { path: "/app/surveys/:id/customize", name: "Customization", icon: <MdOutlineSettingsApplications />, roles: ["companyAdmin"], permissions: ["survey:customize"] },
+        // { path: "/app/surveys/:id/share", name: "Survey Sharing", icon: <MdShare />, roles: ["companyAdmin"], permissions: ["survey:share"] },
         { path: "/app/surveys/settings", name: "Survey Settings", icon: <MdSettings />, roles: ["companyAdmin"], permissions: ["survey:settings:update"] },
-        { path: "/app/surveys/detail", name: "Survey Detail", icon: <MdVisibility />, roles: ["companyAdmin"], permissions: ["survey:detail:view"] },
+        // { path: "/app/surveys/detail", name: "Survey Detail", icon: <MdVisibility />, roles: ["companyAdmin"], permissions: ["survey:detail:view"] },
       ],
     },
     {
@@ -474,7 +474,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
       permissions: ["communication:whatsapp", "communication:sms", "communication:email"],
       submenuItems: [
         { path: "/app/settings/email-templates", name: "Email Templates", icon: <MdMailOutline />, roles: ["companyAdmin", "admin"] },
-        { path: "/app/communication/whatsapp", name: "WhatsApp Settings", icon: <MdWhatsApp />, roles: ["companyAdmin", "admin"] },
+        { path: "/app/communication/whatsapp", name: "WhatsApp Settings", icon: <IoLogoWhatsapp  />, roles: ["companyAdmin", "admin"] },
         { path: "/app/communication/sms", name: "SMS Settings", icon: <MdSms />, roles: ["companyAdmin", "admin"] },
       ],
     },
