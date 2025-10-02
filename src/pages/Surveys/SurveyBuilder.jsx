@@ -23,7 +23,7 @@ import {
   FaChartBar, FaEye, FaHandPointer, FaLightbulb,
   FaGlobe, FaPalette
 } from 'react-icons/fa';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import axiosInstance from '../../api/axiosInstance';
 import { useAuth } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
