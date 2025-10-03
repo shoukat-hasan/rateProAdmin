@@ -959,7 +959,7 @@ const SurveyBuilder = ({ darkMode }) => {
 
           // Navigate to survey list after publish
           setTimeout(() => {
-            navigate('/surveys');
+            navigate('/app/surveys');
           }, 2000);
         } else {
           throw new Error(response.data?.message || 'Failed to publish survey');

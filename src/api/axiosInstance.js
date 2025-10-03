@@ -355,6 +355,92 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Wait until refresh completes
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers["Authorization"] = "Bearer " + token;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const res = await axiosInstance.post("/auth/refresh", {}, { withCredentials: true });
+        const { accessToken } = res.data;
+
+        // Save new token
+        localStorage.setItem("accessToken", accessToken);
+        axiosInstance.defaults.headers.common["Authorization"] = "Bearer " + accessToken;
+
+        processQueue(null, accessToken);
+        return axiosInstance(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
+        localStorage.removeItem("authUser");
+        localStorage.removeItem("accessToken");
+        // window.location.href = "/login"; // optional redirect
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export const startSilentTokenRefresh = () => {
+  const refreshInterval = 14 * 60 * 1000; // 14 min
+
+  const refreshLoop = async () => {
+    try {
+      const res = await axiosInstance.post("/auth/refresh", {}, { withCredentials: true });
+      const { accessToken } = res.data;
+
+      localStorage.setItem("accessToken", accessToken);
+      axiosInstance.defaults.headers.common["Authorization"] = "Bearer " + accessToken;
+
+      console.log("✅ Silent token refresh success");
+    } catch (err) {
+      console.error("❌ Silent token refresh failed:", err);
+      // Optional logout
+    } finally {
+      setTimeout(refreshLoop, refreshInterval);
+    }
+  };
+
+  setTimeout(refreshLoop, refreshInterval);
+};
+
+
 export default axiosInstance;
 
 // ------------------- Auth APIs -------------------

@@ -66,7 +66,7 @@
 //     }
 //     return false;
 //   };
-  
+
 //   const logout = async () => {
 //     try {
 //       await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
@@ -108,8 +108,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   // 👇 Separate loaders
-  const [authLoading, setAuthLoading] = useState(true);     
-  const [globalLoading, setGlobalLoading] = useState(false); 
+  const [authLoading, setAuthLoading] = useState(true);
+  const [globalLoading, setGlobalLoading] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -126,14 +126,29 @@ export const AuthProvider = ({ children }) => {
         setUser(res.data.user);
       } catch (err) {
         console.error("checkAuth error:", err);
-        setUser(null);
+        // Try refresh token
+        try {
+          const refreshRes = await axiosInstance.post("/auth/refresh", {}, { withCredentials: true });
+
+          // Set new access token in axios headers
+          axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${refreshRes.data.accessToken}`;
+
+          // Retry /auth/me with new access token
+          const res = await axiosInstance.get("/auth/me", { withCredentials: true });
+          setUser(res.data.user);
+        } catch (refreshErr) {
+          console.error("Refresh token failed:", refreshErr);
+          // Logout if refresh also fails
+          setUser(null);
+          localStorage.removeItem("authUser");
+        }
       } finally {
         setAuthLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [])
 
   const login = async (email, password) => {
     try {
