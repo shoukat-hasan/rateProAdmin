@@ -75,7 +75,6 @@ import ActionManagement from "./pages/Actions/ActionManagement"
 import { ToastContainer } from "react-toastify"
 import { useAuth } from "./context/AuthContext"
 import FullScreenLoader from "./components/Loader/FullScreenLoader"
-import { startSilentTokenRefresh } from "./api/axiosInstance"
 
 function App() {
   // const navigate = useNavigate();
@@ -95,10 +94,6 @@ function App() {
   const toggleTheme = () => {
     setDarkMode((prev) => !prev)
   }
-
- useEffect(() => {
-    startSilentTokenRefresh();
-  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode)
