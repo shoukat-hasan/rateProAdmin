@@ -78,7 +78,7 @@ import FullScreenLoader from "./components/Loader/FullScreenLoader"
 
 function App() {
   // const navigate = useNavigate();
-  const { loading, globalLoading } = useAuth();
+  const { authLoading, globalLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem("darkMode")
@@ -103,7 +103,7 @@ function App() {
   return (
     <div>
       <>
-      {(loading || globalLoading) && <FullScreenLoader />}
+      {(authLoading || globalLoading) && <FullScreenLoader />}
         <div className={`app-container ${darkMode ? "dark" : "light"}`}>
           <Routes>
             <Route path="/auth-redirect" element={<TokenRedirector />} />

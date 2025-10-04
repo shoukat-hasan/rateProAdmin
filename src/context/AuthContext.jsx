@@ -105,7 +105,11 @@ import axiosInstance from "../api/axiosInstance";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("authUser");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   // 👇 Separate loaders
   const [authLoading, setAuthLoading] = useState(true);
@@ -152,10 +156,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      await axiosInstance.post("/auth/login", { email, password, source: "admin" }, { withCredentials: true });
+      const loginRes = await axiosInstance.post("/auth/login", { email, password, source: "admin" }, { withCredentials: true });
+      const accessToken = loginRes.data.accessToken; // agar backend yeh bhejta hai
+      if (accessToken) {
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      }
       const res = await axiosInstance.get("/auth/me", { withCredentials: true });
-      setUser(res.data.user);
-      localStorage.setItem("authUser", JSON.stringify(res.data.user));
+      const userWithToken = { ...res.data.user, accessToken };
+      setUser(userWithToken);
+      localStorage.setItem("authUser", JSON.stringify(userWithToken));
       return true;
     } catch (err) {
       console.error("Login error:", err);
@@ -184,6 +193,7 @@ export const AuthProvider = ({ children }) => {
       await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
       localStorage.removeItem("authUser");
       setUser(null);
+      delete axiosInstance.defaults.headers.common['Authorization'];
     } catch (err) {
       console.error("Logout error:", err);
     }
