@@ -67,7 +67,7 @@ const SurveyList = ({ darkMode }) => {
   const [surveys, setSurveys] = useState([])
 
   const handleEdit = (surveyId) => {
-    navigate(`/app/surveys/edit/${surveyId}`);
+    navigate(`/app/surveys/builder/edit/${surveyId}`);
   };
 
   const handleAnalytics = (surveyId) => {

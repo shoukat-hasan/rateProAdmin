@@ -34,6 +34,9 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
   const location = useLocation();
   const { id: surveyId } = useParams();
   const { user, setGlobalLoading } = useAuth();
+  
+  // Debug: Log when component renders
+  console.log('SurveyBuilder rendering with surveyId:', surveyId);
 
   // Extract template data if coming from templates page
   const templateData = location.state?.template;
@@ -102,9 +105,6 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
     tone: 'friendly-professional',
     additionalInstructions: ''
   });
-
-
-
 
   // Question Types Configuration
   const questionTypes = [
@@ -233,6 +233,16 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
     { id: 'technology', name: 'Technology & Digital', icon: MdComputer }
   ];
 
+  // Debug: Log survey state changes
+  useEffect(() => {
+    console.log('Survey state changed:', survey);
+  }, [survey]);
+
+  // Debug: Log questions state changes
+  useEffect(() => {
+    console.log('Questions state changed:', questions);
+  }, [questions]);
+
   // Initialize survey from template if available
   useEffect(() => {
     if (templateData && fromTemplates) {
@@ -257,10 +267,13 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
           setLoading(true);
           const response = await axiosInstance.get(`/surveys/${surveyId}`);
 
-          if (response.data && (response.data.survey || response.data.data) && response.status < 400) {
-            const surveyData = response.data.survey || response.data.data;
+          console.log('Survey API Response:', response.data);
 
-            setSurvey({
+          if (response.data && response.status < 400) {
+            // The survey data is at the root level of response.data
+            const surveyData = response.data;
+
+            const newSurveyState = {
               title: surveyData.title || '',
               description: surveyData.description || '',
               category: surveyData.category || '',
@@ -283,9 +296,14 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
                 en: surveyData.translations?.en || { title: surveyData.title, description: surveyData.description },
                 ar: surveyData.translations?.ar || {}
               }
-            });
+            };
+            
+            console.log('Setting survey state:', newSurveyState);
+            setSurvey(newSurveyState);
 
             if (surveyData.questions && surveyData.questions.length > 0) {
+              console.log('Raw questions from API:', surveyData.questions);
+              
               // Transform backend questions to frontend format
               const transformedQuestions = surveyData.questions.map((q, index) => ({
                 id: q.id || Date.now() + index,
@@ -297,7 +315,11 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
                 settings: q.settings || {},
                 translations: q.translations || {}
               }));
+              
+              console.log('Transformed questions:', transformedQuestions);
               setQuestions(transformedQuestions);
+            } else {
+              console.log('No questions found in survey data');
             }
           }
         } catch (error) {
@@ -834,8 +856,6 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
       setAILoadingStates(prev => ({ ...prev, translating: false }));
     }
   };
-
-
 
   // Question Management
   const addQuestion = (type) => {
