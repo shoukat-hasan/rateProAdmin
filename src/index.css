@@ -101,6 +101,14 @@ body {
     color: var(--bs-primary, #17c1ca);
 }
 
+.nav-link {
+    color: var(--bs-primary);
+}
+
+.nav-link:focus, .nav-link:hover {
+    color: #000;
+}
+
 /* Override Bootstrap primary color */
 .btn-primary {
   background-color: var(--primary-color) !important;
