@@ -184,8 +184,8 @@ const ExecutiveDashboard = () => {
         {
           label: 'Satisfaction Score',
           data: dashboardData?.trends.satisfaction.data || [],
-          borderColor: 'rgb(75, 192, 192)',
-          backgroundColor: 'rgba(75, 192, 192, 0.1)',
+          borderColor: 'rgb(var(--bs-teal-rgb))',
+          backgroundColor: 'rgba(var(--bs-teal-rgb), 0.1)',
           tension: 0.4,
           fill: true
         }
@@ -215,8 +215,8 @@ const ExecutiveDashboard = () => {
         {
           label: 'NPS Score',
           data: dashboardData?.trends.nps.data || [],
-          backgroundColor: 'rgba(54, 162, 235, 0.8)',
-          borderColor: 'rgb(54, 162, 235)',
+          backgroundColor: 'rgba(var(--bs-primary-rgb), 0.8)',
+          borderColor: 'rgb(var(--bs-primary-rgb))',
           borderWidth: 1
         }
       ]
@@ -238,12 +238,12 @@ const ExecutiveDashboard = () => {
         {
           label: 'Satisfaction',
           data: dashboardData?.locations.map(loc => loc.satisfaction) || [],
-          backgroundColor: 'rgba(255, 99, 132, 0.8)'
+          backgroundColor: 'rgba(var(--bs-danger-rgb), 0.8)'
         },
         {
           label: 'NPS',
           data: dashboardData?.locations.map(loc => loc.nps / 20) || [], // Scale NPS to match satisfaction
-          backgroundColor: 'rgba(54, 162, 235, 0.8)'
+          backgroundColor: 'rgba(var(--bs-primary-rgb), 0.8)'
         }
       ]
     },

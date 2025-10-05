@@ -22,19 +22,19 @@ import './SurveyDetail.css';
 const SurveyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   // State Management
   const [survey, setSurvey] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
-  
+
   // Modal States
   const [showQRModal, setShowQRModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  
+
   // Survey Stats
   const [stats, setStats] = useState({
     totalResponses: 0,
@@ -43,7 +43,7 @@ const SurveyDetail = () => {
     npsScore: 0,
     responseRate: 0
   });
-  
+
   // Toast
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -83,7 +83,7 @@ const SurveyDetail = () => {
     try {
       const response = await axiosInstance.patch(`/surveys/${id}/status`);
       setSurvey(prev => ({ ...prev, status: response.data.status }));
-      
+
       showSuccessToast(`Survey ${response.data.status === 'active' ? 'activated' : 'deactivated'} successfully!`);
     } catch (err) {
       showErrorToast(err.response?.data?.message || 'Failed to update survey status');
@@ -97,7 +97,7 @@ const SurveyDetail = () => {
         icon: 'success',
         title: 'Survey Deleted!',
         text: 'Survey has been deleted successfully.',
-        confirmButtonColor: '#28a745'
+        confirmButtonColor: 'var(--bs-success)'
       });
       navigate('/surveys');
     } catch (err) {
@@ -130,7 +130,7 @@ const SurveyDetail = () => {
       const response = await axiosInstance.get(`/surveys/${id}/export/pdf`, {
         responseType: 'blob'
       });
-      
+
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -138,7 +138,7 @@ const SurveyDetail = () => {
       link.download = `${survey.title}_report.pdf`;
       link.click();
       window.URL.revokeObjectURL(url);
-      
+
       showSuccessToast('PDF report downloaded successfully!');
     } catch (err) {
       showErrorToast('Failed to export PDF report', err.message);
@@ -234,7 +234,7 @@ const SurveyDetail = () => {
                       Back to Surveys
                     </Button>
                   </div>
-                  
+
                   <div className="d-flex align-items-center mb-2">
                     {survey.logo && (
                       <img
@@ -249,7 +249,7 @@ const SurveyDetail = () => {
                       <p className="text-muted mb-0">{survey.description}</p>
                     </div>
                   </div>
-                  
+
                   <div className="d-flex flex-wrap align-items-center gap-3 mt-3">
                     {getStatusBadge(survey.status)}
                     <Badge bg="light" text="dark" className="d-flex align-items-center">
@@ -266,7 +266,7 @@ const SurveyDetail = () => {
                     </Badge>
                   </div>
                 </div>
-                
+
                 {/* Action Buttons */}
                 <div className="d-flex flex-wrap gap-2">
                   <OverlayTrigger overlay={<Tooltip>Preview Survey</Tooltip>}>
@@ -278,7 +278,7 @@ const SurveyDetail = () => {
                       <MdVisibility />
                     </Button>
                   </OverlayTrigger>
-                  
+
                   <OverlayTrigger overlay={<Tooltip>Edit Survey</Tooltip>}>
                     <Button
                       variant="outline-primary"
@@ -288,7 +288,7 @@ const SurveyDetail = () => {
                       <MdEdit />
                     </Button>
                   </OverlayTrigger>
-                  
+
                   <OverlayTrigger overlay={<Tooltip>Generate QR Code</Tooltip>}>
                     <Button
                       variant="outline-primary"
@@ -298,7 +298,7 @@ const SurveyDetail = () => {
                       <MdQrCode />
                     </Button>
                   </OverlayTrigger>
-                  
+
                   <OverlayTrigger overlay={<Tooltip>Share Survey</Tooltip>}>
                     <Button
                       variant="outline-primary"
@@ -308,7 +308,7 @@ const SurveyDetail = () => {
                       <MdShare />
                     </Button>
                   </OverlayTrigger>
-                  
+
                   <Dropdown>
                     <Dropdown.Toggle variant="outline-secondary" size="sm">
                       <i className="fas fa-ellipsis-v"></i>
@@ -357,7 +357,7 @@ const SurveyDetail = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={3} md={6} className="mb-3">
           <Card className="stats-card h-100">
             <Card.Body className="p-3">
@@ -373,7 +373,7 @@ const SurveyDetail = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={3} md={6} className="mb-3">
           <Card className="stats-card h-100">
             <Card.Body className="p-3">
@@ -389,7 +389,7 @@ const SurveyDetail = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={3} md={6} className="mb-3">
           <Card className="stats-card h-100">
             <Card.Body className="p-3">
@@ -472,7 +472,7 @@ const SurveyDetail = () => {
                           </Card.Body>
                         </Card>
                       </Col>
-                      
+
                       <Col lg={4}>
                         <Card className="mb-4">
                           <Card.Header>
@@ -607,9 +607,9 @@ const SurveyDetail = () => {
                                   </Form.Group>
                                 </Col>
                               </Row>
-                              
+
                               <hr />
-                              
+
                               <h6 className="mb-3">Access Settings</h6>
                               <Row>
                                 <Col md={6}>
@@ -653,7 +653,7 @@ const SurveyDetail = () => {
                                   </div>
                                 </Col>
                               </Row>
-                              
+
                               <div className="text-muted">
                                 <small>
                                   <i className="fas fa-info-circle me-1"></i>
@@ -664,7 +664,7 @@ const SurveyDetail = () => {
                           </Card.Body>
                         </Card>
                       </Col>
-                      
+
                       <Col lg={4}>
                         <Card>
                           <Card.Header>
@@ -729,7 +729,7 @@ const SurveyDetail = () => {
                           </Card.Body>
                         </Card>
                       </Col>
-                      
+
                       <Col md={6} className="mb-4">
                         <Card>
                           <Card.Body className="text-center">
@@ -752,7 +752,7 @@ const SurveyDetail = () => {
                         </Card>
                       </Col>
                     </Row>
-                    
+
                     <Row>
                       <Col>
                         <Card>
@@ -791,11 +791,27 @@ const SurveyDetail = () => {
         </Modal.Header>
         <Modal.Body className="text-center">
           <div className="mb-3">
-            <QRCodeSVG
+            {/* <QRCodeSVG
               value={`${window.location.origin}/survey/${survey?.shareableLink || id}`}
               size={256}
               level="H"
               includeMargin={true}
+            /> */}
+            <QRCodeSVG
+              value={`${window.location.origin}/survey/${survey?.shareableLink || id}`}
+              size={256}
+              level="H" // high error correction taake logo hone ke bawajood QR scan ho jaye
+              includeMargin={true}
+              bgColor="var(--bs-primary)" // primary background color
+              fgColor="var(--bs-dark)" // QR foreground color
+              imageSettings={{
+                src: "/images/logo.png", // yahan apna logo ka path de do (e.g. public folder me rakho)
+                x: undefined,
+                y: undefined,
+                height: 50, // logo size adjust kro
+                width: 50,
+                excavate: true, // ye QR ke bich se background nikal deta hai logo ke liye
+              }}
             />
           </div>
           <p className="text-muted">
@@ -846,7 +862,7 @@ const SurveyDetail = () => {
               </Button>
             </div>
           </Form.Group>
-          
+
           <div className="d-grid gap-2">
             <Button
               variant="success"
@@ -858,7 +874,7 @@ const SurveyDetail = () => {
               <i className="fab fa-whatsapp me-2"></i>
               Share via WhatsApp
             </Button>
-            
+
             <Button
               variant="primary"
               onClick={() => {

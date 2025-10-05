@@ -19,7 +19,7 @@ const Settings = ({ darkMode, toggleTheme }) => {
     weeklyReports: true,
     systemAlerts: true,
     darkMode: darkMode,
-    primaryColor: "#1fdae4",
+    primaryColor: "var(--bs-primary)",
     autoSave: true,
     sessionTimeout: "30",
   })

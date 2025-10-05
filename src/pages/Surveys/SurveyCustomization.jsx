@@ -14,10 +14,10 @@ const SurveyCustomization = () => {
     // Branding
     logo: "",
     companyName: "Rate Pro",
-    primaryColor: "#1fdae4",
-    secondaryColor: "#6c757d",
-    backgroundColor: "#ffffff",
-    textColor: "#212529",
+    primaryColor: "var(--bs-primary)",
+    secondaryColor: "var(--bs-secondary)",
+    backgroundColor: "var(--bs-body-bg)",
+    textColor: "var(--bs-body-color)",
 
     // Layout
     theme: "modern",

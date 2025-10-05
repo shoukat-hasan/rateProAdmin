@@ -48,8 +48,8 @@ const SurveyDistribution = () => {
     includeTitle: true,
     includeLogo: true,
     customText: 'Scan to share your feedback',
-    backgroundColor: '#ffffff',
-    foregroundColor: '#000000',
+    backgroundColor: 'var(--bs-white)',
+    foregroundColor: 'var(--bs-dark)',
     logoUrl: '',
     errorCorrectionLevel: 'M'
   });
@@ -76,7 +76,7 @@ const SurveyDistribution = () => {
       id: 'qr',
       name: 'QR Codes',
       icon: MdQrCode,
-      color: '#007bff',
+      color: 'var(--bs-primary)',
       description: 'Generate QR codes for physical locations',
       locations: ['Entrance', 'Receipt', 'Table', 'Ticket', 'Kiosk', 'Counter']
     },
@@ -84,7 +84,7 @@ const SurveyDistribution = () => {
       id: 'link',
       name: 'Direct Links',
       icon: MdLink,
-      color: '#28a745',
+      color: 'var(--bs-success)',
       description: 'Share survey URLs directly',
       methods: ['Copy Link', 'Short URL', 'Custom Domain']
     },
@@ -92,7 +92,7 @@ const SurveyDistribution = () => {
       id: 'email',
       name: 'Email Campaign',
       icon: MdEmail,
-      color: '#17a2b8',
+      color: 'var(--bs-info)',
       description: 'Send surveys via email',
       features: ['Bulk Send', 'Personalization', 'Scheduling']
     },
@@ -100,7 +100,7 @@ const SurveyDistribution = () => {
       id: 'sms',
       name: 'SMS/WhatsApp',
       icon: MdSms,
-      color: '#ffc107',
+      color: 'var(--bs-warning)',
       description: 'Mobile messaging distribution',
       platforms: ['SMS', 'WhatsApp', 'Telegram']
     },
@@ -108,7 +108,7 @@ const SurveyDistribution = () => {
       id: 'social',
       name: 'Social Media',
       icon: MdShare,
-      color: '#e83e8c',
+      color: 'var(--bs-pink)',
       description: 'Share on social platforms',
       platforms: ['Facebook', 'Twitter', 'LinkedIn', 'Instagram']
     },
@@ -116,7 +116,7 @@ const SurveyDistribution = () => {
       id: 'embed',
       name: 'Website Embed',
       icon: MdWeb,
-      color: '#6f42c1',
+      color: 'var(--bs-purple)',
       description: 'Embed survey in websites/apps',
       types: ['iFrame', 'Widget', 'Modal', 'Popup']
     }
@@ -1032,7 +1032,7 @@ const SurveyDistribution = () => {
                       <h6>Your Website Content</h6>
                       <p className="text-muted small mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                       
-                      <div className="p-3 border rounded" style={{ backgroundColor: '#f8f9fa' }}>
+                      <div className="p-3 border rounded" style={{ backgroundColor: 'var(--bs-light)' }}>
                         <div className="text-center">
                           <h6 className="text-primary">{survey.title}</h6>
                           <p className="small text-muted">{survey.description}</p>

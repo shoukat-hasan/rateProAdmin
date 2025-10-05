@@ -346,7 +346,7 @@ const UserForm = () => {
                             right: "10px",
                             transform: "translateY(-50%)",
                             cursor: isEditMode ? "not-allowed" : "pointer",
-                            color: "#888",
+                            color: "var(--bs-secondary)",
                             fontSize: "1.1rem",
                           }}
                         >

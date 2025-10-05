@@ -262,8 +262,8 @@ const SurveyAnalytics = () => {
       {
         label: 'Daily Responses',
         data: analyticsData.trends.responsesByDate?.map(item => item.count) || [],
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgb(var(--bs-teal-rgb))',
+        backgroundColor: 'rgba(var(--bs-teal-rgb), 0.2)',
         tension: 0.4,
         fill: true
       }
@@ -278,8 +278,8 @@ const SurveyAnalytics = () => {
       {
         label: 'Average Rating',
         data: analyticsData.trends.ratingTrends?.map(item => item.averageRating) || [],
-        borderColor: 'rgb(255, 206, 86)',
-        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+        borderColor: 'rgb(var(--bs-warning-rgb))',
+        backgroundColor: 'rgba(var(--bs-warning-rgb), 0.2)',
         tension: 0.4,
         fill: true
       }
@@ -301,7 +301,7 @@ const SurveyAnalytics = () => {
           '#ffc107'
         ],
         borderWidth: 2,
-        borderColor: '#ffffff'
+        borderColor: 'var(--bs-white)'
       }
     ]
   };
@@ -330,8 +330,8 @@ const SurveyAnalytics = () => {
       {
         label: 'NPS Score',
         data: analyticsData.trends.npsHistory?.map(item => item.npsScore) || [],
-        borderColor: 'rgb(54, 162, 235)',
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgb(var(--bs-primary-rgb))',
+        backgroundColor: 'rgba(var(--bs-primary-rgb), 0.2)',
         tension: 0.4,
         fill: true
       }
@@ -344,15 +344,15 @@ const SurveyAnalytics = () => {
       {
         label: 'Completion Rate (%)',
         data: analyticsData.questions.performance?.map(q => q.completionRate) || [],
-        backgroundColor: 'rgba(54, 162, 235, 0.8)',
-        borderColor: 'rgb(54, 162, 235)',
+        backgroundColor: 'rgba(var(--bs-primary-rgb), 0.8)',
+        borderColor: 'rgb(var(--bs-primary-rgb))',
         borderWidth: 1
       },
       {
         label: 'Average Rating',
         data: analyticsData.questions.performance?.map(q => q.averageRating * 20) || [], // Scale to 100
-        backgroundColor: 'rgba(255, 206, 86, 0.8)',
-        borderColor: 'rgb(255, 206, 86)',
+        backgroundColor: 'rgba(var(--bs-warning-rgb), 0.8)',
+        borderColor: 'rgb(var(--bs-warning-rgb))',
         borderWidth: 1
       }
     ]

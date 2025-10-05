@@ -232,14 +232,14 @@ const AIInsights = () => {
           insights?.sentiment.overview.negative || 0
         ],
         backgroundColor: [
-          'rgba(40, 167, 69, 0.8)',
-          'rgba(255, 193, 7, 0.8)', 
-          'rgba(220, 53, 69, 0.8)'
+          'rgba(var(--bs-success-rgb), 0.8)',
+          'rgba(var(--bs-warning-rgb), 0.8)', 
+          'rgba(var(--bs-danger-rgb), 0.8)'
         ],
         borderColor: [
-          'rgb(40, 167, 69)',
-          'rgb(255, 193, 7)',
-          'rgb(220, 53, 69)'
+          'rgb(var(--bs-success-rgb))',
+          'rgb(var(--bs-warning-rgb))',
+          'rgb(var(--bs-danger-rgb))'
         ],
         borderWidth: 2
       }]
@@ -261,24 +261,24 @@ const AIInsights = () => {
         {
           label: 'Positive',
           data: insights?.sentiment.trends.positive || [],
-          borderColor: 'rgb(40, 167, 69)',
-          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+          borderColor: 'rgb(var(--bs-success-rgb))',
+          backgroundColor: 'rgba(var(--bs-success-rgb), 0.1)',
           tension: 0.4,
           fill: true
         },
         {
           label: 'Neutral',
           data: insights?.sentiment.trends.neutral || [],
-          borderColor: 'rgb(255, 193, 7)',
-          backgroundColor: 'rgba(255, 193, 7, 0.1)',
+          borderColor: 'rgb(var(--bs-warning-rgb))',
+          backgroundColor: 'rgba(var(--bs-warning-rgb), 0.1)',
           tension: 0.4,
           fill: true
         },
         {
           label: 'Negative',
           data: insights?.sentiment.trends.negative || [],
-          borderColor: 'rgb(220, 53, 69)',
-          backgroundColor: 'rgba(220, 53, 69, 0.1)',
+          borderColor: 'rgb(var(--bs-danger-rgb))',
+          backgroundColor: 'rgba(var(--bs-danger-rgb), 0.1)',
           tension: 0.4,
           fill: true
         }

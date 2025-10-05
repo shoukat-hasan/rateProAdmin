@@ -6,8 +6,8 @@ import { MdColorLens, MdUpload, MdSave } from "react-icons/md"
 
 const ThemeSettings = () => {
   const [theme, setTheme] = useState({
-    primaryColor: '#4a6cf7',
-    secondaryColor: '#6c757d',
+    primaryColor: 'var(--bs-primary)',
+    secondaryColor: 'var(--bs-secondary)',
     logo: null,
     logoPreview: ''
   })

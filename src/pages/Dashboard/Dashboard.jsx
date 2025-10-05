@@ -129,8 +129,8 @@ const Dashboard = ({ darkMode, limit = 5 }) => {
       {
         label: "Responses",
         data: [65, 78, 90, 81, 96, 105],
-        borderColor: "rgb(31, 218, 228)",
-        backgroundColor: "rgba(31, 218, 228, 0.2)",
+        borderColor: "rgb(var(--bs-primary-rgb))",
+        backgroundColor: "rgba(var(--bs-primary-rgb), 0.2)",
         fill: true,
         tension: 0.4,
       },
@@ -167,8 +167,8 @@ const Dashboard = ({ darkMode, limit = 5 }) => {
       {
         label: "Completion Rate %",
         data: [75, 82, 78, 85],
-        backgroundColor: "rgba(31, 218, 228, 0.6)",
-        borderColor: "rgba(31, 218, 228, 1)",
+        backgroundColor: "rgba(var(--bs-primary-rgb), 0.6)",
+        borderColor: "rgba(var(--bs-primary-rgb), 1)",
         borderWidth: 2,
         borderRadius: 4,
       },
