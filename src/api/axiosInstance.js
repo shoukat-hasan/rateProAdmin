@@ -31,23 +31,23 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
     const message = error.response?.data?.message || error.message;
-    if (status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        const refreshRes = await axiosInstance.post("/auth/refresh", {}, { withCredentials: true });
-        const newAccessToken = refreshRes.data.accessToken;
-        // Update localStorage and axios headers
-        const authUser  = JSON.parse(localStorage.getItem("authUser") || "{}");
-        localStorage.setItem("authUser", JSON.stringify({ ...authUser, accessToken: newAccessToken }));
-        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        localStorage.removeItem("authUser");
-        window.location.href = "/login"; // or your logout logic
-        return Promise.reject(refreshError);
-      }
-    }
+    // if (status === 401 && !originalRequest._retry) {
+    //   originalRequest._retry = true;
+    //   try {
+    //     const refreshRes = await axiosInstance.post("/auth/refresh", {}, { withCredentials: true });
+    //     const newAccessToken = refreshRes.data.accessToken;
+    //     // Update localStorage and axios headers
+    //     const authUser  = JSON.parse(localStorage.getItem("authUser") || "{}");
+    //     localStorage.setItem("authUser", JSON.stringify({ ...authUser, accessToken: newAccessToken }));
+    //     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+    //     originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+    //     return axiosInstance(originalRequest);
+    //   } catch (refreshError) {
+    //     localStorage.removeItem("authUser");
+    //     window.location.href = "/login"; // or your logout logic
+    //     return Promise.reject(refreshError);
+    //   }
+    // }
     // Specific silent fail for login verification
     if (status === 401 && message?.includes("Login verification required")) {
       return Promise.reject(error);

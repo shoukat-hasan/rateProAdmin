@@ -346,10 +346,15 @@ const SurveyTemplates = ({ darkMode }) => {
   };
 
   const handleUseTemplate = async (template) => {
+    console.log('=== SurveyTemplates: handleUseTemplate called ===');
+    console.log('Template data:', template);
+    
     try {
+      console.log('Setting global loading to true');
       setGlobalLoading(true);
       
       // In production, this would create a new survey from the template
+      console.log('Showing confirmation dialog');
       const result = await Swal.fire({
         title: 'Create Survey from Template',
         text: `Create a new survey using "${template.name}" template?`,
@@ -361,7 +366,12 @@ const SurveyTemplates = ({ darkMode }) => {
         cancelButtonText: 'Cancel'
       });
 
+      console.log('Dialog result:', result);
+      
       if (result.isConfirmed) {
+        console.log('User confirmed, navigating to survey builder with template data');
+        console.log('Navigation state:', { template: template, from: 'templates' });
+        
         // Navigate to create survey with template
         navigate('/surveys/create', { 
           state: { 
@@ -369,16 +379,23 @@ const SurveyTemplates = ({ darkMode }) => {
             from: 'templates' 
           } 
         });
+        
+        console.log('Navigation completed');
+      } else {
+        console.log('User cancelled template selection');
       }
     } catch (error) {
-      console.error('Error using template:', error);
+      console.error('=== SurveyTemplates: Error using template ===');
+      console.error('Error details:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error',
         text: 'Failed to create survey from template. Please try again.'
       });
     } finally {
+      console.log('Setting global loading to false');
       setGlobalLoading(false);
+      console.log('=== SurveyTemplates: handleUseTemplate completed ===');
     }
   };
 

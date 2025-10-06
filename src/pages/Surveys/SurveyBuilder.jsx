@@ -7,7 +7,7 @@ import {
   ProgressBar, Offcanvas
 } from 'react-bootstrap';
 import {
-  MdAdd, MdDelete, MdEdit, MdPreview, MdSave, MdPublish,
+  MdAdd, MdClose, MdDelete, MdEdit, MdPreview, MdSave, MdPublish,
   MdDragHandle, MdContentCopy, MdSettings, MdTranslate,
   MdStar, MdRadioButtonChecked, MdCheckBox, MdTextFields,
   MdLinearScale, MdDateRange, MdCloudUpload, MdToggleOn,
@@ -29,21 +29,43 @@ import { useAuth } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
 import './SurveyBuilder.css';
 
+/**
+ * SurveyBuilder Component
+ * 
+ * Main component for creating and editing surveys. Supports:
+ * - Creating new surveys from scratch
+ * - Creating surveys from templates
+ * - Editing existing surveys
+ * - AI-assisted survey generation
+ * - Drag & drop question management
+ * - Real-time preview and customization
+ */
 const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
+  // Router hooks for navigation and URL parameters
   const navigate = useNavigate();
   const location = useLocation();
-  const { id: surveyId } = useParams();
-  const { user, setGlobalLoading } = useAuth();
-  
-  // Debug: Log when component renders
-  console.log('SurveyBuilder rendering with surveyId:', surveyId);
+  const { id: surveyId } = useParams(); // Extract survey ID from URL (for editing mode)
+  const { user, setGlobalLoading } = useAuth(); // Authentication context
+
+  console.log("user", user);
 
   // Extract template data if coming from templates page
+  // This data is passed via navigation state when user clicks "Use Template"
   const templateData = location.state?.template;
   const fromTemplates = location.state?.from === 'templates';
-  const isEditing = !!surveyId;
+  const isEditing = !!surveyId; // Determine if we're editing existing survey or creating new one
+  
+  // Debug: Log when component renders (AFTER variables are defined)
+  console.log('\n=== SurveyBuilder: Component Render ===');
+  console.log('surveyId:', surveyId);
+  console.log('templateData:', templateData);
+  console.log('fromTemplates:', fromTemplates);
+  console.log('isEditing:', isEditing);
+  console.log('Location state:', location.state);
+  console.log('==================================\n');
 
-  // Main Survey State
+  // Main Survey State - stores all survey metadata and settings
+  // Pre-populated with template data if coming from templates
   const [survey, setSurvey] = useState({
     title: templateData?.name || '',
     description: templateData?.description || '',
@@ -69,31 +91,43 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
     }
   });
 
+  // Survey questions array - stores all questions in the survey
   const [questions, setQuestions] = useState([]);
-  const [activeTab, setActiveTab] = useState('builder');
-  const [selectedQuestion, setSelectedQuestion] = useState(null);
-  const [showQuestionModal, setShowQuestionModal] = useState(false);
-  const [showAIModal, setShowAIModal] = useState(false);
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [showSettingsOffcanvas, setShowSettingsOffcanvas] = useState(false);
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(false);
+  
+  // UI State Management
+  const [activeTab, setActiveTab] = useState('builder'); // Current active tab (builder, preview, settings)
+  const [selectedQuestion, setSelectedQuestion] = useState(null); // Currently selected question for editing
+  const [showQuestionModal, setShowQuestionModal] = useState(false); // Question creation/edit modal
+  const [questionModalMode, setQuestionModalMode] = useState('create'); // 'create' or 'edit' mode for modal
+  const [showAIModal, setShowAIModal] = useState(false); // AI assistant modal
+  const [showPreviewModal, setShowPreviewModal] = useState(false); // Survey preview modal
+  const [showSettingsOffcanvas, setShowSettingsOffcanvas] = useState(false); // Settings panel
+  
+  // Loading and Processing States
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false); // AI generation in progress
+  const [saving, setSaving] = useState(false); // Save operation in progress
+  const [loading, setLoading] = useState(true); // Component loading state - starts true, set to false after initialization
+  
+  // Debug: Log current loading state after it's defined
+  console.log('Initial loading state:', loading);
 
-  // AI Workflow States
-  const [surveyMode, setSurveyMode] = useState('user-defined'); // 'user-defined' or 'ai-assisted'
-  const [showModeSelector, setShowModeSelector] = useState(true);
-  const [aiWorkflowStep, setAIWorkflowStep] = useState(1); // 1: Profile, 2: Review, 3: Customize
-  const [aiGeneratedDraft, setAIGeneratedDraft] = useState(null);
+  // AI Workflow States - manages AI-assisted survey creation flow
+  const [surveyMode, setSurveyMode] = useState('user-defined'); // Survey creation mode: 'user-defined' or 'ai-assisted'
+  const [showModeSelector, setShowModeSelector] = useState(true); // Show mode selection UI
+  const [aiWorkflowStep, setAIWorkflowStep] = useState(1); // AI workflow step: 1=Profile, 2=Review, 3=Customize
+  const [aiGeneratedDraft, setAIGeneratedDraft] = useState(null); // Stores AI-generated survey draft
+  // AI Loading States - tracks different AI operations
   const [aiLoadingStates, setAILoadingStates] = useState({
-    generating: false,
-    optimizing: false,
-    suggesting: false,
-    translating: false
+    generating: false,    // AI survey generation
+    optimizing: false,    // Survey optimization
+    suggesting: false,    // Question suggestions
+    translating: false    // Translation services
   });
 
   // AI Assistant State
-  const [aiPrompt, setAIPrompt] = useState('');
+  const [aiPrompt, setAIPrompt] = useState(''); // User input for AI assistance
+  
+  // Company Profile for AI - used to generate contextual surveys
   const [companyProfile, setCompanyProfile] = useState({
     industry: "",
     products: "", // string hi rakho
@@ -106,7 +140,9 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
     additionalInstructions: ''
   });
 
-  // Question Types Configuration
+  // Question Types Configuration - defines all available question types
+  // Each type includes: id, name, icon, color (CSS variable), category, description, example
+  // Used in the question creation UI and for mapping between frontend/backend formats
   const questionTypes = [
     {
       id: 'rating',
@@ -218,7 +254,8 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
     }
   ];
 
-  // Industry Categories for AI
+  // Industry Categories for AI - used for contextual survey generation
+  // Each industry provides context for AI to generate relevant questions and content
   const industries = [
     { id: 'corporate', name: 'Corporate / HR', icon: MdBusiness },
     { id: 'education', name: 'Education', icon: MdSchool },
@@ -233,7 +270,11 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
     { id: 'technology', name: 'Technology & Digital', icon: MdComputer }
   ];
 
-  // Debug: Log survey state changes
+  // ========================
+  // COMPONENT LIFECYCLE HOOKS
+  // ========================
+  
+  // Debug: Log survey state changes for troubleshooting
   useEffect(() => {
     console.log('Survey state changed:', survey);
   }, [survey]);
@@ -243,27 +284,91 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
     console.log('Questions state changed:', questions);
   }, [questions]);
 
-  // Initialize survey from template if available
+  // Debug: Log loading state changes
   useEffect(() => {
-    if (templateData && fromTemplates) {
-      // Generate initial questions from template
-      const initialQuestions = generateQuestionsFromTemplate(templateData);
-      setQuestions(initialQuestions);
-
-      // Set company profile from template category
-      setCompanyProfile(prev => ({
-        ...prev,
-        industry: templateData.category,
-        surveyGoal: `Create a ${templateData.name.toLowerCase()} for better insights`
-      }));
+    console.log('🔄 Loading state changed to:', loading);
+    if (loading) {
+      console.log('⏳ Component is now in LOADING state');
+    } else {
+      console.log('✅ Component is now READY (not loading)');
     }
-  }, [templateData, fromTemplates]);
+  }, [loading]);
+
+  // Initialize survey from template if available or handle new survey
+  useEffect(() => {
+    console.log('\n=== SurveyBuilder: Initialization useEffect Triggered ===');
+    console.log('Dependencies - templateData:', !!templateData, 'fromTemplates:', fromTemplates, 'surveyId:', surveyId);
+    
+    const initializeSurvey = () => {
+      if (templateData && fromTemplates) {
+        console.log('🎯 CASE: Initializing from template');
+        console.log('Template data structure:', templateData);
+        
+        // Set survey data from template
+        const newSurveyData = {
+          title: templateData.name || '',
+          description: templateData.description || '',
+          category: templateData.category || '',
+        };
+        console.log('Setting survey data:', newSurveyData);
+        
+        setSurvey(prev => ({
+          ...prev,
+          ...newSurveyData
+        }));
+        
+        // Generate initial questions from template
+        console.log('Generating questions from template...');
+        const initialQuestions = generateQuestionsFromTemplate(templateData);
+        console.log('Generated questions:', initialQuestions);
+        setQuestions(initialQuestions);
+
+        // Set company profile from template category
+        const profileUpdate = {
+          industry: templateData.category,
+          surveyGoal: `Create a ${templateData.name.toLowerCase()} for better insights`
+        };
+        console.log('Setting company profile:', profileUpdate);
+        setCompanyProfile(prev => ({
+          ...prev,
+          ...profileUpdate
+        }));
+        
+        console.log('✅ Template initialization complete');
+      } else if (!surveyId) {
+        // This is a new survey without template
+        console.log('🆕 CASE: New survey without template');
+      } else {
+        console.log('📝 CASE: Loading existing survey (surveyId:', surveyId, ')');
+      }
+      
+      // Set loading to false after initialization (if not loading existing survey)
+      if (!surveyId) {
+        console.log('Setting loading to false for new/template survey');
+        // Small timeout to ensure UI updates properly
+        setTimeout(() => {
+          console.log('⏰ Timeout completed - setting loading to false');
+          setLoading(false);
+        }, 100);
+      } else {
+        console.log('Keeping loading true - will be handled by loadSurvey useEffect');
+      }
+    };
+
+    initializeSurvey();
+    console.log('=== SurveyBuilder: Initialization useEffect Completed ===\n');
+  }, [templateData, fromTemplates, surveyId]);
 
   // Load existing survey if editing
   useEffect(() => {
+    console.log('\n=== SurveyBuilder: LoadSurvey useEffect Triggered ===');
+    console.log('Condition check - surveyId:', surveyId, 'templateData:', !!templateData);
+    
     const loadSurvey = async () => {
       if (surveyId && !templateData) {
+        console.log('📋 LOADING existing survey with ID:', surveyId);
         try {
+          console.log('Setting loading to true for survey load');
           setLoading(true);
           const response = await axiosInstance.get(`/surveys/${surveyId}`);
 
@@ -332,12 +437,16 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
             navigate('/surveys');
           });
         } finally {
+          console.log('✅ Survey loading completed - setting loading to false');
           setLoading(false);
         }
+      } else {
+        console.log('❌ Skipping survey load - condition not met (surveyId:', surveyId, ', templateData:', !!templateData, ')');
       }
     };
 
     loadSurvey();
+    console.log('=== SurveyBuilder: LoadSurvey useEffect Completed ===\\n');
   }, [surveyId, templateData, navigate]);
 
   // Generate questions from template
@@ -860,18 +969,30 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
   // Question Management
   const addQuestion = (type) => {
     const questionType = questionTypes.find(qt => qt.id === type);
+    
+    // Create appropriate default options based on question type
+    let defaultOptions = [];
+    if (type === 'single_choice' || type === 'multiple_choice') {
+      defaultOptions = ['Option 1', 'Option 2', 'Option 3'];
+    } else if (type === 'yes_no') {
+      defaultOptions = ['Yes', 'No'];
+    } else if (type === 'likert') {
+      defaultOptions = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
+    }
+    
     const newQuestion = {
       id: Date.now(),
       type: type,
       title: `New ${questionType.name}`,
       description: '',
       required: false,
-      options: type.includes('choice') ? ['Option 1', 'Option 2', 'Option 3'] : [],
-      settings: {}
+      options: defaultOptions,
+      settings: type === 'rating' ? { scale: 5 } : type === 'nps' ? { scale: 10 } : {}
     };
 
     setQuestions([...questions, newQuestion]);
     setSelectedQuestion(newQuestion);
+    setQuestionModalMode('create');
     setShowQuestionModal(true);
   };
 
@@ -1126,6 +1247,9 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
   };
 
   if (loading) {
+    console.log('🔄 RENDERING: Loading component (loading = true)');
+    console.log('Current state: surveyId:', surveyId, 'templateData:', !!templateData, 'fromTemplates:', fromTemplates);
+    
     return (
       <Container fluid className="survey-builder">
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
@@ -1133,10 +1257,18 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
             <Spinner animation="border" variant="primary" className="mb-3" />
             <h5>Loading Survey...</h5>
             <p className="text-muted">Please wait while we fetch your survey data.</p>
+            <div className="mt-3 text-muted small">
+              <div>Debug Info:</div>
+              <div>Survey ID: {surveyId || 'None'}</div>
+              <div>Has Template: {templateData ? 'Yes' : 'No'}</div>
+              <div>From Templates: {fromTemplates ? 'Yes' : 'No'}</div>
+            </div>
           </div>
         </div>
       </Container>
     );
+  } else {
+    console.log('✅ RENDERING: Main survey builder component (loading = false)');
   }
 
   return (
@@ -1667,6 +1799,7 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
                                                   size="sm"
                                                   onClick={() => {
                                                     setSelectedQuestion(question);
+                                                    setQuestionModalMode('edit');
                                                     setShowQuestionModal(true);
                                                   }}
                                                 >
@@ -2137,24 +2270,33 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
               </Modal.Footer>
             </Modal>
 
-            {/* Question Edit Modal - Simplified for now */}
+            {/* Dynamic Question Modal - Handles all question types */}
             <Modal
               show={showQuestionModal}
               onHide={() => setShowQuestionModal(false)}
               size="lg"
             >
               <Modal.Header closeButton>
-                <Modal.Title>Edit Question</Modal.Title>
+                <Modal.Title>
+                  {questionModalMode === 'create' ? 'Create' : 'Edit'} Question
+                  {selectedQuestion && (
+                    <Badge bg="secondary" className="ms-2">
+                      {questionTypes.find(qt => qt.id === selectedQuestion.type)?.name}
+                    </Badge>
+                  )}
+                </Modal.Title>
               </Modal.Header>
               <Modal.Body>
                 {selectedQuestion && (
                   <div>
+                    {/* Basic Question Information */}
                     <Form.Group className="mb-3">
-                      <Form.Label>Question Title</Form.Label>
+                      <Form.Label>Question Title *</Form.Label>
                       <Form.Control
                         type="text"
                         value={selectedQuestion.title}
                         onChange={(e) => setSelectedQuestion({ ...selectedQuestion, title: e.target.value })}
+                        placeholder="Enter your question..."
                       />
                     </Form.Group>
 
@@ -2165,8 +2307,139 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
                         rows={2}
                         value={selectedQuestion.description}
                         onChange={(e) => setSelectedQuestion({ ...selectedQuestion, description: e.target.value })}
+                        placeholder="Add additional context or instructions..."
                       />
                     </Form.Group>
+
+                    {/* Question Type Specific Options */}
+                    {(selectedQuestion.type === 'single_choice' || selectedQuestion.type === 'multiple_choice') && (
+                      <div className="mb-3">
+                        <Form.Label>Answer Options</Form.Label>
+                        {selectedQuestion.options.map((option, index) => (
+                          <div key={index} className="d-flex align-items-center mb-2">
+                            <Form.Control
+                              type="text"
+                              value={option}
+                              onChange={(e) => {
+                                const newOptions = [...selectedQuestion.options];
+                                newOptions[index] = e.target.value;
+                                setSelectedQuestion({ ...selectedQuestion, options: newOptions });
+                              }}
+                              placeholder={`Option ${index + 1}`}
+                            />
+                            {selectedQuestion.options.length > 2 && (
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                className="ms-2"
+                                onClick={() => {
+                                  const newOptions = selectedQuestion.options.filter((_, i) => i !== index);
+                                  setSelectedQuestion({ ...selectedQuestion, options: newOptions });
+                                }}
+                              >
+                                <MdClose />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => {
+                            const newOptions = [...selectedQuestion.options, `Option ${selectedQuestion.options.length + 1}`];
+                            setSelectedQuestion({ ...selectedQuestion, options: newOptions });
+                          }}
+                        >
+                          <MdAdd className="me-1" /> Add Option
+                        </Button>
+                      </div>
+                    )}
+
+                    {selectedQuestion.type === 'yes_no' && (
+                      <div className="mb-3">
+                        <Form.Label>Yes/No Options</Form.Label>
+                        <div className="d-flex gap-3">
+                          <Form.Control
+                            type="text"
+                            value={selectedQuestion.options[0] || 'Yes'}
+                            onChange={(e) => {
+                              const newOptions = [e.target.value, selectedQuestion.options[1] || 'No'];
+                              setSelectedQuestion({ ...selectedQuestion, options: newOptions });
+                            }}
+                            placeholder="Yes option text"
+                          />
+                          <Form.Control
+                            type="text"
+                            value={selectedQuestion.options[1] || 'No'}
+                            onChange={(e) => {
+                              const newOptions = [selectedQuestion.options[0] || 'Yes', e.target.value];
+                              setSelectedQuestion({ ...selectedQuestion, options: newOptions });
+                            }}
+                            placeholder="No option text"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedQuestion.type === 'rating' && (
+                      <div className="mb-3">
+                        <Form.Label>Rating Scale</Form.Label>
+                        <Form.Select
+                          value={selectedQuestion.settings?.scale || 5}
+                          onChange={(e) => setSelectedQuestion({ 
+                            ...selectedQuestion, 
+                            settings: { ...selectedQuestion.settings, scale: parseInt(e.target.value) }
+                          })}
+                        >
+                          <option value={3}>3 Stars</option>
+                          <option value={5}>5 Stars</option>
+                          <option value={10}>10 Stars</option>
+                        </Form.Select>
+                      </div>
+                    )}
+
+                    {selectedQuestion.type === 'likert' && (
+                      <div className="mb-3">
+                        <Form.Label>Likert Scale Options</Form.Label>
+                        {selectedQuestion.options.map((option, index) => (
+                          <div key={index} className="d-flex align-items-center mb-2">
+                            <Form.Control
+                              type="text"
+                              value={option}
+                              onChange={(e) => {
+                                const newOptions = [...selectedQuestion.options];
+                                newOptions[index] = e.target.value;
+                                setSelectedQuestion({ ...selectedQuestion, options: newOptions });
+                              }}
+                              placeholder={`Scale option ${index + 1}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {selectedQuestion.type === 'nps' && (
+                      <div className="mb-3">
+                        <Alert variant="info">
+                          <strong>NPS Scale:</strong> 0-10 rating scale where 0 = "Not at all likely" and 10 = "Extremely likely"
+                        </Alert>
+                      </div>
+                    )}
+
+                    {(selectedQuestion.type === 'text_short' || selectedQuestion.type === 'text_long') && (
+                      <div className="mb-3">
+                        <Form.Label>Text Input Settings</Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={selectedQuestion.settings?.placeholder || ''}
+                          onChange={(e) => setSelectedQuestion({ 
+                            ...selectedQuestion, 
+                            settings: { ...selectedQuestion.settings, placeholder: e.target.value }
+                          })}
+                          placeholder="Placeholder text for input field"
+                        />
+                      </div>
+                    )}
 
                     <Form.Check
                       type="switch"
@@ -2174,6 +2447,7 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
                       label="Required Question"
                       checked={selectedQuestion.required}
                       onChange={(e) => setSelectedQuestion({ ...selectedQuestion, required: e.target.checked })}
+                      className="mt-3"
                     />
                   </div>
                 )}
@@ -2188,8 +2462,9 @@ const SurveyBuilder = ({ darkMode }) => { // eslint-disable-line no-unused-vars
                     updateQuestion(selectedQuestion.id, selectedQuestion);
                     setShowQuestionModal(false);
                   }}
+                  disabled={!selectedQuestion?.title?.trim()}
                 >
-                  Save Changes
+                  {questionModalMode === 'create' ? 'Create' : 'Save'} Question
                 </Button>
               </Modal.Footer>
             </Modal>
