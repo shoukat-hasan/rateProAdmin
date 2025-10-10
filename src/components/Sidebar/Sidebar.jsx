@@ -396,8 +396,13 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
     }
   }
   const sidebarStyle = {
-    width: collapsed ? "70px" : "280px", height: "100vh", position: "fixed", top: 0,
-    left: isMobile || isTablet ? (isOpen ? 0 : "-280px") : 0, zIndex: 1050, transition: "all 0.3s ease",
+    width: collapsed ? "70px" : "280px", 
+    height: "100vh", 
+    position: "fixed", 
+    top: 0,
+    left: isMobile ? (isOpen ? 0 : "-100%") : 0, 
+    zIndex: 1050, 
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
     backgroundColor: darkMode ? "var(--dark-card)" : "var(--light-card)",
     borderRight: `1px solid ${darkMode ? "var(--dark-border)" : "var(--light-border)"}`,
     boxShadow: "var(--shadow-md)",
@@ -536,7 +541,7 @@ const Sidebar = ({ darkMode, isOpen, isMobile, isTablet, collapsed, onClose, onT
     <div 
       ref={sidebarRef} 
       style={sidebarStyle} 
-      className={`sidebar d-flex flex-column ${collapsed ? 'collapsed' : 'expanded'} ${isMobile ? 'mobile' : ''} ${isOpen && isMobile ? 'open' : ''} ${darkMode ? 'dark-mode' : ''}`}
+      className={`sidebar d-flex flex-column ${collapsed ? 'collapsed' : 'expanded'} ${isMobile ? 'mobile' : ''} ${isTablet ? 'tablet' : ''} ${isOpen && isMobile ? 'open' : ''} ${darkMode ? 'dark-mode' : ''}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
     >

@@ -26,11 +26,20 @@
 .sidebar.mobile {
   width: 100vw;
   max-width: 320px;
-  transform: translateX(-100%);
+  left: -100%;
 }
 
 .sidebar.mobile.open {
-  transform: translateX(0);
+  left: 0;
+}
+
+.sidebar.tablet {
+  width: var(--sidebar-collapsed-width, 70px);
+  left: 0;
+}
+
+.sidebar.tablet.expanded {
+  width: var(--sidebar-width, 280px);
 }
 
 /* Sidebar Header */
@@ -308,17 +317,53 @@
   margin-right: 0.5rem;
 }
 
-/* Mobile Optimizations */
+/* Responsive Optimizations */
+@media (max-width: 1023px) and (min-width: 769px) {
+  /* Tablet: Show collapsed sidebar by default, expandable on hover/toggle */
+  .sidebar.tablet {
+    width: var(--sidebar-collapsed-width, 70px) !important;
+    left: 0 !important;
+  }
+  
+  .sidebar.tablet:hover,
+  .sidebar.tablet.expanded {
+    width: var(--sidebar-width, 280px) !important;
+  }
+  
+  .sidebar.tablet .collapsed-dropdown {
+    display: block;
+  }
+  
+  .sidebar.tablet .nav-tooltip {
+    display: block;
+  }
+  
+  .sidebar.tablet.collapsed .nav-text,
+  .sidebar.tablet.collapsed .nav-arrow,
+  .sidebar.tablet.collapsed .sidebar-logo {
+    display: none;
+  }
+  
+  .sidebar.tablet.collapsed .nav-icon {
+    margin-right: 0;
+  }
+  
+  .sidebar.tablet.collapsed .nav-link {
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .sidebar {
+  .sidebar.mobile {
     width: 100vw !important;
     max-width: 320px;
-    transform: translateX(-100%);
+    left: -100%;
     box-shadow: none;
   }
   
-  .sidebar.open {
-    transform: translateX(0);
+  .sidebar.mobile.open {
+    left: 0;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   }
   
@@ -352,7 +397,7 @@
 }
 
 @media (max-width: 480px) {
-  .sidebar {
+  .sidebar.mobile {
     max-width: 280px;
   }
   
@@ -363,6 +408,29 @@
   .sidebar-logo {
     font-size: 1.1rem;
   }
+}
+
+/* Large screens: Default expanded, collapsible */
+@media (min-width: 1024px) {
+  .sidebar:not(.mobile):not(.tablet) {
+    position: fixed;
+    left: 0 !important;
+  }
+  
+  .sidebar:not(.mobile):not(.tablet).collapsed {
+    width: var(--sidebar-collapsed-width, 70px);
+  }
+  
+  .sidebar:not(.mobile):not(.tablet).expanded {
+    width: var(--sidebar-width, 280px);
+  }
+}
+
+/* Smooth transitions for all screen sizes */
+.sidebar {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Dark Mode Support */

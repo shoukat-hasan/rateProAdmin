@@ -7,7 +7,7 @@ import Sidebar from "../Sidebar/Sidebar.jsx"
 import Header from "../Header/Header.jsx"
 import "./Layout.css"
 
-const Layout = ({ darkMode, toggleTheme, onToggle }) => {
+const Layout = ({ darkMode, toggleTheme }) => {
   // Responsive breakpoints
   const [screenSize, setScreenSize] = useState({
     isMobile: false,
@@ -45,16 +45,16 @@ const Layout = ({ darkMode, toggleTheme, onToggle }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        if (screenSize.isMobile || screenSize.isTablet) {
+        if (screenSize.isMobile) {
           setSidebarOpen(false)
         } else if (!sidebarCollapsed) {
-          onToggle?.()
+          setSidebarCollapsed(true)
         }
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [screenSize.isMobile, screenSize.isTablet, sidebarCollapsed, onToggle])
+  }, [screenSize.isMobile, sidebarCollapsed])
 
   // Initialize and handle responsive behavior
   useEffect(() => {
@@ -73,9 +73,13 @@ const Layout = ({ darkMode, toggleTheme, onToggle }) => {
   useEffect(() => {
     if (!isInitialized) return
 
-    if (screenSize.isMobile || screenSize.isTablet) {
-      // Mobile/Tablet: Sidebar is overlay, closed by default
+    if (screenSize.isMobile) {
+      // Mobile: Sidebar is overlay, closed by default
       setSidebarOpen(false)
+    } else if (screenSize.isTablet) {
+      // Tablet: Sidebar is collapsed by default, but visible
+      setSidebarCollapsed(true)
+      setSidebarOpen(true) // Always "open" but in collapsed state
     } else {
       // Desktop: Load saved collapsed state
       const savedState = localStorage.getItem('sidebarCollapsed')
@@ -85,6 +89,7 @@ const Layout = ({ darkMode, toggleTheme, onToggle }) => {
         // Auto-collapse on smaller desktop screens
         setSidebarCollapsed(screenSize.width < 1200)
       }
+      setSidebarOpen(true) // Always open on desktop
     }
   }, [screenSize.isMobile, screenSize.isTablet, screenSize.width, isInitialized])
 
@@ -97,20 +102,20 @@ const Layout = ({ darkMode, toggleTheme, onToggle }) => {
 
   // Enhanced sidebar control functions
   const toggleSidebar = useCallback(() => {
-    if (screenSize.isMobile || screenSize.isTablet) {
+    if (screenSize.isMobile) {
       setSidebarOpen(prev => !prev)
     } else {
       setSidebarCollapsed(prev => !prev)
     }
-  }, [screenSize.isMobile, screenSize.isTablet])
+  }, [screenSize.isMobile])
 
   const closeSidebar = useCallback(() => {
-    if (screenSize.isMobile || screenSize.isTablet) {
+    if (screenSize.isMobile) {
       setSidebarOpen(false)
     } else {
       setSidebarCollapsed(true)
     }
-  }, [screenSize.isMobile, screenSize.isTablet])
+  }, [screenSize.isMobile])
 
   // Enhanced content styling with better responsive behavior
   const getContentStyle = useCallback(() => {
@@ -130,16 +135,17 @@ const Layout = ({ darkMode, toggleTheme, onToggle }) => {
     }
 
     if (screenSize.isTablet) {
+      // Tablet: Always account for collapsed sidebar
       return {
         ...baseStyle,
-        marginLeft: 0,
-        width: "100%",
+        marginLeft: "var(--sidebar-collapsed-width, 70px)",
+        width: "calc(100% - var(--sidebar-collapsed-width, 70px))",
         padding: "0 8px"
       }
     }
 
     // Desktop
-    const sidebarWidth = sidebarCollapsed ? "var(--sidebar-collapsed-width)" : "var(--sidebar-width)"
+    const sidebarWidth = sidebarCollapsed ? "var(--sidebar-collapsed-width, 70px)" : "var(--sidebar-width, 280px)"
     return {
       ...baseStyle,
       marginLeft: sidebarWidth,
@@ -158,11 +164,11 @@ const Layout = ({ darkMode, toggleTheme, onToggle }) => {
   return (
     <div className={`layout-container ${darkMode ? "dark" : "light"}`}>
       <Sidebar
-        isOpen={screenSize.isMobile || screenSize.isTablet ? sidebarOpen : true}
+        isOpen={sidebarOpen}
         isMobile={screenSize.isMobile}
         isTablet={screenSize.isTablet}
         isDesktop={screenSize.isDesktop}
-        collapsed={screenSize.isDesktop && sidebarCollapsed}
+        collapsed={sidebarCollapsed}
         darkMode={darkMode}
         onClose={closeSidebar}
         onToggle={toggleSidebar}
@@ -197,7 +203,7 @@ const Layout = ({ darkMode, toggleTheme, onToggle }) => {
       </div>
 
       {/* Enhanced mobile overlay with better UX */}
-      {(screenSize.isMobile || screenSize.isTablet) && sidebarOpen && (
+      {screenSize.isMobile && sidebarOpen && (
         <div
           className="sidebar-overlay"
           onClick={closeSidebar}

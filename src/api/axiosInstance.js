@@ -25,42 +25,107 @@ axiosInstance.interceptors.request.use(
 );
 
 // ===== Response interceptor with refresh token logic =====
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
     const message = error.response?.data?.message || error.message;
-    // if (status === 401 && !originalRequest._retry) {
-    //   originalRequest._retry = true;
-    //   try {
-    //     const refreshRes = await axiosInstance.post("/auth/refresh", {}, { withCredentials: true });
-    //     const newAccessToken = refreshRes.data.accessToken;
-    //     // Update localStorage and axios headers
-    //     const authUser  = JSON.parse(localStorage.getItem("authUser") || "{}");
-    //     localStorage.setItem("authUser", JSON.stringify({ ...authUser, accessToken: newAccessToken }));
-    //     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-    //     originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-    //     return axiosInstance(originalRequest);
-    //   } catch (refreshError) {
-    //     localStorage.removeItem("authUser");
-    //     window.location.href = "/login"; // or your logout logic
-    //     return Promise.reject(refreshError);
-    //   }
-    // }
-    // Specific silent fail for login verification
+
+    console.log("Response Interceptor Triggered:", {
+      status,
+      message,
+      url: originalRequest?.url,
+      method: originalRequest?.method,
+    });
+
+    // ✅ 1. Handle 401 (token expired)
+    if (status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // 🚧 Agar refresh already chal raha hai → queue me daal do
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshRes = await axiosInstance.post("/auth/refresh", {}, { withCredentials: true });
+        const newAccessToken = refreshRes.data.accessToken;
+
+        // 🧠 Save to localStorage
+        const authUser = JSON.parse(localStorage.getItem("authUser") || "{}");
+        localStorage.setItem("authUser", JSON.stringify({ ...authUser, accessToken: newAccessToken }));
+        // console.log(accessToken);
+
+        // 🧠 Update axios headers
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+
+        // ✅ Process queue of failed requests
+        processQueue(null, newAccessToken);
+
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        console.error("🔁 Refresh Token Failed:", refreshError?.response?.data || refreshError.message);
+
+        // ⚠️ Sirf tab logout karo jab refresh token actual me invalid ho
+        const isInvalidToken =
+          refreshError.response?.status === 401 &&
+          (refreshError.response?.data?.message?.includes("Invalid refresh token") ||
+            refreshError.response?.data?.message?.includes("No refresh token"));
+
+        if (isInvalidToken) {
+          localStorage.removeItem("authUser");
+          window.location.href = "/login";
+        }
+
+        processQueue(refreshError, null);
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // 🚫 2. Silent fail for login verification
     if (status === 401 && message?.includes("Login verification required")) {
       return Promise.reject(error);
     }
+
+    // 🧾 3. Debug log
     console.error("📦 API Error:", {
       status,
       message,
       url: originalRequest?.url,
       method: originalRequest?.method,
     });
+
     return Promise.reject(error);
   }
 );
+
 
 export default axiosInstance;
 
